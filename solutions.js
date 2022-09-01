@@ -190,3 +190,76 @@ var orangesRotting = function(grid) {
     }
     return count? -1: day
 };
+
+// 33. Search in rotated sorted array
+// on each loop we do an extra check to see if our left or right sections can possibly contain our target
+var search = function(nums, target) {
+    let min = 0
+    let max = nums.length - 1
+    
+    while( (min <= max) && (0 <= max) && (max < nums.length) && (0 <= min) && (min < nums.length)) {
+        let mid = Math.floor((max+min)/2)
+        if (nums[mid] === target) {
+            return mid
+        }
+        if (target < nums[mid]){
+            if ((nums[max] <= nums[mid]) && (target < nums[min])) {
+                min = mid + 1 
+            } else {
+                max = mid - 1
+            }
+            
+        }
+        if (nums[mid] < target) {
+            if ((nums[mid] <= nums[min]) && (nums[max] < target)) {
+                max = mid - 1
+            } else {
+                min = mid + 1
+            }
+        }
+    }
+    return -1
+};
+
+// 39. combination sum
+// finding all paths that sum up to the targt... each path has a unique array if we hit the target return ans
+var combinationSum = function(candidates, target) {
+    let ans = []
+    
+    const travel = (path, index, sum) => {
+        if (target < sum ) return
+        if (sum === target) { ans.push(path) }
+        
+        while (index < candidates.length) {
+            travel([...path, candidates[index]], index, sum + candidates[index])
+            index++
+        }
+    }
+    travel([], 0, 0)
+    return ans
+};
+
+// 46. permutations 
+// following a path very similar to problem above (39. combination sum)
+var permute = function(nums) {
+    let ans = []
+    
+    const arrayBuilder = (array, added ) => {
+        if (array.length === nums.length) {
+            ans.push([...array])
+        } else {
+            for (let num of nums) {
+                if (added[num]) {
+                    continue
+                }
+                array.push(num)
+                added[num] = true
+                arrayBuilder(array, added)
+                array.pop()
+                added[num] = false
+            }
+        }
+    }
+    arrayBuilder([], {})  
+    return ans
+};
