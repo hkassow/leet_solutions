@@ -278,3 +278,66 @@ var lowestCommonAncestor = function(root, p, q) {
     return (left && right)? root: (left || right)
 };
 
+
+// 721. accounts merge
+// using travel function to find the parent node for each email
+// basically linked lists? 
+// merge function takes first email travels down it adding onto end
+var accountsMerge = function(accounts) {
+    let email2Group = {}
+    let email2Name = {}
+    
+    const travel = (x) => {
+        if (email2Group[x] !== x) {
+            email2Group[x] = travel(email2Group[x])
+        }
+        return email2Group[x]
+    }
+    const merge = (x, y) => {    
+        email2Group[travel(y)] = email2Group[travel(x)]  
+    }
+    for (const [name, ...emails] of accounts) {
+        
+        for (const email of emails) {
+            email2Name[email] = name
+            if (!email2Group[email]) {
+                email2Group[email] = email
+            }
+            merge(email, emails[0])
+        }
+    }
+    const uniqueAccounts = {}
+    for (const email of Object.keys(email2Group)) {
+        const parent = travel(email)
+        if (!uniqueAccounts[parent]) {
+            uniqueAccounts[parent] = []
+        }
+        uniqueAccounts[parent].push(email)
+    }
+    return Object.entries(uniqueAccounts).map(([headEmail, array]) => [email2Name[headEmail], ...array.sort()])
+};
+
+// 75. sort color
+// triple pointer 
+//only weird case is if its 0 we increment both count and zeropointer
+//because we are either at zero pointer or have passed it we know that we wont be putting a 2 value into counter 
+// thats why we can increment them both at same time 
+var sortColors = function(nums) {
+    let zeroPointer = 0
+    let counter = 0
+    let twoPointer = nums.length - 1
+    
+    while (counter <= twoPointer) {
+        let currNum = nums[counter]
+        if (currNum === 0) {
+            [nums[zeroPointer], nums[counter]] = [nums[counter], nums[zeroPointer]]
+            zeroPointer++
+            counter++
+        } else if (currNum === 2) {
+            [nums[twoPointer], nums[counter]] = [nums[counter], nums[twoPointer]]
+            twoPointer--
+        } else if (currNum === 1) {
+            counter ++
+        }
+    }
+};
