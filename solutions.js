@@ -263,3 +263,18 @@ var permute = function(nums) {
     arrayBuilder([], {})  
     return ans
 };
+
+// 236. lowest common ancestor of a binary tree 
+// if root === value either it is the ancestor or q is in a different path thats why we can kick out on the first return 
+// if we end up in case where we are [1,2,3] looking for [2,3] we would find both left and right values truthy 
+// we return root upstream as either left or right (depending on the root that called) 
+// and then the other left or right respectively will always be falsey value and our root will travel to our top call and return itself once more 
+var lowestCommonAncestor = function(root, p, q) {
+    if (!root || root === p || root === q) {
+        return root
+    }
+    let left = lowestCommonAncestor(root.left,p,q)
+    let right = lowestCommonAncestor(root.right,p,q)
+    return (left && right)? root: (left || right)
+};
+
