@@ -318,26 +318,22 @@ var accountsMerge = function(accounts) {
 };
 
 // 75. sort color
-// triple pointer 
-//only weird case is if its 0 we increment both count and zeropointer
-//because we are either at zero pointer or have passed it we know that we wont be putting a 2 value into counter 
-// thats why we can increment them both at same time 
+// fill in 2 on every number 
+// if number was 0 or 1 we place it back in the array and increment accordingly
 var sortColors = function(nums) {
-    let zeroPointer = 0
-    let counter = 0
-    let twoPointer = nums.length - 1
+    let [zeroPointer, onePointer] = [0, 0]
     
-    while (counter <= twoPointer) {
-        let currNum = nums[counter]
-        if (currNum === 0) {
-            [nums[zeroPointer], nums[counter]] = [nums[counter], nums[zeroPointer]]
+    for (let i = 0; i < nums.length; i++) {
+        const x = nums[i]
+        nums[i] = 2
+        if (x === 1) {
+            nums[onePointer] = 1
+            onePointer++
+        } else if (x === 0) {
+            nums[onePointer] = 1
+            nums[zeroPointer] = 0
             zeroPointer++
-            counter++
-        } else if (currNum === 2) {
-            [nums[twoPointer], nums[counter]] = [nums[counter], nums[twoPointer]]
-            twoPointer--
-        } else if (currNum === 1) {
-            counter ++
+            onePointer++
         }
     }
 };
