@@ -493,3 +493,24 @@ var spiralOrder = function(matrix) {
     }
      return ans
  };
+
+
+// 78. subsets 
+// builds all subsets starting from []
+// first num produces [[], [1]]
+// then we take next num and concat it with every subset already in our subset and add those to the subsets
+// [[], [1], [2], [1,2]]
+// also there is a recursive solution using backtracking (push + pop your dependency array so you dont re-add numbers)
+
+var subsets = function(nums) {
+    let powerSet = [[]]
+    
+    for (let num of nums) {
+        let len = powerSet.length
+        for (let i = 0; i < len; i++) {
+            let x = powerSet[i]
+            powerSet.push([...powerSet[i], num])
+        }
+    }
+    return powerSet
+};
