@@ -382,3 +382,28 @@ var wordBreak = function(s, wordDict) {
     travel(0, "")
     return ans
 };
+
+
+// 416. partition equal subset sum
+// dp is simply a boolean array asking if we can make an array w/ this sum
+// dp[0] sum of 0 always true, no elements
+// first loop will only have dp[0] be true 
+// so will place a value at dp[nums[0]] = true
+// then every num after that will either place a new sum start and/or add onto previous ones
+
+var canPartition = function(nums) {
+    let sum = nums.reduce((a,b) => a+b)
+    
+    if (sum%2) return false
+    
+    let half = sum/2
+    let dp = Array(half+1).fill(false)
+    dp[0] = true
+    
+    for (let num of nums) {
+        for (let i = half; num <= i; i--) {
+            dp[i] = dp[i] || dp[i-num]
+        }
+    }
+    return dp[half]
+};
