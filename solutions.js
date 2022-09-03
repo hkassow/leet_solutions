@@ -407,3 +407,89 @@ var canPartition = function(nums) {
     }
     return dp[half]
 };
+
+// 8. string to integer (atoi)
+// could just do parseInt and check max/min bounds
+// also can use trim to eliminate white spacing (tried to do it as naively as possible without any additional functions)
+// return Math.max(Math.min(parseInt(s) || 0, 2147483647), -2147483648)
+// this one liner also suffices... however parseInt is essentially atoi?
+var myAtoi = function(s) {    
+    let sign
+    let number = ""
+    let regex = /[0-9]/
+    let min = Math.pow(-2, 31)
+    let max = (-1 * min) - 1 
+    
+    for (let chara of s) {
+        if (chara.match(regex)) {
+            number += chara
+        } else if (number || sign) {
+            break
+        } else if (chara === "-" || chara === "+") {
+            sign = (chara === "-")? -1:1
+        } else if (chara === " ") {
+            continue
+        } else {
+            break
+        }
+    }
+    if (!number) return 0
+    number = (sign)? sign* +number: +number
+    if (number < min) return min
+    if (number > max) return max
+    return number
+};
+
+
+// 54. spiral matrix
+// first solution uses simple boundary... slowly tracing the outer matrix until our boundaries close on eachother
+// 2nd solution involves removing the "top level array" then popping out right sided elements
+// then inverting our matrix and repeating these 2 steps 
+// i think this solution would breakdown on larger matrix sizes because repeated calls to shift + reverse
+var spiralOrder = function(matrix) {
+    var [rowMax, colMax, rowMin, colMin, ans] = [matrix.length - 1, matrix[0].length - 1, 0, 0, []]
+    
+    
+    while (rowMin <= rowMax && colMin <= colMax) {
+        for (let i = colMin; i <= colMax; i++) {
+            ans.push(matrix[rowMin][i])
+        }
+        rowMin ++
+        
+        for (let j = rowMin; j <= rowMax; j++) {
+           ans.push(matrix[j][colMax]) 
+        }
+        colMax --
+        
+        if (rowMax < rowMin || colMax < colMin) break
+        
+        for (let i = colMax; colMin <= i; i--) {
+            ans.push(matrix[rowMax][i])
+        }
+        rowMax -- 
+        
+        for (let j = rowMax; rowMin <= j; j--) {
+            ans.push(matrix[j][colMin])
+        }
+        colMin ++
+    }
+    return ans
+};
+
+var spiralOrder = function(matrix) {
+    let ans = []
+    
+    while (matrix.length) {
+        ans.push(...matrix.shift())
+        
+        for (let array of matrix) {
+            if(array.length) {
+                ans.push(array.pop())
+                array.reverse()
+            }
+        }
+        
+        matrix.reverse()
+    }
+     return ans
+ };
