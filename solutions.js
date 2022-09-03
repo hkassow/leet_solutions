@@ -337,3 +337,48 @@ var sortColors = function(nums) {
         }
     }
 };
+
+// 139. word break
+// we travel along every possible slice of our word if its in our word dic
+// if we reach target length bail out
+
+var wordBreak = function(s, wordDict) {
+    let wordObj = new Set(wordDict)
+    let wordLens = new Set(wordDict.map(word => word.length))
+    let starts = new Set([0])
+    
+    for (let start of starts) {
+        for (let len of wordLens) { 
+            if (wordObj.has(s.slice(start, start+len))) {
+                if (start+len === s.length) {
+                    return true
+                }
+                starts.add(start+len)
+            }
+        }
+    }
+    return false
+};
+
+// 140. word break II
+// very similar to word break I traveling down paths keeping track of sentence
+var wordBreak = function(s, wordDict) {
+    var ans = []
+    var wordSet = new Set(wordDict)
+    var wordLen = new Set(wordDict.map(word => word.length))
+    
+    const travel = (start, sentence) => {
+        if (start === s.length) {
+            ans.push(sentence)
+            return
+        }
+        for (let len of wordLen) {
+            let sub = s.slice(start, start+len)
+            if (wordSet.has(sub)) {
+                travel(start+len, sentence?`${sentence} ${sub}`: sub)
+            }
+        }
+    }
+    travel(0, "")
+    return ans
+};
