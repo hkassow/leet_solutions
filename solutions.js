@@ -514,3 +514,66 @@ var subsets = function(nums) {
     }
     return powerSet
 };
+
+
+// 199. binary tree right side view
+// fills out left most paths first 
+// then any "right" node will override previous node 
+var rightSideView = function(root) {
+    var ans = []
+    
+    const travel = (root,h) => {
+        if (!root) return
+        
+        ans[h] = root.val
+        travel(root.left, h+1)
+        travel(root.right, h+1)
+    }
+    
+    travel(root, 0)
+    return ans
+};
+
+// 5. longest palindromic substring 
+// expanding about the even and odd centers 
+
+var longestPalindrome = function(s) {
+    let [lp, rp] = [0, 0]
+    
+    const findLongestPali = (i,j) => {
+        while ((s[i] === s[j]) && (0 <= i) && (j < s.length)) {
+            i--
+            j++
+        }
+        return [i+1, j]
+    }
+    
+    for (let center=0; center < s.length; center++ ) {
+        
+        let odd = findLongestPali(center, center)
+        let even = findLongestPali(center, center+1)
+        
+        if ((rp-lp) < (odd[1] - odd[0])) {
+            [lp, rp] = odd
+        }
+        if ((rp-lp) < (even[1] - even[0])) {
+            [lp, rp] = even
+        }
+    }
+    return s.slice(lp, rp)
+};
+
+// 62. unique paths
+// dp tabulation bottom up 
+var uniquePaths = function(m, n) {
+    var count = 0
+    const dp = Array(m).fill().map(() => Array(n).fill(1))
+
+    for (let i = 1; i < m; i++) {
+        for (let j = 1; j < n; j++) {
+            
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+        }
+    }
+    return dp[m-1][n-1]
+};
