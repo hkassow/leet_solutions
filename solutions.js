@@ -577,3 +577,44 @@ var uniquePaths = function(m, n) {
     }
     return dp[m-1][n-1]
 };
+
+// 105. construct binary tree from preorder and inorder traversal 
+//  preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+// tree [3,9,20,null,null,15,7]
+// we stop traveling down the node if we reach our stop value
+var buildTree = function(preorder, inorder) {
+    let [p, i] = [0, 0]
+    
+    const helpBuild = (stop) => {
+        if (inorder[i] !== stop) {
+            let node = new TreeNode(preorder[p])
+            p++
+            node.left = helpBuild(node.val)
+            i++
+            node.right = helpBuild(stop)
+            return node
+        }
+        return null
+    }
+    return helpBuild()
+};
+
+// 106. construct binary tree from inorder and postorder traversal
+// inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]
+//parse both lists backwards using inorder as our "stopper" 
+var buildTree = function(inorder, postorder) {
+    let i = p = inorder.length - 1
+    
+    const helpBuild = (stop) => {
+        if (inorder[i] !== stop) {
+            let node = new TreeNode(postorder[p])
+            p--
+            node.right = helpBuild(node.val)
+            i--
+            node.left = helpBuild(stop)
+            return node    
+        }
+        return null
+    }
+    return helpBuild()
+};
