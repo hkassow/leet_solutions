@@ -1,4 +1,319 @@
-// 322. Coin Change
+// 57 insert interval
+// check boundary conditions on this one
+var insert = function(intervals, newInterval) {
+    let ans = []
+    let set = false
+    
+    for (let interval of intervals) {
+        if ((interval[1] < newInterval[0])) {
+            ans.push(interval)
+        } else if (newInterval[1] < interval[0]){
+            if (!set) { 
+                ans.push(newInterval)
+                set = true
+            }
+            ans.push(interval)
+        } else {
+            if (!set) {
+                ans.push(newInterval)
+                set = true
+            }
+            ans[ans.length - 1] = [Math.min(ans[ans.length - 1][0], interval[0]), Math.max(ans[ans.length - 1][1], interval[1])]
+        }
+    }
+    if (!set) {
+        ans.push(newInterval)
+    }
+    return ans
+};
+ 
+// 542 01 matrix
+// expand from the 0 nodes 
+
+var updateMatrix = function(mat) {
+    let [m, n] = [mat.length, mat[0].length] 
+    let queue = new Queue()
+    let ans  = Array(m).fill().map(() => Array(n).fill(-1))
+    
+    
+    for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+            if (mat[i][j] === 0) {
+                ans[i][j] = 0
+                queue.enqueue([i, j])
+            }
+        }
+    }
+    
+    while (!queue.isEmpty()) {
+        let node = queue.dequeue()
+        let dir = [[0,1], [1,0], [0,-1], [-1,0]]
+        
+        for (let dirNode of dir) {
+            let adjNode = [node[0] + dirNode[0], node[1] + dirNode[1]]
+            if (( 0 <= adjNode[0]) & (adjNode[0] < m) & (0 <= adjNode[1]) & (adjNode[1] < n)) {
+                if ((mat[adjNode[0]][adjNode[1]] === 1) & (ans[adjNode[0]][adjNode[1]] === -1)) {
+                    ans[adjNode[0]][adjNode[1]] = ans[node[0]][node[1]] + 1
+                    queue.enqueue(adjNode)
+                }
+            
+            }
+        }
+    }
+    return ans
+};
+
+// 973 k closest points to origin
+// maxProirity (heap) with prority set by distance from origin
+// if our heap is full, check if the farthest element from the origin
+// is closer than our next point
+
+ var kClosest = function(points, k) {
+    let x = new MaxPriorityQueue({priority: (num) => dist(num)})
+    
+    
+    for (let point of points) {
+        
+        if (x.size() < k ) {
+            x.enqueue(point)
+        } else {
+            if (dist(point) < dist(x.front()["element"])) {
+                x.dequeue()
+                x.enqueue(point)
+            }
+        }
+    }
+    return x.toArray().map((hash) => hash["element"])
+};
+    
+    
+const dist = (num) => {
+    return (num[0]*num[0] + num[1]*num[1])
+}
+
+// 3 longest substring without repeating characters
+
+var lengthOfLongestSubstring = function(s) {
+    let ans = 0
+    let currentSub = ''
+    
+    for (let letter of s) {
+        while (currentSub.includes(letter)){
+            currentSub = currentSub.substring(1)
+        }
+        
+        
+        
+        currentSub = currentSub + letter
+        if (ans < currentSub.length) {
+                ans =  currentSub.length
+            }
+    }
+    return ans
+};
+
+//15 3sum
+var threeSum = function(nums) {
+    nums = nums.sort((a,b) => a - b ) 
+    
+    let i = 0
+    let n = nums.length
+    let ans = []
+    
+    while (i < n ) {
+        if (!(nums[i] <= 0)) {
+            break
+        } else if (nums[i] === nums[i-1]) {
+            i++ 
+            continue
+        }
+        let j = i + 1
+        let k = n - 1
+        while (j < k) {
+            let sum = nums[i] + nums[j] + nums[k]
+            if (sum < 0) {
+                j++;
+            } else if (0 < sum) {
+                k--
+            } else {
+                ans.push([nums[i],nums[j],nums[k]])
+                while (j < k & (nums[j] === nums[j+1])){ 
+                    j++
+                }
+                while (j < k & (nums[k] === nums[k-1])) {
+                    k--
+                }
+                j++
+                k--
+            }
+        }
+        i++
+    }
+    return ans
+};
+
+// 102 binary tree level order traversal
+
+var levelOrder = function(root) {
+    let ans = []
+    dpr(root, ans, 0)
+    return ans
+};
+
+
+
+const dpr = (root, array, height) => {
+    if (!root) {
+        return
+    } 
+    if (array.length === height) {
+        array.push([])
+    }
+    array[height].push(root.val)
+    dpr(root.left, array, height+1)
+    dpr(root.right, array, height+1)
+}
+
+
+// 133 clone graph 
+
+
+var cloneGraph = function(node, visited ={}) {
+    
+    if (!node) {
+        return
+    } 
+    if (visited[node.val]) {
+        return visited[node.val]
+    }
+    
+    let clone = new Node(node.val)
+    visited[clone.val] = clone
+    
+    for (let neighbor of node.neighbors) {
+        if (visited[neighbor.val]) {
+            clone.neighbors.push(visited[neighbor.val])
+        } else {
+            clone.neighbors.push(cloneGraph(neighbor, visited))
+        }
+    }
+    return clone
+};
+
+
+
+// 150 evaluate reverse polish notation
+// storing functions inside a hash 
+// Math.trunc removes decimals no rounding
+// only reach an operation after we've reached at least two integers
+// other wise it would be an invalid RPN
+var evalRPN = function(tokens) {
+    const operations = {'+': (a,b) => (a+b), "-": (a,b) => (a-b), "*": (a,b) => (a*b), "/": (a,b) => Math.trunc(a/b) }
+    let stack = []
+    for (let i=0; i < tokens.length; i++) {
+        if (operations[tokens[i]]) {
+            a = parseInt(stack.pop())
+            b = parseInt(stack.pop())
+            stack.push(operations[tokens[i]](b,a))
+        } else {
+            stack.push(tokens[i])
+        }
+    }
+     return stack.pop()
+ };
+
+// 207 course schedule 
+// graph stores the depencies 
+// degree stores how many prereqs a class has (if it has noreqs degree is 0)
+var canFinish = function(numCourses, prerequisites) {
+    const order = []
+    const graph = new Map()
+    const degree = Array(numCourses).fill(0)
+    for (let [a, b] of prerequisites) {
+        if (!graph.get(b)) {
+            graph.set(b, [])
+        }
+        graph.get(b).push(a)
+        degree[a]++ 
+    }
+    const queue = []
+    for (let i = 0; i < numCourses; i++) {
+        if (degree[i] === 0) {
+            queue.push(i)
+        }
+    }
+    while (queue.length) {
+        let nextCourse = queue.shift()
+        if (graph.get(nextCourse)) {
+            
+            for (let course of graph.get(nextCourse)) {
+                degree[course]--
+                if (degree[course] === 0) {
+                    queue.push(course)
+                }
+            }
+        }
+        order.push(nextCourse)
+    }
+    return (order.length === numCourses)
+};
+
+
+
+
+
+// 208. implement trie (prefix tree)
+// implement insert, search, and prefix 
+// root = {a: {p: {p: {l: {e: {lastLetter: true }}}}}}
+// trie containing apple
+
+var Trie = function() {
+    this.root = {} 
+};
+
+Trie.prototype.insert = function(word) {
+    let node = this.root
+    
+    for (let c of word) {
+        if (!node[c]) {
+            node[c] = {}
+        }
+        node = node[c]
+    }
+    
+    node.lastLetter = true
+};
+Trie.prototype.search = function(word) {
+    let node = this.root
+    
+    for (let c of word) {
+        node = node[c]
+        if (!node) {
+            return false
+        }
+     }
+    return (!!node.lastLetter)
+};
+Trie.prototype.startsWith = function(prefix) {
+    let node = this.root
+    
+    for (let c of prefix) {
+        node = node[c]
+        if (!node) {
+            return false
+        }
+     }
+    return true
+};
+
+/** 
+ * Your Trie object will be instantiated and called as such:
+ * var obj = new Trie()
+ * obj.insert(word)
+ * var param_2 = obj.search(word)
+ * var param_3 = obj.startsWith(prefix)
+ */
+// 322. coin change
 // DP 
 // if your solution is slower than o(n) can you sort array?
 var coinChange = function(coins, amount) {
@@ -617,4 +932,141 @@ var buildTree = function(inorder, postorder) {
         return null
     }
     return helpBuild()
+};
+
+
+
+// 11. container with the most water
+// two pointer, shrinking our container
+
+var maxArea = function(height) {
+    let leftPointer = 0
+    let rightPointer = height.length
+    let max = 0
+    
+    
+    while (leftPointer < rightPointer) {
+        let [leftHeight, rightHeight] = [height[leftPointer], height[rightPointer]]
+        let area = (rightPointer - leftPointer) * (Math.min(leftHeight, rightHeight))
+        
+        if (max < area) {
+            max = area   
+        }
+        if (leftHeight < rightHeight) {
+            leftPointer++
+        } else {
+            rightPointer --
+        }
+    }
+    return max
+};
+
+
+
+// 17. letter combination of a phone number
+// pretty simple building problem 
+var letterCombinations = function(digits) {
+    if (!digits.length) return []
+    let digit2Letter = {
+        2: ["a" , "b" , "c"],
+        3: ["d", "e", "f"],
+        4: [ "g", "h", "i"],
+        5: ["j", "k", "l"],
+        6: ["m", "n", "o"],
+        7: ["p", "q", "r", "s"], 
+        8: ["t", "u", "v"],
+        9: ["w", "x", "y", "z"]
+    }
+    let res = []
+    
+    const helpBuildLetter = (i, string) => {
+        if (i === digits.length) {
+            res.push(string)
+            return
+        }
+        let digit = digits[i]
+        for (let letter of digit2Letter[digit]) {
+            let newString = string + letter
+            helpBuildLetter(i+1, newString)
+        }
+    }
+    helpBuildLetter(0, "")
+    return res
+}; 
+
+
+// 79. word search
+// use the matrix and set position to "*" if we have traveled 
+// this prvenets any unnecessary space use
+var exist = function(board, word) {
+    let adjVector = [[0,1], [1,0] , [0, -1] , [-1,0]]
+    let ans = false
+    let stack = []
+    
+    
+    //p = word pointer
+    const helpTravel = (i, j, p) => {
+        if (p === word.length) {
+            return true
+        } 
+        for (let adj of adjVector) {
+            
+            let newPoint = [i + adj[0], j + adj[1]]
+            if (0 <= newPoint[0] && 0 <= newPoint[1] && newPoint[0] < board.length && newPoint[1] < board[0].length) {
+                if (board[newPoint[0]][newPoint[1]] === word[p]) {
+                    board[newPoint[0]][newPoint[1]] = "*"
+                    if (helpTravel(newPoint[0], newPoint[1], p+1)) return true
+                    board[newPoint[0]][newPoint[1]] = word[p]
+                }
+            }
+        }
+        
+    }
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] === word[0]) {
+                board[i][j] = "*"
+                if (helpTravel(i, j, 1)) return true
+                board[i][j] = word[0]
+                
+            } 
+        }
+    }
+    
+    
+    return ans
+};
+
+
+
+// 438. find all anagrams in a string
+var findAnagrams = function(s, p) {
+    
+    let letterFreq = {}
+    let ans = []
+    let left = 0 
+    let right = 0
+    let count = p.length
+    
+    for (let i = 0; i < p.length; i++) {
+        if (!letterFreq[p[i]]) {
+            letterFreq[p[i]] = 0
+        }
+        letterFreq[p[i]] ++
+    }
+    
+    while (right < s.length) {
+        if (0 < letterFreq[s[right]]) count--
+        letterFreq[s[right]]--
+        right++
+        
+        if (count === 0) ans.push(left)
+        if (right-left === p.length){ 
+            
+            if (0 <= letterFreq[s[left]]) count++
+            letterFreq[s[left]]++
+            left++
+        }
+    }
+    return ans
 };
