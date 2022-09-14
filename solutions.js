@@ -1040,6 +1040,7 @@ var exist = function(board, word) {
 
 
 // 438. find all anagrams in a string
+// sliding window
 var findAnagrams = function(s, p) {
     
     let letterFreq = {}
@@ -1069,4 +1070,126 @@ var findAnagrams = function(s, p) {
         }
     }
     return ans
+};
+
+
+
+
+
+// 310 minimum height trees
+// used set for o(1) delete vs array that would have o(n) because of searching index
+ var findMinHeightTrees = function(n, edges) {
+    if (n < 2) return [0]
+    let graph = Array(n).fill().map(() => new Set())
+    for (const [i,j] of edges) {
+        graph[i].add(j)
+        graph[j].add(i)
+    }
+    
+    let outerLeaves = []
+    //index for leaf
+    graph.forEach((connections, index) => {
+        if (connections.size === 1) {
+            outerLeaves.push(index)
+        }
+    })
+    while (2 < n) {
+        n = n - outerLeaves.length
+        let newLeaves = []
+        for (const leaf of outerLeaves) {
+            let innerLeaf = graph[leaf].values().next().value
+            graph[innerLeaf].delete(leaf)
+            graph[leaf].delete(innerLeaf)
+            if (graph[innerLeaf].size === 1) {
+                newLeaves.push(innerLeaf)
+            }
+        }
+        outerLeaves = newLeaves
+    }
+    return outerLeaves
+};
+
+
+
+// 621 task scheduler 
+// take the biggest limiter and use that to create your interals
+// you can stretch your interval to be longer than the cooldown period to achieve the minimum number of idles
+var leastInterval = function(tasks, n) {
+    let max = 0
+    let maxCount = 0
+    let taskCount = {}
+    
+    
+    for (const task of tasks) {
+        if (!taskCount[task]) {
+            taskCount[task] = 0
+        }
+        taskCount[task]++
+        
+        if (taskCount[task] === max) {
+            maxCount++
+        } else if (max < taskCount[task]) {
+            max = taskCount[task]
+            maxCount = 1
+        }
+     }
+     const partLength = n - (maxCount - 1)
+     const partCount = max - 1
+     const emptySlots = partLength * partCount
+     const availableTasks = tasks.length - max * maxCount 
+     const idleSlots = Math.max(0, emptySlots - availableTasks) 
+ 
+     return tasks.length + idleSlots
+ };
+
+
+
+ // 146. lru cache
+ // using dumby head and tail to prevent checking boundaries
+ var LRUCache = function(capacity) {
+    this.head = {val: "head"}
+    this.tail = {val: "tail"}
+    this.hash = {}
+    this.size = 0
+    this.max = capacity
+    this.head.next = this.tail
+    this.tail.prev = this.head
+};
+
+LRUCache.prototype.get = function(key) {
+    let node = this.hash[key]
+    if (!node) return (-1)
+    
+    node.next.prev = node.prev
+    node.prev.next = node.next
+    this.head.next.prev = node
+    node.prev = this.head
+    node.next = this.head.next
+    this.head.next = node
+   
+    
+    return node.val
+};
+
+LRUCache.prototype.put = function(key, value) {
+    if (this.hash[key]) {
+        this.hash[key].val = value
+        this.get(key)
+    } else {
+        if (this.size === this.max) {
+            delete this.hash[this.tail.prev.key]
+            this.tail.prev = this.tail.prev.prev
+            this.tail.prev.next = this.tail
+        } else { this.size ++ }
+        
+        let newNode = {key: key,
+                      val: value}
+        
+        newNode.next= this.head.next
+        newNode.prev = this.head
+        this.head.next.prev = newNode
+        this.head.next = newNode
+        
+        this.hash[key] = newNode
+    }
 };
