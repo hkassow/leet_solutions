@@ -1193,3 +1193,183 @@ LRUCache.prototype.put = function(key, value) {
         this.hash[key] = newNode
     }
 };
+
+
+// 230. kth smallest element in a bst
+
+var kthSmallest = function(root, k) {
+    let kthSmall = 0
+    
+    const travelOver = (node, element = 0) => {
+        if (!node || kthSmall) return element
+        
+        element = travelOver(node.left, element) + 1 
+        
+        if (element === k) {
+            kthSmall = node.val
+            return;
+        }
+        
+        element = travelOver(node.right, element)
+        return element
+    }
+    
+    travelOver(root, 0)
+    return kthSmall
+};
+
+// 76. minimum window substring
+// sliding window 
+var minWindow = function(s, t) {
+    let letterFreq = {}
+    let count = 0
+    
+    let [leftMin, rightMin] = [-1, s.length]
+    
+    let [leftW, rightW] = [0, 0]
+    
+    
+    for (const letter of t) {
+        if (!letterFreq[letter]) {
+            letterFreq[letter] = 0
+        }
+        letterFreq[letter]++
+        count++
+    }
+    
+    
+    
+    while (rightW < s.length) {
+        
+        if (t.includes(s[rightW])) {
+            letterFreq[s[rightW]]--
+            if (0 <= letterFreq[s[rightW]]) {
+                count--
+                while (count===0) {
+                    if (t.includes(s[leftW])) {
+                        letterFreq[s[leftW]]++
+                        if (0 < letterFreq[s[leftW]]) {
+                            count++
+                            if ((rightW - leftW) < (rightMin - leftMin)) {
+                                
+                                [rightMin, leftMin] = [rightW, leftW]
+                            }
+                        }
+                    }
+                    leftW++
+                }
+            }
+        }
+        rightW++
+    }
+    if (leftMin === -1) return ""
+    return s.substring(leftMin, rightMin+1)
+};
+
+
+
+// 297 serialize and deserialize binary tree
+// function takes in a root node
+// travels down the left side creating node.left values
+// once we reach a null value adds a null stopper
+// once we reach end of just left nodes we look at the leftmost node's right node 
+
+var serialize = function(root) {
+    if (!root) return null
+    let str = ''
+    
+    const serializeDown = (node) => {
+        if (!node) {
+            str += ` null`
+        } else {
+            str += ` ${node.val}`
+            serializeDown(node.left)
+            
+            serializeDown(node.right)
+        } 
+    }
+    serializeDown(root)
+    return str
+};
+
+var deserialize = function(data) {
+    if (!data) return null
+    data = data.trim().split(' ')
+    
+    let p = 0
+    
+    const helper = () => {
+        if (data[p] === 'null') {
+            p++
+            return null  
+        } 
+        let node = new TreeNode(data[p])
+        p++
+        node.left = helper()
+        
+        node.right = helper()
+        return node
+    }
+    
+    
+    return helper()
+};
+
+// 42 trapping rain water
+//two pointer moving one boundary at a time until they meet
+
+
+var trap = function(height) {
+    let trapped = 0
+    let lp = 0
+    let rp = height.length - 1
+    let leftMax = height[lp]
+    let rightMax = height[rp]
+    
+    while (lp < rp) {
+        leftMax = Math.max(height[lp], leftMax)
+        rightMax = Math.max(height[rp], rightMax)
+        
+        trapped += leftMax - height[lp];
+        trapped += rightMax - height[rp];
+        
+        (rightMax < leftMax)? rp-- : lp++
+    }
+    
+    return trapped
+};
+
+
+// 295. find median from data stream 
+// keeping track of all the numbers left of our median in maxHeap (1,2,3) < 3 is highest priority
+// all numbers right of our median in min heap (5,4,3) < 3 is highest priority  
+// rebalancing heaps so that theyre always equal or offset by 1
+
+var MedianFinder = function() {
+    this.rightHeap = new MinPriorityQueue({priority: (num) => num})
+    this.leftHeap = new MaxPriorityQueue({priority: (num) => num})
+};
+
+MedianFinder.prototype.addNum = function(num) {
+    if (num < this.leftHeap.front()?.element) {
+        this.leftHeap.enqueue(num)
+    } else {
+        this.rightHeap.enqueue(num)
+    }
+    
+    if (this.rightHeap.size() - this.leftHeap.size() > 1) {
+        this.leftHeap.enqueue(this.rightHeap.dequeue().element)
+    } else if (this.leftHeap.size() - this.rightHeap.size() > 1) {
+        this.rightHeap.enqueue(this.leftHeap.dequeue().element)
+    }
+
+};
+MedianFinder.prototype.findMedian = function() {
+   if (this.rightHeap.size() > this.leftHeap.size()) {
+       return this.rightHeap.front().element
+   } else if (this.leftHeap.size() > this.rightHeap.size()) {
+       return this.leftHeap.front().element
+   } else {
+       return (this.rightHeap.front().element + this.leftHeap.front().element)/2
+   }
+};
