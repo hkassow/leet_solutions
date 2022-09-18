@@ -1373,3 +1373,88 @@ MedianFinder.prototype.findMedian = function() {
        return (this.rightHeap.front().element + this.leftHeap.front().element)/2
    }
 };
+
+
+
+// 127. word ladder 
+// go through each letter placement for each word that gets into our list
+// will slowly eliminate all potential matches by removing them from the wordSet
+// once we can get to a word we dont want to travel it again so we remove it ^^
+
+// turned the word into an array because thats how i usually remember
+// this way is more condense and clear
+// let altWord = word.substring(0, i) + letter + word.substring(i + 1);
+var ladderLength = function(beginWord, endWord, wordList) {
+    
+    let alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    
+    let wordSet = new Set(wordList)
+    
+    let queue = [beginWord]
+    let steps = 1
+    
+    while (queue.length) {
+        let next = []
+        
+        for (const word of queue) {
+            if (word === endWord) {
+                return steps
+            }
+            for (let i = 0; i < beginWord.length; i++) {
+                let wordArray = [...word]
+                for (const letter of alphabet) {
+                    wordArray[i] = letter
+                    let altWord = wordArray.join('')
+                    if (wordSet.has(altWord)) {
+                        next.push(altWord)
+                        wordSet.delete(altWord)
+                    }
+                }
+            }
+            
+        }
+        queue = next
+        steps++
+    }
+    return 0
+};
+
+
+// 224. basic calculator 
+// when we reach ( we store previous sum & sign (incase negative before like '-(5)' )
+// if no previous sum or sign it will just be sum = 0 and sign = 1
+// when we reach ) we take our equation and add it to the previous stored sum 
+var calculate = function(s) {
+    
+    
+    let regex = /[0-9]/
+    
+    let sum = 0
+    let sign = 1
+    let stack = []
+    
+    for (let i = 0; i < s.length; i++) {
+        if (s[i].match(regex)) {
+            let currNum = ''
+            while (i < s.length && s[i].match(regex)) {
+                currNum += s[i]
+                i++
+            }
+            i--
+            sum += currNum * sign
+        } else if (s[i] === '(') {
+            stack.push(sum)
+            stack.push(sign)
+            sum = 0
+            sign = 1
+        } else if (s[i] === ')') {
+            sign = stack.pop()
+            sum = stack.pop() + sign*sum
+        } else if (s[i] === '-') {
+            sign = -1
+        } else if (s[i] === '+') {
+            sign = 1
+        }
+    }
+    return sum
+};
