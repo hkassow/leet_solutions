@@ -1458,3 +1458,107 @@ var calculate = function(s) {
     }
     return sum
 };
+
+// 432. all o'one data structure
+// using linked list to keep track of key count 
+// each unique key value will get its own node and its own set
+// inc and dec remove key from previous node and add it to the new node
+// if the previous node is empty we need to remove it from our linked list
+// instead of keeping track of maxCount we couldve kept track of the tail of our LL
+// but i found keeping track of num to be easier 
+var AllOne = function() {
+    this.keyToCount = {}
+    this.countToNode = {}
+    this.head = {
+        next: null,
+        val : new Set()
+    }
+    this.head.val.add('')
+    this.countToNode[0] = this.head
+    this.maxCount = 0
+};
+AllOne.prototype.inc = function(key) {
+    if (!this.keyToCount[key]) {
+        this.keyToCount[key] = 0
+    }
+    let count = this.keyToCount[key]
+    let prevNode = this.countToNode[count]
+    prevNode.val.delete(key)
+    
+    if (count !== 0 && !prevNode.val.keys().next().value) {
+        prevNode.prev.next = prevNode.next
+        if (prevNode.next) {
+            prevNode.next.prev = prevNode.prev
+        }
+        prevNode = prevNode.prev
+        delete this.countToNode[count]
+    }
+    
+    count++
+    if (!this.countToNode[count]) {
+        this.countToNode[count] = {
+            prev: prevNode,
+            next: prevNode.next,
+            val: new Set()
+        }
+        if (prevNode.next) {
+            prevNode.next.prev = this.countToNode[count]
+        }
+        prevNode.next = this.countToNode[count]
+    }
+    this.countToNode[count].val.add(key)
+    this.keyToCount[key] = count
+    if (this.maxCount < count) {
+        this.maxCount = count
+    }
+    
+};
+AllOne.prototype.dec = function(key) {
+    let count = this.keyToCount[key]
+    let startNode = this.countToNode[count]
+    startNode.val.delete(key)
+    count--
+    
+    if (!this.countToNode[count]) {
+        this.countToNode[count] = {
+            next: startNode,
+            prev: startNode.prev,
+            val: new Set()
+        }
+        startNode.prev.next = this.countToNode[count]
+    }
+    startNode.prev = this.countToNode[count]
+    
+    if (!startNode.val.keys().next().value) {
+        if (startNode.next) {
+            startNode.next.prev = startNode.prev
+            startNode.prev.next = startNode.next
+
+        } else {
+            startNode.prev.next = null
+            if (this.maxCount === count+1) {
+                this.maxCount = count
+            }
+        }
+        delete this.countToNode[count+1]
+    }
+    
+    
+    this.keyToCount[key] = count
+    if (0 < count) {
+        this.countToNode[count].val.add(key)
+    }
+       
+}
+AllOne.prototype.getMaxKey = function() {
+
+    return this.countToNode[this.maxCount].val.keys().next().value
+};
+
+
+AllOne.prototype.getMinKey = function() {
+    if (this.head.next) {
+        return this.head.next.val.keys().next().value
+    }
+    return this.head.val.keys().next().value
+};
