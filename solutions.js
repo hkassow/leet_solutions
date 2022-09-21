@@ -1740,3 +1740,46 @@ var containsDuplicate = function(nums) {
 
     return distinctSet.size !== nums.length
 };
+
+
+// 242. valid anagram
+
+var isAnagram = function(s, t) {
+    let sLetterFreq = {}
+    let count = 0
+    for (const letter of s) {
+        if (!sLetterFreq[letter]) {
+            sLetterFreq[letter] = 0
+            count += 1
+        }
+        sLetterFreq[letter] += 1
+    }
+    
+    
+    for (const letter of t) {
+        if (!sLetterFreq[letter]) {
+            return false
+        }
+        sLetterFreq[letter] -= 1
+        if (sLetterFreq[letter] === 0) {
+            count -= 1
+        }
+    }
+    return !count
+};
+
+// 1. two sum 
+// careful of evaluating prevNums[sum] incase the ith position is the 0th position
+// this will evaluate to falsey value
+var twoSum = function(nums, target) {
+    let prevNums = {}
+   
+   for (let i = 0; i < nums.length; i++) {
+       let sum = target - nums[i]
+       if (prevNums[sum] !== undefined) {
+           return [prevNums[sum], i]
+       } 
+       prevNums[nums[i]] = i
+   }
+   
+}
