@@ -1656,3 +1656,42 @@ var sumEvenAfterQueries = function(nums, queries) {
     
     return result
 };
+
+// 23. merge k sorted lists
+// used merging two lists over and over
+var mergeKLists = function(lists) {
+    while (1 < lists.length) {
+        let a = lists.pop()
+        let b = lists.pop()
+        lists.push(mergeTwoLists(a,b))
+    }
+    
+     
+     return lists[0] || null
+ };
+ var mergeTwoLists = (a, b) => {
+     let dumbyHead = new ListNode()
+     let node = dumbyHead
+     while(a && b) {
+         
+         
+         if (a.val < b.val) {
+             node.next = new ListNode(a.val)
+             a = a.next
+         } else {
+             node.next = new ListNode(b.val)
+             b = b.next
+         }
+         node = node.next
+     }
+     
+     
+     if (a) {
+         node.next = a
+     }
+     if (b) {
+         node.next = b
+     }
+     
+     return dumbyHead.next
+ }
