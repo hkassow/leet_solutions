@@ -1562,3 +1562,97 @@ AllOne.prototype.getMinKey = function() {
     }
     return this.head.val.keys().next().value
 };
+
+
+// 1235 job scheduling 
+// use binary search to find the largest profit before our start time 
+// start with the earliest end time 
+
+var jobScheduling = function(startTime, endTime, profit) {
+    let dp = []
+    let jobs = []
+    
+    for (let i = 0; i < startTime.length; i++ ) {
+        jobs.push([startTime[i], endTime[i], profit[i]])
+    }
+    jobs.sort((a,b) => a[1] - b[1])
+    
+    dp[0] = [0, 0]
+    
+    const findHighestProfitBefore = (avaliable) => {
+        let low = 0
+        let high = dp.length
+        let mid
+        
+        while (low < high) {
+            mid = Math.floor((low+high)/2)
+            
+            if (dp[mid][0] <= avaliable ) {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        } 
+        return low - 1
+    }
+   
+    
+    for (let i = 0; i < startTime.length; i++) {
+        let job = jobs[i]
+        let profitIdx = findHighestProfitBefore(job[0])
+        let currProfit = job[2] + dp[profitIdx][1]
+        
+        
+        if (dp[dp.length -1][1] < currProfit) {
+            dp.push([job[1], currProfit])
+        }
+    }
+    
+    return dp[dp.length - 1][1]
+    
+};
+
+
+// 985. sum of even numbers after queries 
+
+var sumEvenAfterQueries = function(nums, queries) {
+    let result = Array(nums.length)
+    let sum = 0
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i]%2 === 0) {
+            sum += nums[i]
+        } 
+    }
+    
+    
+    for (let j = 0; j < queries.length; j++) {
+        result[j] = sum
+        
+        const query = queries[j]
+        
+        const [val, i] = query 
+        
+        const [startValDiv, queryValDiv] = [Math.abs(nums[i]%2), Math.abs(val%2)]
+        
+       
+        if (startValDiv === 0) {
+            
+            if (queryValDiv === 0) {
+                result[j] += val
+            } else {
+                result[j] -= nums[i] 
+            }
+           
+        } 
+        else if ( startValDiv === 1 && queryValDiv === 1) {
+            result[j] += val + nums[i]
+        } 
+  
+        
+        nums[i] += val
+        sum = result[j]
+    }
+    
+    return result
+};
