@@ -1701,47 +1701,42 @@ var mergeKLists = function(lists) {
  // use monostack to keep track of rectangle heights
  // if we reach a height that is smaller than top of the stack we must pop rectangles from the stack 
  // increasing the width as we go relative to what we have popped
- var largestRectangleArea = function(heights) {
-    
+ // pushed a 0 rectangle to the end to force our stack to dump at the end
+ var largestRectangleArea = function(heights) { 
     let maxArea = heights[0]
     
+    heights.push(0)
     
-    
-    // [maxHeight, idx]
+    // [height, width]
     let monoStack = []
     
     
     for (let i = 0; i < heights.length; i++) {
-       
-        if (!monoStack.length || monoStack[monoStack.length - 1][0] < heights[i]) {
-            monoStack.push([heights[i], 1])
-        } else {
-            let width = 0
-            while(monoStack.length && heights[i] <= monoStack[monoStack.length - 1][0]) {
-                let currRect = monoStack.pop()
-                width += currRect[1]
-            
-                if (maxArea < width*currRect[0]) {
-                    maxArea = width*currRect[0]
-                }
+        let width = 0
+        
+        while(monoStack.length && heights[i] <= monoStack[monoStack.length - 1][0]) {
+            let currRect = monoStack.pop()
+            width += currRect[1]
+
+            if (maxArea < width*currRect[0]) {
+                maxArea = width*currRect[0]
             }
-            if (heights[i]) {
-                monoStack.push([heights[i], width+1])
-            }
-            
+        }
+        if (heights[i]) {
+            monoStack.push([heights[i], width+1])
         }
         
     }
-    
-    let width = 0
-    while (monoStack.length) {
-        const rect = monoStack.pop()
-        width += rect[1]
-            
-        if (maxArea < width * rect[0]) {
-            maxArea = width * rect[0]
-        }
-    }
-    
     return maxArea
+};
+
+
+
+
+// 217. contains duplicate 
+
+var containsDuplicate = function(nums) {
+    let distinctSet = new Set(nums)
+
+    return distinctSet.size !== nums.length
 };
