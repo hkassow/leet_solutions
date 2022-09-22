@@ -1783,3 +1783,32 @@ var twoSum = function(nums, target) {
    }
    
 }
+
+// 49. group anagrams 
+
+var groupAnagrams = function(strs) {
+    
+    let result = {}
+    
+    for (let str of strs) {
+        
+        let orderedStr = str.split("").sort().join("")
+        if (result[orderedStr]) {
+            result[orderedStr].push(str)
+        } else {
+            result[orderedStr] = [str]
+        }
+    }
+    return Object.values(result)
+}
+
+
+// 557. reverse words in a string III
+// reverse each word but maintain order
+
+var reverseWords = function(s) {
+    
+    let arrayStr = s.split(' ')
+    arrayStr = arrayStr.map(word => word.split('').reverse().join(''))
+    return arrayStr.join(' ')
+};
