@@ -1812,3 +1812,50 @@ var reverseWords = function(s) {
     arrayStr = arrayStr.map(word => word.split('').reverse().join(''))
     return arrayStr.join(' ')
 };
+
+// 347. top k frequent elements
+// first way using SORT
+// second way is o(n) with no sort
+var topKFrequent = function(nums, k) {
+    let numToCount = {}
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (!numToCount[nums[i]]) {
+            numToCount[nums[i]] = 0
+        }
+        numToCount[nums[i]] += 1
+        
+    }
+    
+    return Object.keys(numToCount).sort((a,b) => numToCount[a] - numToCount[b]).slice(-k)
+   
+};
+var topKFrequentNoSort = function(nums, k) {
+    let numToCount = {}
+    let bucket = []
+    
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (!numToCount[nums[i]]) {
+            numToCount[nums[i]] = 0
+        }
+        numToCount[nums[i]] += 1
+        
+    }
+    
+    for (let num of Object.keys(numToCount)) {
+        if (!bucket[numToCount[num]]) {
+            bucket[numToCount[num]] = []
+        }
+        bucket[numToCount[num]].push(num)
+    }
+    
+    let ans = []
+    
+    for (let j = bucket.length - 1; ans.length !== k; j--) {
+        if (bucket[j]) {
+            ans.push(...bucket[j])
+        }
+    }
+    return ans
+};
