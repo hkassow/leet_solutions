@@ -1859,3 +1859,85 @@ var topKFrequentNoSort = function(nums, k) {
     }
     return ans
 };
+
+// 1680. concatenation of consecutive binary numbers
+// think about if we were concatenating decimal numbers
+// for numbers 1-9 we would shift/multiply by 10
+// then when we reach a new multiple of 10 we increase how much we are shifting by 10
+// in binary we shifting by a power of 2 and increasing when we reach new power of 2 
+var concatenatedBinary = function(n) {
+    let mod = 1e9 + 7
+    let twoPow = 2
+    
+    
+    let ans = 1
+    for (let i = 2; i <= n; i++) {
+        if (i === twoPow) twoPow *= 2
+        ans = (ans * twoPow + i) % mod 
+    }
+    
+    return ans
+};
+
+// 113 path sum II
+
+var pathSum = function(root, targetSum) {
+    
+    
+    let path = []
+    let ans = []
+    const travelPath = (sum, node) => {
+        if (node) {
+            sum += node.val
+            path.push(node.val)
+            
+            if (!node.left && !node.right) {
+                if (sum === targetSum) {
+                    ans.push([...path])
+                }
+            }
+            
+            travelPath(sum, node.left)
+        
+            travelPath(sum, node.right)
+            
+            path.pop(node.val)
+        
+        }
+        
+
+    }
+    travelPath(0, root)
+    return ans
+};
+
+// 36. valid sudoku 
+
+var isValidSudoku = function(board) {
+    for (let i = 0; i < 9; i++) {
+        const checkRow = {}
+        const checkCol = {}
+        const checkBox = {}
+        for (let j = 0; j < 9; j++) {
+            let _row = board[i][j]
+            let _col = board[j][i]
+            let _box = board[3 * Math.floor(i/3) + Math.floor(j/3)][3 * (i%3) + (j%3)]
+            
+            if (checkRow[_row] && _row !== '.')  {    
+                return false
+            }
+            if (checkCol[_col] && _col !== '.') {
+                return false
+            }
+            if (checkBox[_box] && _box !== '.') {
+                return false
+            }
+        
+            checkRow[_row] = true
+            checkCol[_col] = true
+            checkBox[_box] = true
+        }
+    }
+    
+    return true
+};
