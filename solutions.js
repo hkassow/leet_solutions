@@ -1941,3 +1941,67 @@ var isValidSudoku = function(board) {
     
     return true
 };
+
+// 128. longest consecutive sequence 
+// ends takes in the tail node and returns the head node
+// starts takes in the head node and returns the tail node
+// for every number im checking if there is a previous list that starts or ends adjacent to number
+var longestConsecutive = function(nums) {
+    let longest = 0
+    
+    nums = new Set(nums)
+    let ends = {}
+    let starts = {}
+    let start, end
+    
+    for (let num of nums) {
+        start = num
+        end = num
+        
+        if (starts[num+1] !== undefined) {
+            end = starts[num + 1]
+            delete starts[num + 1]
+        } 
+        
+        if (ends[num-1] !== undefined) {
+            start = ends[num - 1]
+            delete ends[num - 1]
+        }
+        
+        longest = Math.max(longest, end - start + 1)
+        
+        
+        starts[start] = end
+        ends[end] = start
+    }
+    
+    return longest
+};
+
+// 125. valid palindrome
+var isPalindrome = function(s) {
+    let regex = /[a-zA-Z0-9]/
+    let leftP = 0
+    let rightP = s.length - 1
+    
+    while (leftP < rightP) {
+        if (!s[leftP].match(regex)) {
+            leftP ++
+            continue;
+        }
+        
+        if (!s[rightP].match(regex)) {
+            rightP --
+            continue
+        }
+        
+        if (s[rightP].toLowerCase() !== s[leftP].toLowerCase()) {
+            return false
+        }
+        leftP ++
+        rightP --
+    }
+   
+    
+    return true
+};
