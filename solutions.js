@@ -2187,3 +2187,94 @@ class linkedList {
         return node
     }
 }
+
+
+// 622. design circular queue
+// linked list but fed into itself
+
+
+var MyCircularQueue = function(k) {
+    this.max = k
+    this.size = 0
+    this.head
+};
+
+/** 
+ * @param {number} value
+ * @return {boolean}
+ */
+MyCircularQueue.prototype.enQueue = function(value) {
+    if (this.size === this.max) {
+        return false
+    }
+    let node = new Node(value)
+    this.size ++
+    if (this.size === 1) {
+        this.head = node
+        this.head.next = node
+        this.head.prev = node
+    } else {
+        node.prev = this.head.prev
+        node.next = this.head
+        this.head.prev.next = node
+        this.head.prev = node
+    }
+    
+    return true
+};
+
+/**
+ * @return {boolean}
+ */
+MyCircularQueue.prototype.deQueue = function() {
+    if (this.size === 0) {
+        return false
+    }
+    
+    this.size--
+    let node = this.head
+    node.next.prev = node.prev
+    node.prev.next = node.next
+    this.head = node.next
+    
+    return true
+};
+
+/**
+ * @return {number}
+ */
+MyCircularQueue.prototype.Front = function() {
+    if (this.isEmpty()) return -1
+    return this.head.val
+};
+
+/**
+ * @return {number}
+ */
+MyCircularQueue.prototype.Rear = function() {
+    if (this.isEmpty()) return -1
+    return this.head.prev.val
+};
+
+/**
+ * @return {boolean}
+ */
+MyCircularQueue.prototype.isEmpty = function() {
+    return (!this.size)
+};
+
+/**
+ * @return {boolean}
+ */
+MyCircularQueue.prototype.isFull = function() {
+    return (this.size === this.max)
+};
+
+
+class Node {
+    constructor(val) {
+        this.next = null
+        this.prev = null
+        this.val =  val
+    }
+}
