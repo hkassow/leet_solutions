@@ -1702,13 +1702,8 @@ var mergeKLists = function(lists) {
  // pushed a 0 rectangle to the end to force our stack to dump at the end
  var largestRectangleArea = function(heights) { 
     let maxArea = heights[0]
-    
     heights.push(0)
-    
-    // [height, width]
     let monoStack = []
-    
-    
     for (let i = 0; i < heights.length; i++) {
         let width = 0
         
@@ -1722,8 +1717,7 @@ var mergeKLists = function(lists) {
         }
         if (heights[i]) {
             monoStack.push([heights[i], width+1])
-        }
-        
+        }   
     }
     return maxArea
 };
@@ -2352,4 +2346,55 @@ var dailyTemperatures = function(temperatures) {
     }
     
     return ans
+};
+
+
+// 853. car fleet
+// sort the cars by position
+// start from the 2nd closest car to target
+// ask if previous car is slower if it is we change our time to match the slower car
+// increment if we find a car that is slower than the car ahead of it because this is now the new leading slow car
+
+var carFleet = function(target, position, speed) {
+    let ans = 1
+    let cars = []
+    for (let i = 0; i < position.length; i++) {
+        cars.push([position[i], speed[i], (target - position[i])/speed[i]])
+    }
+    
+    cars.sort((a,b) => b[0] - a[0])
+    
+    for (let i = 1; i < cars.length; i++) {
+        
+        if (cars[i][2] <= cars[i-1][2]) {
+            cars[i][2] = cars[i-1][2]
+        } else {
+            ans ++
+        }
+    }
+    
+    return ans
+};
+
+// 704. binary search
+// MATH.FLOOR since 3/2 => 1.5 
+
+var search = function(nums, target) {
+    let lp = 0
+    let rp = nums.length - 1
+    let mid
+    
+    while (lp <= rp) {
+        mid = lp + Math.floor((rp - lp)/2)
+        if (nums[mid] === target) {
+            return mid
+        }
+        else if (nums[mid] > target) {
+            rp = mid - 1
+        }
+        else {
+            lp = mid + 1
+        }
+    }
+    return -1
 };
