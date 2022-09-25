@@ -2330,3 +2330,26 @@ var generateParenthesis = function(n) {
     
     return res
 };
+
+// 739. daily temperatures 
+// mono stack storing index of days that havent found a warmer day
+// once we reach a day warmer than the top of our stack we loop until the top of the stack is empty of warmer than the current day
+var dailyTemperatures = function(temperatures) {
+    let ans = Array(temperatures.length)
+    
+    let tempStack = []
+    let currTemp = temperatures[0]
+    for (let i = 0; i < temperatures.length; i++) {
+        ans[i] = 0
+        currTemp = temperatures[i]
+       
+        while (temperatures[tempStack[tempStack.length - 1]] < currTemp) {
+            let j = tempStack.pop()
+            ans[j] = i-j
+                
+        }
+        tempStack.push(i)
+    }
+    
+    return ans
+};
