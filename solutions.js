@@ -1,4 +1,4 @@
-// 57 insert interval
+// 57. insert interval
 // check boundary conditions on this one
 var insert = function(intervals, newInterval) {
     let ans = []
@@ -27,7 +27,7 @@ var insert = function(intervals, newInterval) {
     return ans
 };
  
-// 542 01 matrix
+// 542. 01 matrix
 // expand from the 0 nodes 
 
 var updateMatrix = function(mat) {
@@ -63,7 +63,7 @@ var updateMatrix = function(mat) {
     return ans
 };
 
-// 973 k closest points to origin
+// 973. k closest points to origin
 // maxProirity (heap) with prority set by distance from origin
 // if our heap is full, check if the farthest element from the origin
 // is closer than our next point
@@ -91,8 +91,8 @@ const dist = (num) => {
     return (num[0]*num[0] + num[1]*num[1])
 }
 
-// 3 longest substring without repeating characters
-
+// 3. longest substring without repeating characters
+// instead of using includes can use an object
 var lengthOfLongestSubstring = function(s) {
     let ans = 0
     let currentSub = ''
@@ -112,7 +112,7 @@ var lengthOfLongestSubstring = function(s) {
     return ans
 };
 
-//15 3sum
+//15. 3sum
 var threeSum = function(nums) {
     nums = nums.sort((a,b) => a - b ) 
     
@@ -152,7 +152,7 @@ var threeSum = function(nums) {
     return ans
 };
 
-// 102 binary tree level order traversal
+// 102. binary tree level order traversal
 
 var levelOrder = function(root) {
     let ans = []
@@ -175,7 +175,7 @@ const dpr = (root, array, height) => {
 }
 
 
-// 133 clone graph 
+// 133. clone graph 
 
 
 var cloneGraph = function(node, visited ={}) {
@@ -202,7 +202,7 @@ var cloneGraph = function(node, visited ={}) {
 
 
 
-// 150 evaluate reverse polish notation
+// 150. evaluate reverse polish notation
 // storing functions inside a hash 
 // Math.trunc removes decimals no rounding
 // only reach an operation after we've reached at least two integers
@@ -222,7 +222,7 @@ var evalRPN = function(tokens) {
      return stack.pop()
  };
 
-// 207 course schedule 
+// 207. course schedule 
 // graph stores the depencies 
 // degree stores how many prereqs a class has (if it has noreqs degree is 0)
 var canFinish = function(numCourses, prerequisites) {
@@ -940,24 +940,22 @@ var buildTree = function(inorder, postorder) {
 // two pointer, shrinking our container
 
 var maxArea = function(height) {
-    let leftPointer = 0
-    let rightPointer = height.length
+    let leftP = 0
+    let rightP = height.length - 1
     let max = 0
-    
-    
-    while (leftPointer < rightPointer) {
-        let [leftHeight, rightHeight] = [height[leftPointer], height[rightPointer]]
-        let area = (rightPointer - leftPointer) * (Math.min(leftHeight, rightHeight))
+    let runningArea = 0
+    while (leftP < rightP) {
+        runningArea = (rightP - leftP) * Math.min(height[leftP], height[rightP])
         
-        if (max < area) {
-            max = area   
-        }
-        if (leftHeight < rightHeight) {
-            leftPointer++
+        max = Math.max(runningArea, max)
+        
+        if (height[leftP] < height[rightP]) {
+            leftP++
         } else {
-            rightPointer --
+            rightP--
         }
     }
+    
     return max
 };
 
@@ -1076,7 +1074,7 @@ var findAnagrams = function(s, p) {
 
 
 
-// 310 minimum height trees
+// 310. minimum height trees
 // used set for o(1) delete vs array that would have o(n) because of searching index
  var findMinHeightTrees = function(n, edges) {
     if (n < 2) return [0]
@@ -1111,7 +1109,7 @@ var findAnagrams = function(s, p) {
 
 
 
-// 621 task scheduler 
+// 621. task scheduler 
 // take the biggest limiter and use that to create your interals
 // you can stretch your interval to be longer than the cooldown period to achieve the minimum number of idles
 var leastInterval = function(tasks, n) {
@@ -1268,7 +1266,7 @@ var minWindow = function(s, t) {
 
 
 
-// 297 serialize and deserialize binary tree
+// 297. serialize and deserialize binary tree
 // function takes in a root node
 // travels down the left side creating node.left values
 // once we reach a null value adds a null stopper
@@ -1315,7 +1313,7 @@ var deserialize = function(data) {
     return helper()
 };
 
-// 42 trapping rain water
+// 42. trapping rain water
 //two pointer moving one boundary at a time until they meet
 
 
@@ -1564,7 +1562,7 @@ AllOne.prototype.getMinKey = function() {
 };
 
 
-// 1235 job scheduling 
+// 1235. job scheduling 
 // use binary search to find the largest profit before our start time 
 // start with the earliest end time 
 
@@ -1879,7 +1877,7 @@ var concatenatedBinary = function(n) {
     return ans
 };
 
-// 113 path sum II
+// 113. path sum II
 
 var pathSum = function(root, targetSum) {
     
@@ -2005,3 +2003,187 @@ var isPalindrome = function(s) {
     
     return true
 };
+
+
+// 167. two sum II - input array is sorted
+// use two pointers
+// since array is already sorted we just keep incrementing one pointer until we find sum
+
+var twoSum = function(numbers, target) {
+    let leftP = 0
+    let rightP = numbers.length - 1
+    let sum = 0
+
+    while (leftP < rightP) {
+        sum = numbers[leftP] + numbers[rightP]
+        if (sum === target) {
+            return [leftP + 1, rightP + 1]
+        }
+        
+        if (sum < target) {
+            leftP ++
+        } else {
+            rightP --
+        }
+    }
+};
+
+
+// 121. best time to buy and sell stock
+var maxProfit = function(prices) {
+    let currentBuy = prices[0]
+    let max = 0
+    
+    
+    for (const price of prices) {
+        max = Math.max(max, price - currentBuy)
+        currentBuy = Math.min(price, currentBuy)
+    }
+    return max
+};
+
+// 424. longest repeating character replacement 
+// use sliding window
+// if we visit distinct characters our maxWindow will stay at 1 
+// so our left index will start to move forward once we reach the alloted amount of replaced letters
+// if we reach a non-distinct character IN our window our window size increases
+// the trick is we never reduce our window size so returning right - left is sufficient
+var characterReplacement = function(s, k) {
+    let left = 0
+    let right = 0
+    let visitedCount = {}
+    let maxWindow = 0
+    
+    while (right < s.length) {
+        const char = s[right]
+        if (!visitedCount[char]) {
+            visitedCount[char] = 0
+        }
+        visitedCount[char] += 1
+        
+        if (maxWindow < visitedCount[char]) {
+            maxWindow = visitedCount[char]
+        }
+        
+        if (right - left + 1 - maxWindow > k) {
+            visitedCount[s[left]]--
+            left++
+        }
+        right++
+    }
+    
+    
+    return right - left
+};
+
+// 567. permutation in string
+// sliding window 
+// if we reach a letter that is either not in s1 or
+// we have too many iterations of the current letter in our sliding window
+// then we start to throw out letters until either we are at our right index
+// or we need the current letter in our window
+//
+var checkInclusion = function(s1, s2) {
+    let letterCount = {}
+    for (const letter of s1) {
+        if (!letterCount[letter]) {
+            letterCount[letter] = 0
+        }
+        letterCount[letter] ++
+    }
+    let leftP = 0
+    let rightP = 0
+    while (rightP < s2.length) {
+        const char = s2[rightP]
+        if (!letterCount[char]) { 
+            while (leftP <= rightP && !letterCount[char]) {
+                letterCount[s2[leftP]]++
+                leftP++
+            }
+        }
+        if (letterCount[char]) {
+            letterCount[char]--
+        }
+
+        rightP++
+        if (rightP - leftP === s1.length) {
+            return true
+        }
+    }
+    return false
+};
+
+// 239. sliding window maximum
+// use linked list to keep track of monotonic decreasing nums
+// if our current max is out of range we shift to the next max
+var maxSlidingWindow = function(nums, k) {
+    if (k === 1) {
+        return nums
+    }
+    
+    let ans = []
+    
+    let window = new linkedList()
+    
+    for (let i = 0; i < nums.length; i++) {
+        let num = nums[i]
+        if (window.peekFront().val < i - k + 1) {
+            
+            window.shift()
+        }
+        while (nums[window.peekLast().val] < num ) {
+            window.pop()
+        }
+        window.push(i)
+        if (k - 1 <= i) {
+            ans.push(nums[window.peekFront().val])
+        }
+    }
+    return ans
+};
+
+
+class linkedNode {
+    constructor(val) {
+        this.val = val
+        this.next = null
+        this.prev = null
+    }
+}
+
+class linkedList {
+    constructor() {
+        this.head = new linkedNode()
+        this.tail = new linkedNode()
+        this.head.next = this.tail
+        this.tail.prev = this.head
+        
+    }
+    peekFront = () => {
+        return this.head.next
+    }
+    peekLast = () => {
+        return this.tail.prev
+    }
+
+    push = (val) => {
+        let node = new linkedNode(val)
+        node.next = this.tail
+        node.prev = this.tail.prev
+        this.tail.prev.next = node
+        this.tail.prev = node
+    }
+    shift = () => {
+        let node = this.head.next
+        node.next.prev = this.head
+        this.head.next = node.next
+        
+        return node
+    }
+    pop = () => {
+        let node = this.tail.prev
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        return node
+    }
+}
