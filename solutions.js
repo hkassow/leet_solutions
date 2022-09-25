@@ -210,13 +210,13 @@ var cloneGraph = function(node, visited ={}) {
 var evalRPN = function(tokens) {
     const operations = {'+': (a,b) => (a+b), "-": (a,b) => (a-b), "*": (a,b) => (a*b), "/": (a,b) => Math.trunc(a/b) }
     let stack = []
-    for (let i=0; i < tokens.length; i++) {
-        if (operations[tokens[i]]) {
+    for (const token of tokens) {
+        if (operations[token]) {
             a = parseInt(stack.pop())
             b = parseInt(stack.pop())
-            stack.push(operations[tokens[i]](b,a))
+            stack.push(operations[token](b,a))
         } else {
-            stack.push(tokens[i])
+            stack.push(token)
         }
     }
      return stack.pop()
@@ -2278,3 +2278,55 @@ class Node {
         this.val =  val
     }
 }
+
+// 20. valid parentheses
+// inserting the opposite symbol 
+// when we reach a closing symbol we compare it with the expected closing bracket
+var isValid = function(s) {
+    
+    let stack = []
+    
+    for (let symbol of s) {
+        if (symbol === '(' ) {
+            stack.push(')')
+        }
+        else if (symbol === '{') {
+            stack.push('}')
+        }
+        else if (symbol === '[') {
+            stack.push(']')
+        } else {
+            if (symbol !== stack.pop()) {
+                return false
+            }
+        }
+    }
+    return !stack.length
+};
+
+// 22. generate parentheses
+// back tracking
+
+var generateParenthesis = function(n) {
+    const res = []
+    
+    
+    
+    const travelPath = (open, close, str) => {
+        if (str.length === n*2) {
+            res.push(str)
+        } else {
+            if (0 < open) {
+                travel(open - 1, close ,str+'(')
+            }
+            if (open < close) {
+                travel(open, close - 1, str+')' )
+           
+            }
+        }
+         
+    }
+    travelPath(n, n, '')
+    
+    return res
+};
