@@ -2398,3 +2398,23 @@ var search = function(nums, target) {
     }
     return -1
 };
+
+// 74. search a 2d matrix 
+// this solution treates the matrix like a sorted list
+var searchMatrix = function(matrix, target) {
+    let x = matrix[0].length 
+    
+    let min = 0
+    let max = x*matrix.length - 1
+    let mid
+    let num
+    while (min <= max) {
+        mid = min + Math.floor((max - min) / 2)
+        num = matrix[Math.floor(mid/x)][mid%x]
+        
+        if (num === target) return true
+        else if (num < target) min = mid+1
+        else max = mid-1
+    }
+    return false
+};
