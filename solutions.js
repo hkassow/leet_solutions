@@ -2418,3 +2418,35 @@ var searchMatrix = function(matrix, target) {
     }
     return false
 };
+
+// 990. satisfiability of equality equations
+// uses 2 passes
+// first pass assigns every element a parent element
+// second pass looks at the inequalities to make sure 
+// if "a!=b" a and b do not have shared parent
+var equationsPossible = function(equations) {
+    let parent = new Map()
+    
+    const find = (a) => {
+        parent.set(a, parent.get(a) || a)
+        return (parent.get(a) !== a)? find(parent.get(a)) : a
+        
+    }
+    for (const assignment of equations) {
+        if (assignment[1] === '=') {
+            const a = assignment[0]
+            const b = assignment[3]
+            
+            parent.set(find(a), find(b))
+        }
+    } 
+    for (const inequality of equations) {
+        if (inequality[1] === '!') {
+            const a = inequality[0]
+            const b = inequality[3]
+            
+            if (find(a) === find(b)) return false
+        }
+    }
+    return true
+};
