@@ -2042,32 +2042,35 @@ var maxProfit = function(prices) {
 // so our left index will start to move forward once we reach the alloted amount of replaced letters
 // if we reach a non-distinct character IN our window our window size increases
 // the trick is we never reduce our window size so returning right - left is sufficient
+// if our left index is outside the bounds of right index - (max count + k) 
+// we move left index forward to maintain the max window
 var characterReplacement = function(s, k) {
-    let left = 0
-    let right = 0
-    let visitedCount = {}
-    let maxWindow = 0
+    let letterFreq = {}
+    let maxSize = 0
+    let leftP = 0
+    let rightP = 0
     
-    while (right < s.length) {
-        const char = s[right]
-        if (!visitedCount[char]) {
-            visitedCount[char] = 0
-        }
-        visitedCount[char] += 1
+    while (rightP < s.length) {
+        const char = s[rightP]
+        if (!letterFreq[char]) letterFreq[char] = 0
+        letterFreq[char]++
         
-        if (maxWindow < visitedCount[char]) {
-            maxWindow = visitedCount[char]
+        if (maxSize < letterFreq[char]) {
+            maxSize = letterFreq[char]
         }
         
-        if (right - left + 1 - maxWindow > k) {
-            visitedCount[s[left]]--
-            left++
+        if (leftP <= (rightP - maxSize - k)) {
+            letterFreq[s[leftP]]--
+            leftP++
         }
-        right++
+        rightP++
     }
     
     
-    return right - left
+    return rightP - leftP
+
+    //return Math.min(s.length, maxSize + k)
+    //this is usually the return value that makes the most sense to me
 };
 
 // 567. permutation in string
@@ -2449,4 +2452,383 @@ var equationsPossible = function(equations) {
         }
     }
     return true
+};
+
+
+// 875. koko eating bananas 
+// binary search 
+var minEatingSpeed = function(piles, h) {
+    let minP = 0
+    let maxP = findMax(piles)
+    let mid
+    
+    while (minP <= maxP) {
+        mid = minP + Math.trunc((maxP - minP)/2)
+        let speed = eatSpeed(piles, mid)
+        if (speed <= h) {
+            maxP = mid - 1
+        } else {
+            minP = mid + 1
+        }
+    }
+    return minP
+};
+
+const findMax = (array) => {
+        let max = 0
+        for (let i = 0; i < array.length; i++) {
+            if (max < array[i]) {
+                max = array[i]
+            }
+        }
+        return max
+}
+
+const eatSpeed = (piles, k) => {
+        let hours = 0
+        
+        for (const pile of piles) {
+            hours += Math.ceil(pile/k)
+        }
+        
+        return hours
+}
+
+// 153. find minimum in rotated sorted array
+// if we reach a sorted array leftP < mid < rightP return leftP
+// else if the pivot is on the right side of our array
+// then the middle element will be greater than rightP and we shift to the right window
+// removing the mid element because we know our rightP will be smaller
+// otherwise we cant be certain that mid is not the smallest element 
+// but we know it is some element in the left window including mid
+// think small case [3,1,2] [2,3,1] [1,2,3]
+var findMin = function(nums) {
+    let leftP = 0
+    let rightP = nums.length - 1
+    let mid
+    while (leftP <= rightP) {
+        mid = leftP + Math.trunc((rightP - leftP)/2)
+        if (nums[leftP] <= nums[mid] && nums[mid] <= nums[rightP]) {
+            return nums[leftP]
+        }
+        if (nums[rightP] < nums[mid]) {
+            leftP = mid + 1
+        } else {
+            rightP = mid
+        }
+        
+    }
+};
+
+// 981. time based key-value store
+// binary search solution is first 
+// second solution uses an array and populates all possible values for our timestamp to be called on
+//  
+var TimeMap = function() {
+    this.timeMap = {}
+};
+
+TimeMap.prototype.set = function(key, value, timestamp) {
+    if (!this.timeMap[key]) {
+        this.timeMap[key] = []
+    }
+    this.timeMap[key].push([timestamp, value])
+};
+
+TimeMap.prototype.get = function(key, timestamp) {
+    if (!this.timeMap[key]) return ""
+    let leftP = 0
+    let rightP = this.timeMap[key].length - 1
+    let mid
+    let res = ""
+    while (leftP <= rightP) {
+        mid = leftP + Math.trunc((rightP - leftP)/2)
+        
+        if (this.timeMap[key][mid][0] <= timestamp) {
+            leftP = mid + 1
+            res = this.timeMap[key][mid][1]
+        } else {
+            rightP = mid - 1
+        }
+    }
+    return res
+};
+// second solution using an array an no binary search
+// the memory for this is probably much worse because we have to store based on value of timestamp
+// and not how many times we have called set 
+var TimeMap = function() {
+    this.timeMap = {}
+};
+
+TimeMap.prototype.set = function(key, value, timestamp) {
+    if (!this.timeMap[key]) {
+        this.timeMap[key] = Array(timestamp).fill("")
+    }
+    
+    let pastVal = this.timeMap[key].at(-1)
+    for (let i = this.timeMap[key].length; i < timestamp; i++) {
+        this.timeMap[key].push(pastVal)
+    }
+    this.timeMap[key][timestamp] = value
+};
+TimeMap.prototype.get = function(key, timestamp) {
+    if (!this.timeMap[key]) return ""
+    
+    return this.timeMap[key][Math.min(timestamp, this.timeMap[key].length - 1)]
+};
+
+
+// 4. median of two sorted arrays
+
+
+var findMedianSortedArrays = function(nums1, nums2) {
+    let n1 = nums1.length,
+        n2 = nums2.length
+        
+    if (n1 < n2) return findMedianSortedArrays(nums2, nums1) 
+    let leftP = 0,
+        rightP = nums2.length*2,
+        mid1,
+        mid2
+
+    while (leftP <= rightP) {
+        mid2 = leftP + Math.floor((rightP - leftP)/2)
+        mid1 = n1 + n2 - mid2 
+        const left1 = mid1 === 0? -Infinity: nums1[Math.floor((mid1-1)/2)],
+              left2 = mid2 === 0? -Infinity: nums2[Math.floor((mid2-1)/2)],
+              right1 = mid1 === 2*n1? Infinity: nums1[Math.floor(mid1/2)],
+              right2 = mid2 === 2 *n2? Infinity: nums2[Math.floor(mid2/2)]
+        
+        if (right2 < left1) {
+            leftP = mid2 + 1
+        } else if (right1 < left2) {
+            rightP = mid2 - 1
+        } else {
+            return (Math.max(left1,left2) + Math.min(right1,right2))/2
+        }
+    }
+};
+
+
+// 838. push dominoes
+// here is two solutions because 
+// i think the first one is too long to reproduce without struggling with edge cases
+
+//1st solution
+// 3 possibilites
+// 1) if we reach a "."
+// we look for a Left falling domino 
+// if our right pointer then arrives at a Right falling domino first 
+// then theres no possibility for this domino to fall
+// 2) if we reach a "R" then we look for a "L"
+// if our right pointer reachs  a "R" domino before finding a "L" dominio
+// we move our left pointer up to our right pointer knocking over every domino to the right
+// if we do reach a "L" domino with our right pointer we just need to find the lenght of our inner set
+// then we knock over the respective dominos as we move up left pointer
+// 3) if we reach a "L" then we can just move our pointers up
+// this is because we knock over the "." dominos when we reach them
+// either there are no dominos to the left to knock over
+// or theyre already knocked over by a previous iteration
+
+var pushDominoes = function(dominoes) {
+    let ans = dominoes.split('')
+    let leftP = 0
+    let rightP = 0
+    let leftDomino = ans[leftP]
+    let rightDomino = ans[rightP]
+
+    while (leftP < dominoes.length) {
+        leftDomino = ans[leftP]
+        rightDomino = ans[rightP]
+        if (leftDomino === '.') {
+            while(rightP < dominoes.length && rightDomino === '.') {
+                rightP++
+                rightDomino = ans[rightP]
+            }
+            if (rightDomino === 'R' || rightDomino === '.' || !rightDomino) {
+                leftP = rightP
+            } else {
+                while (leftP < rightP) {
+                    ans[leftP] = 'L'
+                    leftP++
+                }
+            }
+        } else if (leftDomino === 'R') {
+            while (rightP < dominoes.length && (rightP === leftP || rightDomino === '.')) {
+                rightP++
+                rightDomino = ans[rightP]
+            }
+            if (rightDomino === 'L') {
+                let len = rightP - leftP + 1
+                let mid = (leftP + Math.floor(len/2))
+                let odd = len%2
+                leftP++
+                while (leftP < rightP) {
+                    if (leftP < mid) {
+                        ans[leftP] = 'R'
+                    } else {
+                        if (odd) {
+                            if (mid < leftP) {
+                                ans[leftP] ='L'
+                            }
+                        } else {
+                            ans[leftP] = 'L'
+                        }
+                    }
+                    leftP++
+                }
+            } else {
+                while (leftP < rightP) {
+                    ans[leftP] = "R"
+                    leftP++
+                }
+            }
+        } else {
+            leftP++
+            rightP++
+        }
+    }
+    return ans.join("")
+}
+
+// 2nd solution
+// here we do two passes the first pass to count how far every neutral domino is from right falling domino
+// on second pass we count how far every neutral domino is from the closest left falling domino
+// on the second pass we also compare the two values and react accordingly
+var pushDominoes = function(dominoes) {
+    let firstPassArray = Array(dominoes.length).fill()
+    let ans = Array(dominoes.length)
+    let sinceRight = 0
+    for (let i = 0; i < dominoes.length; i++) {
+        if (dominoes[i] === '.' && sinceRight) {
+            firstPassArray[i] = sinceRight
+            sinceRight ++
+        } else if (dominoes[i] === 'R') {
+            sinceRight = 1
+        } else {
+            sinceRight = 0
+        }
+    }
+    let sinceLeft = 0
+    for (let j = dominoes.length - 1; 0 <= j; j--) {
+        if (!firstPassArray[j]) {
+            if (dominoes[j] === '.' && sinceLeft) {
+                ans[j] = 'L'
+            } else {
+                ans[j] = dominoes[j]   
+            }
+        } else {
+            if (!sinceLeft || firstPassArray[j] < sinceLeft) {
+                ans[j] = 'R'
+            } else if (sinceLeft === firstPassArray[j]) {
+                ans[j] = '.'
+            } else {
+                ans[j] = 'L'
+            }    
+        }
+        if (dominoes[j] === 'L') {
+            sinceLeft = 1 
+        } else if (dominoes[j] === 'R') {
+            sinceLeft = 0
+        } else if (sinceLeft) {
+            sinceLeft++
+        }
+    }
+    return ans.join("")
+};
+
+
+// 206. reverse linked list
+// recursive
+var reverseList = function(head, prevNode = null) {
+    if (head === null) return prevNode
+    let node = new ListNode(head.val, prevNode)
+
+    return reverseList(head.next, node)
+    
+};
+
+// iterative
+var reverseList = function(head) {
+    let prevNode = null
+    while (head) {
+        let node = new ListNode(head.val, prevNode)
+        prevNode = node
+        head = head.next
+    }
+    return prevNode
+};
+
+
+// 21. merge two sorted lists
+var mergeTwoLists = function(list1, list2) {
+    let mergedList = new ListNode(),
+        currNode = mergedList
+    
+    while (list1 && list2) {
+        if (list1.val < list2.val) {
+            currNode.next = list1
+            list1 = list1.next
+        } else {
+            currNode.next = list2
+            list2 = list2.next
+        }
+        currNode = currNode.next
+    }
+    
+    currNode.next = list1 || list2
+    return mergedList.next
+};
+
+// 143. reorder list
+// the proper steps are 
+// > find middle of list 
+// > reverse right side
+// > merge left side with reversed right side
+// here I use an array to track every part of the linked lists
+// then traveling the array backwards gives up our backwards linked list
+var reorderList = function(head) {
+    let currNode = head
+    let backwards = []
+    
+    while (currNode) {
+        backwards.push(currNode)
+        currNode = currNode.next
+    }
+    let j = backwards.length - 1,
+        i = 0,
+        node1,
+        node2
+    
+    while (i < j) {
+        node1 = backwards[i]
+        node2 = backwards[j]
+        node2.next = node1.next
+        node1.next = node2
+        i++
+        j--
+    }
+    backwards[i].next = null
+};
+
+// 19. remove nth node from end of list
+// let fast be n ahead of slow 
+// then prog fast and slow at same speed
+// once fast reaches end slow will be at nth node from the end which will be where we chop 
+var removeNthFromEnd = function(head, n) {
+    let smartNode = new ListNode(null, head),
+        slow = smartNode,
+        fast = smartNode
+    
+    for (let i = 0; i <= n; i++){
+        fast = fast.next
+    }
+    
+    while (fast) {
+        fast = fast.next
+        slow = slow.next
+    }
+    slow.next = slow.next.next
+    
+    return smartNode.next
 };
