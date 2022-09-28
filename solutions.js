@@ -2832,3 +2832,60 @@ var removeNthFromEnd = function(head, n) {
     
     return smartNode.next
 };
+
+// 138. copy list with random pointer 
+// store pointer to node inside old node so if we loop back we can assign our value 
+
+var copyRandomList = function(head) {
+    let currOldNode = head,
+        smartHead = new Node(),
+        currNewNode = smartHead,
+        index = 0
+    
+    while (currOldNode) {
+        let node = currOldNode.pointer || new Node(currOldNode.val)
+        currOldNode.pointer = node
+        if (currOldNode.random) {
+            node.random = currOldNode.random.pointer || new Node(currOldNode.random.val)
+            currOldNode.random.pointer = node.random
+        }
+        currNewNode.next = node
+        currNewNode = node
+        currOldNode = currOldNode.next
+        index++
+    }
+    return smartHead.next
+};
+
+
+// 2. add two numbers
+
+var addTwoNumbers = function(l1, l2) {
+    let carry = 0,
+        smartHead = new ListNode(),
+        currNode = smartHead
+    
+    while (l1 || l2) {
+        const value = (l1? l1.val:0) + (l2? l2.val:0) + carry
+        carry = (10<= value)? 1:0
+        currNode.next = new ListNode(value%10)
+        currNode = currNode.next
+        l1 = l1?.next 
+        l2 = l2?.next
+    }
+    if (carry) {
+        currNode.next = new ListNode(1)
+    }
+    return smartHead.next
+};
+
+// 141. linked list cycle
+
+var hasCycle = function(head) {
+    if (!head) return false
+    
+    if (head.visited === true) return true
+    
+    head.visited = true
+    return hasCycle(head.next)
+};
