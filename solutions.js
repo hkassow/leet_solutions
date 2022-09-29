@@ -1693,7 +1693,30 @@ var mergeKLists = function(lists) {
      
      return dumbyHead.next
  }
-
+// using priority queue
+ var mergeKLists = function(lists) {
+    let minPrio = new MinPriorityQueue({priority: (a) => a.val})
+    
+    
+    for (const list of lists) {
+        if (list) {
+            minPrio.enqueue(list)
+        }
+    }
+    const smartHead = new ListNode('sentinel', null)
+    let currNode = smartHead
+    
+    while (minPrio.size()) {
+        const node = minPrio.dequeue().element
+        if (node.next) {
+            minPrio.enqueue(node.next)
+        }
+        currNode.next = node
+        currNode = node
+    }
+    currNode.next = null
+    return smartHead.next
+};
 
  // 84. largest rectangle in histogram
  // use monostack to keep track of rectangle heights
@@ -2880,7 +2903,7 @@ var addTwoNumbers = function(l1, l2) {
 };
 
 // 141. linked list cycle
-
+// with o(n) extra memory
 var hasCycle = function(head) {
     if (!head) return false
     
@@ -2888,4 +2911,115 @@ var hasCycle = function(head) {
     
     head.visited = true
     return hasCycle(head.next)
+};
+// with o(1) extra memory 
+var hasCycle = function(head) {
+    let smartNode = new ListNode(),
+        fast = smartNode,
+        slow = smartNode
+    smartNode.next = head
+    fast = fast?.next?.next
+
+    while (fast && fast !== slow){
+        fast = fast.next?.next
+        slow = slow.next
+    }
+    return (fast)? true: false
+};
+
+
+// 287. find duplicate number
+var findDuplicate = function(nums) {
+    let lambda = 1,
+        fast = 0,
+        slow = nums[0],
+        twoPow = 1
+    
+    while (fast !== slow) {
+        if (lambda === twoPow) {
+            slow = fast
+            twoPow *= 2
+            lambda = 0
+        }
+        fast = nums[fast]
+        lambda++
+    }
+    fast = 0
+    slow = 0
+    
+    while (0 < lambda) {
+        fast = nums[fast]
+        lambda--
+    }
+    
+    while (fast !== slow) {
+        fast = nums[fast]
+        slow = nums[slow]
+    }
+    return fast
+};
+
+var findDuplicate = function(nums) {
+    let slow = nums[0],
+        fast = nums[nums[0]]
+  
+    while (fast !== slow) {
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+    }
+    slow = 0
+    
+    while (slow !== fast) {
+        slow = nums[slow]
+        fast = nums[fast]
+    }
+    return fast
+};
+
+// 92. reverse linked list II
+// using similar logic to reverse linked list for o(1) memory usage
+// except we must find the correct starting nodes
+var reverseBetween = function(head, left, right) {
+    let count = 1,
+        currNode = head,
+        start = head
+    
+    while (count < left) {
+        start = currNode
+        currNode = currNode.next
+        count++
+    }
+    
+    let tail = currNode,
+        prev = null
+    while (count <= right) {
+        let node = currNode
+        currNode = currNode.next
+        node.next = prev
+        prev = node
+        count++
+    }
+    start.next = prev
+    tail.next = currNode
+    return (left === 1)? prev: head
+};
+
+// 25. reverse nodes in k-group 
+// use function from 92. reverse linked list II
+var reverseKGroup = function(head, k) {
+    let startNode = head,
+        scoutNode = head,
+        count = 1
+    for (let i = 0; i<k-1; i++){
+        scoutNode = scoutNode.next
+    }
+    while (scoutNode) {
+        scoutNode = scoutNode.next
+        head = reverseBetween(head,count, count+k-1) // this function from reverse linked list II 
+        count = count+k
+        for (let i = 0; i<k-1; i++){
+            scoutNode = scoutNode?.next || null
+        }
+    }
+    return head
 };
