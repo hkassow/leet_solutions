@@ -3160,3 +3160,23 @@ var maxPathSum = function(root) {
     return travel(root)[1]
     
 };
+
+
+// 658. find k closest elements
+
+var findClosestElements = function(arr, k, x) {
+    let lp = 0,
+        rp = arr.length - k, 
+        mid
+    
+    while (lp < rp) {
+        mid = lp + Math.floor((rp - lp) / 2)
+        
+        if (arr[mid+k] - x < x- arr[mid]) {
+            lp = mid+1
+        } else{
+            rp = mid
+        }
+    }
+    return arr.slice(lp, lp + k);
+} 
