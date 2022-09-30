@@ -155,25 +155,21 @@ var threeSum = function(nums) {
 // 102. binary tree level order traversal
 
 var levelOrder = function(root) {
-    let ans = []
-    dpr(root, ans, 0)
-    return ans
-};
-
-
-
-const dpr = (root, array, height) => {
-    if (!root) {
-        return
-    } 
-    if (array.length === height) {
-        array.push([])
+    if (!root) return []
+    let res = []
+    
+    const addLevel = (depth, root) => {
+        if (!root) return
+        if (!res[depth]) {
+            res.push([])
+        }
+        res[depth].push(root.val)
+        addLevel (depth+1, root.left)
+        addLevel (depth+1, root.right)
     }
-    array[height].push(root.val)
-    dpr(root.left, array, height+1)
-    dpr(root.right, array, height+1)
-}
-
+    addLevel(0, root)
+    return res
+};
 
 // 133. clone graph 
 
@@ -3022,4 +3018,125 @@ var reverseKGroup = function(head, k) {
         }
     }
     return head
+};
+
+
+// 572. subtree of another tree
+
+var isSubtree = function(root, subRoot) {
+    if (!subRoot) return true
+    if (!root) return false
+    if (isSameIsh(root, subRoot)) {
+        return true
+    } else {
+        let left = isSubtree(root.left, subRoot),
+            right = isSubtree(root.right, subRoot)
+        return left || right
+    }
+};
+
+var isSameIsh = function(p, q) {
+    if (!q && !p) return true
+    else if (!q || !p || p.val !== q.val) return false
+    
+    return isSameIsh(p.left, q.left) && isSameIsh(p.right, q.right)
+};
+
+
+
+
+// 235. lowest common ancestor of a binary search tree
+// since its a binary search tree either we arrive at one of the target nodes or we arrive at a node between the targets
+var lowestCommonAncestor = function(root, p, q) {
+    if ((root.val <= p.val && q.val <= root.val) || (root.val <= q.val && p.val <= root.val)) {
+        return root
+    } else {
+        return (root.val < q.val)? lowestCommonAncestor(root.right, p, q): lowestCommonAncestor(root.left, p, q)
+    }
+};
+
+
+// 1448. count good nodes in binary tree
+// travel down every path keeping track of max
+
+var goodNodes = function(root) {
+    let res = 0
+    
+    const travel = (max, root) => {
+        if (!root) return
+        if (max <= root.val) {
+            res++
+        }
+        travel(Math.max(root.val, max), root.right)
+        travel(Math.max(root.val, max), root.left)
+
+    }
+    
+    travel(root.val, root)
+    return res
+};
+
+
+
+// 218. the skyline problem
+// using priority queue to keep track of all the buildings currently in our range ordered by height
+// when we reach a new building we remove every building in our queue that does not overlap with our new building up to a new local max
+// ^ here we are careful when we expunge buildings from our list we check if the last expunged building failed to overlap with the new local max
+// if this happens we add our critical point and continue removing elements while pushing our right index forward
+// when we finish removing buildings from our list we look at our current right index
+// if it does not equal our current buildings index then we must add a 0 because there is a gap between buildings
+// last we compare our current building to our local max
+var getSkyline = function(buildings) {
+    let res = [],
+        currBuildings = new MaxPriorityQueue({priority: (a) => a[2]})
+    buildings.push([Infinity, Infinity, 0])
+    for (let i = 0; i<buildings.length;i++) {
+        
+        const building = buildings[i]
+        let farthestRight = currBuildings.front()?.element[1],
+            currHeight
+        while (currBuildings.front()?.element[1] < building[0]) {
+            const [left, right, height] = currBuildings.front().element
+             if (farthestRight < right){
+                 if (height !== currHeight){
+                     if (building[2] < height || right < building[0]) {
+                        res.push([farthestRight, height])
+                     }
+                 }
+                 farthestRight = right
+                 currHeight = height
+             }
+            if (!currHeight) { currHeight = true }
+            currBuildings.dequeue()
+        }
+        
+        if (res.length) {
+            if (res.at(-1)[0] === building[0]) {
+            if (res.at(-1)[1] < building[2]) {
+                res.pop()
+            }
+            } 
+        }
+        
+        if (farthestRight < building[0] && currHeight) {
+            if (currBuildings.front()?.element[0] <= farthestRight) {
+                res.push([farthestRight, currBuildings.front().element[2]])
+            } else {
+                res.push([farthestRight, 0])  
+            }
+        }
+        
+        
+        if (currBuildings.front()) {
+            if (currBuildings.front().element[2] < building[2]) {
+                res.push([building[0], building[2]])
+            }
+            
+        } else {
+            res.push([building[0], building[2]])
+        }
+        currBuildings.enqueue(building)
+    }
+    res.pop()
+    return res
 };
