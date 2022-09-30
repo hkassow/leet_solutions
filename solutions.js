@@ -3140,3 +3140,23 @@ var getSkyline = function(buildings) {
     res.pop()
     return res
 };
+
+
+// 124. binary tree maximum path sum 
+
+
+var maxPathSum = function(root) {
+    if (!root) return 0
+    
+    
+    const travel = (node) => {
+        if (!node) return [-Infinity, -Infinity]
+        let left = travel(node.left),
+            right = travel(node.right),
+            maxLen = Math.max(node.val, left[0] + node.val, right[0] + node.val),
+            maxPath = Math.max(left[1], right[1], maxLen, left[0] + node.val + right[0])
+        return [maxLen, maxPath]
+    }
+    return travel(root)[1]
+    
+};
