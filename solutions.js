@@ -3356,3 +3356,106 @@ var lastStoneWeight = function(stones) {
     
     return (heap.size())? heap.front().element: 0
 };
+
+
+// 215. kth largest element in an array
+// use pivot sort to find an alement such that after pivot sort the left side is nums.length - k 
+// meaning our pivot element is the kth largest elemetn
+
+var findKthLargest = function(nums, k) {
+    const swap = (i, j) => {
+        [nums[i], nums[j]] = [nums[j], nums[i]]
+    }
+    const partition = (lo, hi) => {
+        const pivot = nums[hi]
+        let i = lo,
+            j = hi - 1
+        while (i <= j) {
+            while (nums[i] < pivot) {
+                i++
+            }
+            while (pivot < nums[j]) {
+                j--
+            }
+            if (i <= j) {
+                swap(i,j)
+                i++
+                j--
+            }
+        }
+        swap(i, hi) 
+        return i
+    }
+    let lo = 0,
+        hi = nums.length - 1,
+        kth
+    while (kth !== nums.length - k) {
+        const j = partition(lo, hi)
+        if (j < nums.length - k) {
+            lo = j + 1
+        } else {
+            hi = j - 1
+        }
+        kth = j
+    }
+    return nums[kth] 
+};
+
+
+// 355. design twitter
+// 
+class TweetNode{
+    constructor(userId, tweetId){
+        this.id = userId
+        this.tweetId = tweetId
+        this.next = null
+        this.prev = null
+    }
+}
+
+class Twitter {
+    constructor() {
+        this.users = {};
+        this.tweets = new TweetNode('sentinel', 'sentinel');
+    }
+    postTweet(userId, tweetId) {
+        if (!this.users[userId]) {
+            this.users[userId] = { follows: {} };
+            this.users[userId].follows[userId] = true;
+        }
+
+        let node = new TweetNode(userId, tweetId);
+        node.next = this.tweets;
+        this.tweets.prev = node;
+        this.tweets = node;
+    }
+    getNewsFeed (userId) {
+        if (!this.users[userId]) return [];
+        let allowedIds = this.users[userId].follows;
+        let feed = [], currTweet = this.tweets;
+         while (feed.length < 10 && currTweet.id !== 'sentinel') {
+            if (allowedIds[currTweet.id]) {
+               feed.push(currTweet.tweetId);
+            }
+            currTweet = currTweet.next;
+            }
+        return feed;
+    }
+    follow (followerId, followeeId) {
+        if (!this.users[followerId]) {
+            this.users[followerId] = { follows: {} };
+            this.users[followerId].follows[followerId] = true;
+        }
+
+        this.users[followerId].follows[followeeId] = true;
+    };
+    unfollow (followerId, followeeId) {
+        if (!this.users[followerId]) {
+            this.users[followerId] = { follows: {} };
+            this.users[followerId].follows[followerId] = true;
+        }
+        delete this.users[followerId].follows[followeeId];
+    };
+   
+}
+
