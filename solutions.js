@@ -3286,3 +3286,50 @@ WordDictionary.prototype.search = function(word) {
     }
     return [...res]
 };
+
+
+// 703. kth largest element in a stream
+// use priority queue, always keeps k elements front element will be the smallest
+var KthLargest = function(k, nums) {
+    this.largerK = new MinPriorityQueue({priority: (a) => a})
+    
+    for (const num of nums) {
+        if (this.largerK.size() < k) {
+            this.largerK.enqueue(num)
+        } else {
+            this.add(num)
+        }
+    }
+    while (this.largerK.size() < k) {
+        this.largerK.enqueue(- Infinity)
+    }
+};
+
+KthLargest.prototype.add = function(val) {
+    if (this.largerK.front().element < val) {
+        this.largerK.enqueue(val)
+        this.largerK.dequeue()
+    }
+    
+    
+    return this.largerK.front().element
+};
+
+
+// 91. decode ways
+var numDecodings = function(s) {
+    if (!s.length) return 0
+    let dp = Array(s.length + 1).fill(0)
+    dp[s.length] = 1
+    
+    for (let i = s.length - 1; 0 <= i; i--) {
+        if (s[i] !== "0") {
+            dp[i] = dp[i+1]
+            if (i < s.length-1 && (s[i] === '1' || (s[i] === '2' && s[i+1] < 7))) {
+                dp[i] += dp[i+2] 
+            }
+        }
+    }
+    return dp[0]
+}
+ 
