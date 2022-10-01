@@ -288,7 +288,7 @@ Trie.prototype.search = function(word) {
             return false
         }
      }
-    return (!!node.lastLetter)
+    return node.lastLetter? true : false
 };
 Trie.prototype.startsWith = function(prefix) {
     let node = this.root
@@ -3180,3 +3180,109 @@ var findClosestElements = function(arr, k, x) {
     }
     return arr.slice(lp, lp + k);
 } 
+
+
+
+// 211. design add and search words data structure
+// trie data structure 
+// handle path correctly
+var WordDictionary = function() {
+    this.trie = {}
+};
+WordDictionary.prototype.addWord = function(word) {
+    let node = this.trie 
+    
+    for (const letter of word) {
+        if (!node[letter]) {
+            node[letter] = {}
+        }
+        
+        node = node[letter]
+    }
+    node.last = true
+};
+
+WordDictionary.prototype.search = function(word) {
+    const travel = (idx, store) => {
+        const letter = word[idx]
+        idx++
+    
+        
+        if (letter === '.') {
+            for (const paths of Object.values(store)) {
+                if (idx === word.length) {
+                    if (paths.last) return true
+                } else {
+                    if (travel(idx, paths)) return true
+                }
+                
+            }
+        }
+        
+        
+        if (!store[letter]) return false 
+        
+        if (idx === word.length) {
+            return store[letter].last? true: false
+        } else {
+            return travel(idx, store[letter])
+        }
+    }
+    return travel(0, this.trie)
+};
+
+// 212. word search II 
+// build trie
+// travel from every node, adding word if we reach a node.last
+// stop if we backtrack or if our trie does not contain any words with the current letter combination
+ var findWords = function(board, words) {
+    let trie = {},
+        n = board[0].length,
+        m = board.length,
+        res
+    
+    for (const word of words) {
+        let node = trie
+        for (const letter of word) {
+            if (!node[letter]) {
+                node[letter] = {}
+            }
+            node = node[letter]
+        }
+        node.last = word
+    }
+    
+    
+    const travel = (i, j, store) => {
+        if (!store || board[i][j] === '#' || !store[board[i][j]]) return
+        
+        const letter = board[i][j]
+        store = store[letter]
+        if (store?.last) {
+            res.push(store.last)
+            store.last = false  
+        }
+
+        board[i][j] = '#'
+        if (i+1 < m ) {
+            travel(i+1, j, store)
+        }
+        if (0 < i ) {
+            travel(i-1, j, store)
+        }
+        if (j+1 < n ) {
+            travel(i, j+1, store)
+        }
+        if (0 < j ) {
+            travel(i, j-1, store)
+        }
+        board[i][j] = letter
+        
+    }
+    for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+            travel(i, j, trie)
+        }
+    }
+    return [...res]
+};
