@@ -65,25 +65,26 @@ var updateMatrix = function(mat) {
 
 // 973. k closest points to origin
 // maxProirity (heap) with prority set by distance from origin
-// if our heap is full, check if the farthest element from the origin
-// is closer than our next point
+// to avoid checking if the array size currently doesnt have enough elements
+// push k elements into our heap that are infinitly distances from the origin
+// then on every new point we always throw out an element and always add an element
+
 
  var kClosest = function(points, k) {
     let x = new MaxPriorityQueue({priority: (num) => dist(num)})
+
+    while (heap.size() < k) {
+        heap.enqueue([Infinity, 0])
+      }
     
-    
-    for (let point of points) {
-        
-        if (x.size() < k ) {
-            x.enqueue(point)
-        } else {
-            if (dist(point) < dist(x.front()["element"])) {
-                x.dequeue()
-                x.enqueue(point)
-            }
+      for (const point of points) {
+        const dis = dist(point)
+        if (dis < heap.front().priority) {
+            heap.dequeue()
+            heap.enqueue(point)
         }
-    }
-    return x.toArray().map((hash) => hash["element"])
+      }
+      return heap.toArray().map(a => a.element)
 };
     
     
@@ -3333,3 +3334,25 @@ var numDecodings = function(s) {
     return dp[0]
 }
  
+
+
+// 1046. last stone weight
+
+var lastStoneWeight = function(stones) {
+    let heap = new MaxPriorityQueue({priority: (a) => a})
+    
+    for (const stone of stones) {
+        heap.enqueue(stone)
+    }
+    
+    while (1 < heap.size()) {
+        const y = heap.dequeue().element,
+              x = heap.dequeue().element
+        
+        if (y-x) {
+            heap.enqueue(y-x)
+        }
+    }
+    
+    return (heap.size())? heap.front().element: 0
+};
