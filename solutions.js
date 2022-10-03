@@ -3459,3 +3459,148 @@ class Twitter {
    
 }
 
+// 1155. number of dice rolls with target sum
+// dp[i] will be the sum after the (n-1+i)th dice has been rolled 
+// dp[n+1] is starting point
+// dp[1] will be the sum of all the dice rolled, which based on our tracking will only have one sum 
+// or no sums if it is invalid such as too many dice and not a high enough target (10 dice, target of 9)
+
+
+// this problem does not need right shifting and probably makes more sense without it 
+// ie: dp[n] = starting point
+// dp [0] = end point
+// dp[i] = sum of n-i dice
+
+
+// on each new dice roll we bound our index to include only valid sums
+// our min will be either 1 or whatever is needed to complete a valid sum
+// consider dices = 1 target = 3
+// the min would be 3 
+// the max our dice can roll depends on how many dice are left to roll, 
+// we can assume all these dice left roll 1
+// resulting in max being k or target - sum - (#dicesLeft - 1) * 
+
+var numRollsToTarget = function(n, k, target) {
+    let dp = Array(n+1).fill([])
+    const mod = 10e8 +7
+    dp[n+1] = [[0,1]]
+    //sum, count
+    
+    for (let j = n; 0 < j; j--) {
+        let sums = dp[j+1],
+            newSums = new Map()
+        for (const sum of sums) {
+            const min = Math.max(1, target - sum[0] - (j-1)*k)
+            const max = Math.min(target - sum[0] - (j-1), k)
+            let i = min
+            while (i <= max) {
+                if (!newSums.has(sum[0]+i)) {
+                    newSums.set(sum[0]+i, 0)
+                }
+                newSums.set(sum[0]+i, (newSums.get(sum[0]+i) + sum[1])%mod)
+                i++
+            }
+        }
+        dp[j] = Array.from(newSums)
+    }
+
+    // check if a sum was possible 
+    return dp[1][0]? dp[1][0][1]: 0
+};
+
+
+// 90. subsets II
+
+var subsetsWithDup = function(nums) {
+    let powerSet = new Set()
+    
+    nums = nums.sort((a,b) => a-b)
+    powerSet.add('[]')
+    for (let j = 0; j < nums.length; j++) {
+    
+        let prevSets = [...powerSet.values()].map(a => JSON.parse(a))
+       
+        
+        for (let prevSet of prevSets) {
+            const newSet = [...prevSet, nums[j]]
+            powerSet.add(JSON.stringify(newSet))
+        }
+    }
+    
+    
+    return [...powerSet.values()].map(a => JSON.parse(a))
+};
+
+// 40. combination sum II
+// use count 
+var combinationSum2 = function(candidates, target) {
+    let candidateCount = {}
+    
+    for (let candidate of candidates) {
+        if (!candidateCount[candidate]){
+            candidateCount[candidate] = 0
+        }
+        candidateCount[candidate]++
+    }
+    let dp = []
+    dp[0] = []
+    dp[0].push([0, []])
+    candidates.sort((a,b) => a-b)
+    let res = []
+    for (let i = 0; i < candidates.length; i++) {
+        let num = candidates[i]
+        if (target < num || (0 < i && num === candidates[i-1])) {
+            dp[i+1] = dp[i]
+            continue
+        }
+        
+        let paths = [...dp[i]];
+        dp[i+1] = []
+        
+        let options = [[num, [num]]],
+            sum = num
+        for (let i = 2; i <= candidateCount[num]; i++) {
+            sum += num
+            options.push([sum, [...options.at(-1)[1], num]])
+        }
+
+        for (const path of paths) {
+            dp[i+1].push([...path])
+            for (const option of options) {
+                
+                const newSum = option[0] + path[0],
+                      newArray = [...path[1], ...option[1]]
+                if (newSum === target) {
+                    res.push(newArray)
+                } else if (newSum < target) {
+                    dp[i+1].push([newSum, newArray])
+                }
+            }
+        }
+    }
+    return res
+};
+
+
+// 1578. minimum time to make rope colorful
+// on a chain of same color ballons we will pop all but the one with the largest time
+// compare two ballons pop one, keep other
+var minCost = function(colors, neededTime) {
+    let currColor = '#',
+        maxTime = 0,
+        sum = 0
+    
+    for (let i = 0; i < colors.length; i++) {
+        const color = colors[i]
+        
+        if (color === currColor) {
+            sum += Math.min(neededTime[i], maxTime)
+            maxTime = Math.max(neededTime[i], maxTime)
+        } else {
+            currColor = color
+            maxTime = neededTime[i]
+        }
+    }
+    return sum
+    
+};
