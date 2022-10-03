@@ -3600,6 +3600,9 @@ var minCost = function(colors, neededTime) {
 };
 
 // 51. n-queens
+// imagine building the board one row at a time we must place at some point
+// base case is row = 0 
+// start placing queen at all the potential spots then go from there
 
 var solveNQueens = function(n) {
     let res = []
@@ -3627,4 +3630,113 @@ var solveNQueens = function(n) {
    dp([],0)
     return res
 };
+
+// 695. max area of island
+// same logic as count islands but we keep track of area
+var maxAreaOfIsland = function(grid) {
+    let maxArea = 0
     
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            if (grid[i][j] === 1) {
+                let max = moveAdj(grid, i, j)
+                if (maxArea < max) {
+                    maxArea = max
+                }
+            }
+        }
+    }
+    return maxArea
+};
+
+var moveAdj = (grid, i,j) => {
+    grid[i][j] = 0
+    let area = 1
+    if (i+1 < grid.length) {
+          if (grid[i+1][j] === 1 ) {
+              area += moveAdj(grid, i+1,j)
+          }  
+    }
+    if (0 <= i-1) {
+        if (grid[i-1][j] === 1) {
+            area += moveAdj(grid, i-1, j)
+        }
+    }
+    if (j+1 < grid[0].length) {
+        if (grid[i][j+1] === 1) {
+            area += moveAdj(grid, i, j+1)
+        }
+    }
+    if (0 <= j-1) {
+        if (grid[i][j-1] === 1) {
+            area += moveAdj(grid, i, j-1)
+        }
+    }
+    return area
+}
+
+
+// 417. pacific atlantic water flow
+// flow upwards from both oceans 
+// one ocean at a time
+// at each node we mark it in our sets
+// at the end we compare our set keys
+var pacificAtlantic = function(heights) {
+    let res = []
+    let pacificAccess = new Set()
+    let atlanticAccess = new Set()
+    let dir = [[1,0], [-1,0], [0,1], [0,-1]]
+    
+    
+    let pacificFlow = new Queue(),
+        atlanticFlow = new Queue()
+    
+    for (let i = 0; i < heights.length; i++) {
+        pacificFlow.enqueue([i,0])
+        atlanticFlow.enqueue([i, heights[0].length - 1])
+    }
+    for (let j = 0; j < heights[0].length; j++) {
+        pacificFlow.enqueue([0,j])
+        atlanticFlow.enqueue([heights.length -1,j])
+    }
+    while (pacificFlow.size()) {
+        let node = pacificFlow.dequeue()
+        let height = heights[node[0]][node[1]]
+        pacificAccess.add(JSON.stringify(node))
+        
+        for (let adj of dir) {
+            const [p,q] = [node[0] + adj[0], node[1] + adj[1]]
+            if (0 <= p && 0 <= q && p < heights.length && q < heights[0].length) {
+                if (height <= heights[p][q]) {
+                    if (!pacificAccess.has(JSON.stringify([p,q]))) {
+                        pacificFlow.enqueue([p,q])
+                    }
+                }
+            }
+        }
+        
+        
+    }
+    while (atlanticFlow.size()) {
+        let node = atlanticFlow.dequeue(),
+            height = heights[node[0]][node[1]]
+        atlanticAccess.add(JSON.stringify(node))
+        for (let adj of dir) {
+            const [p,q] = [node[0] + adj[0], node[1] + adj[1]]
+            if (0 <= p && 0 <= q && p < heights.length && q < heights[0].length) {
+                if (height <= heights[p][q]) {
+                    if (!atlanticAccess.has(JSON.stringify([p,q]))) {
+                        atlanticFlow.enqueue([p,q])
+                    }
+                }
+            }
+        }
+        
+    }
+    for (const key of pacificAccess.keys()) {
+        if (atlanticAccess.has(key)) {
+            res.push(JSON.parse(key))
+        }
+    }
+    return res
+};
