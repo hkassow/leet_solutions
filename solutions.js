@@ -303,13 +303,7 @@ Trie.prototype.startsWith = function(prefix) {
     return true
 };
 
-/** 
- * Your Trie object will be instantiated and called as such:
- * var obj = new Trie()
- * obj.insert(word)
- * var param_2 = obj.search(word)
- * var param_3 = obj.startsWith(prefix)
- */
+
 // 322. coin change
 // DP 
 // if your solution is slower than o(n) can you sort array?
@@ -3604,3 +3598,33 @@ var minCost = function(colors, neededTime) {
     return sum
     
 };
+
+// 51. n-queens
+
+var solveNQueens = function(n) {
+    let res = []
+    let row = Array(n).fill('.')
+   const dp = (board , k) => {
+       if (k === n) {
+           res.push(board.map((queenP) => {
+               const arr = [...row]
+               arr[queenP[1]] = 'Q'
+               return arr.join("")
+           }))
+           return
+       }
+       let i = k
+       for (let j = 0; j < n; j++) {
+           const queenPosition = [i, j]
+           if (checkIfValid(board,i,j,n)) {
+               board.push(queenPosition)
+              
+               dp(board, k+1)
+               board.pop()
+           }
+       }
+   }
+   dp([],0)
+    return res
+};
+    
