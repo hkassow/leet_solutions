@@ -1369,10 +1369,8 @@ MedianFinder.prototype.findMedian = function() {
 // go through each letter placement for each word that gets into our list
 // will slowly eliminate all potential matches by removing them from the wordSet
 // once we can get to a word we dont want to travel it again so we remove it ^^
-
-// turned the word into an array because thats how i usually remember
-// this way is more condense and clear
 // let altWord = word.substring(0, i) + letter + word.substring(i + 1);
+// can also destructure string using array
 var ladderLength = function(beginWord, endWord, wordList) {
     
     let alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
@@ -1390,10 +1388,8 @@ var ladderLength = function(beginWord, endWord, wordList) {
                 return steps
             }
             for (let i = 0; i < beginWord.length; i++) {
-                let wordArray = [...word]
                 for (const letter of alphabet) {
-                    wordArray[i] = letter
-                    let altWord = wordArray.join('')
+                    let altWord = word.substring(0,i) + letter + word.substring(i+1)
                     if (wordSet.has(altWord)) {
                         next.push(altWord)
                         wordSet.delete(altWord)
@@ -3739,4 +3735,126 @@ var pacificAtlantic = function(heights) {
         }
     }
     return res
+};
+
+// 112. path sum
+
+var hasPathSum = function(root, targetSum) {
+    if (!root) return false
+    const travel = (node, sum) => {
+        if (!node) return false
+        sum += node.val
+        if (sum === targetSum && !node.left && !node.right ) return true
+        
+        let left = travel(node.left, sum)
+        if (left) return true
+        
+        let right = travel(node.right, sum)
+        if (right) return true
+        
+        return false
+    }
+    
+    return travel(root, 0)
+};
+
+
+// 210. course schedule II
+
+var findOrder = function(numCourses, prerequisites) {
+    if (!prerequisites.length){
+        let arr = []
+        for (let i = 0; i < numCourses; i++) {
+            arr.push(i)
+        }
+        return arr
+    } 
+    let dependencies = {}
+    let numDep = {}
+    for (let i = 0; i < numCourses;i++) {
+        dependencies[i] = []
+        numDep[i] = 0
+    }
+    for (const [a, b] of prerequisites) {
+        if (!dependencies[a]) {
+            dependencies[a] = []
+        }
+        if (!dependencies[b]) {
+            dependencies[b] = []
+            
+        }
+        dependencies[b].push(a)
+        numDep[a] ++
+    }
+    let stack = []
+    for (const [key, value] of Object.entries(dependencies)) {
+        if (!numDep[key]) {
+            stack.push(key)
+            delete numDep[key]
+        }
+    }
+    let count = 0
+    let order = []
+    while (stack.length) {
+        let course = stack.pop()
+        order.push(course)
+        count++
+        for (const depend of dependencies[course]) {
+            numDep[depend]--
+            if (numDep[depend] <= 0) {
+                stack.push(depend)
+                delete numDep[depend]
+            } 
+        }
+    }
+    if (Object.keys(numDep).length) return []
+    return (count <= numCourses)? order: [] 
+};
+
+// 322. reconstruct itinerary
+// use map to store destinations from each airport and how many times we can travel there
+// sort the destinations so our first succesful path is the one lexigraphically the smallest
+// then it just becomes backtracking problem
+// on each iteration we add to path and remove a ticket from the map
+// if its succesful then we can return the path
+// if not we remove from the path and add back our ticket
+
+var findItinerary = function(tickets) {
+    let outGoing = {}
+  
+    for (const ticket of tickets) {
+        if (!outGoing[ticket[0]]) {
+            outGoing[ticket[0]] = new Map()
+        }
+        outGoing[ticket[0]].set(ticket[1], (outGoing[ticket[0]].get(ticket[1]) || 0) + 1)
+    }
+    
+
+    for (let keys of Object.keys(outGoing)) {
+        let departures = outGoing[keys]
+        
+        outGoing[keys] = new Map([...departures].sort())
+    }
+    
+    
+    const travel = (arrivalAirport, order) => {
+        
+        if (order.length === tickets.length + 1) return order
+        
+        let destinationsMap = outGoing[arrivalAirport]
+        if (!destinationsMap) return false
+        for (let destination of destinationsMap.keys()) {
+            if (destinationsMap.get(destination)) {
+                let count = destinationsMap.get(destination)
+                destinationsMap.set(destination, count-1)
+                order.push(destination)
+                let path = travel(destination, order)
+                if (path) return path
+                order.pop()
+                destinationsMap.set(destination, count)
+            }
+        }
+        return false
+    }
+    return travel("JFK", ["JFK"])
 };
