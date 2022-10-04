@@ -3858,3 +3858,37 @@ var findItinerary = function(tickets) {
     }
     return travel("JFK", ["JFK"])
 };
+
+
+// 1584. min cost to connect all points
+
+var minCostConnectPoints = function(points) {
+    let connections = 0
+    let visited = Array(points.length).fill(1000000000000)
+    let i = 0
+    let sum = 0
+    
+    while (connections < points.length-1) {
+        visited[i] = Infinity
+        let min_j = i
+        for (let j = 0; j < points.length; j++) {
+            if (visited[j] !== Infinity) {
+                let dist = distance(points[j], points[i])
+                if (dist < visited[j]) {
+                    visited[j] = dist
+                }
+                if (visited[j] < visited[min_j]) {
+                    min_j = j
+                }
+            }
+        }
+        i = min_j
+        sum += visited[min_j]
+        connections++
+    }
+    return sum
+};
+
+var distance = (a,b) => {
+    return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1])
+}
