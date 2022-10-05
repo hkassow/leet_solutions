@@ -3892,3 +3892,72 @@ var minCostConnectPoints = function(points) {
 var distance = (a,b) => {
     return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1])
 }
+
+// 743. network delay time
+// travel along lowest weight path
+// once we reach all nodes we have successful time 
+var networkDelayTime = function(times, n, k) {
+    let paths = {}
+    
+    for (const [source,target,time] of times){
+        if (!paths[source]) {
+            paths[source] = []
+        }
+        paths[source].push([target, time])
+    }
+    
+    let minPath = new MinPriorityQueue({priority: (a) => a[1]})
+    let time = 0
+    let visited = {}
+    let nodesVisited = 0
+    minPath.enqueue([k, 0])
+    while (minPath.size() && nodesVisited<n){
+        let [node, nodeTime] = minPath.dequeue().element
+        if (visited[node]) continue
+        
+        visited[node] = true
+        if (time < nodeTime) {
+            time = nodeTime
+        }
+        nodesVisited++
+        const avaliableNodes = paths[node]
+        if (!avaliableNodes) continue
+        for (const path of avaliableNodes) {
+            if (visited[path[0]]) continue
+            minPath.enqueue([path[0], path[1] + nodeTime])
+        }
+    }
+    return (nodesVisited < n || time === 0)? -1: time
+};
+
+// 778. swin in rising water
+// pretty trivial with min heap
+// just keep going to the smallest element and checking if its our i,j
+// since we are always taking the smallest possible element 
+// we record the max height weve had to travel to
+
+var swimInWater = function(grid) {
+    let currMax = 0
+    let minHeap = new MinPriorityQueue({priority: (a) => a[2]})
+    let dir = [[1,0], [-1,0], [0,1], [0,-1]]
+    minHeap.enqueue([0,0, grid[0][0]])
+    while (minHeap.size()) {
+        const [i,j, time] = minHeap.dequeue().element
+        if (currMax < time) {
+            currMax = time
+        }
+        if (i === grid.length -1 && j === grid.length -1 ){
+            break;
+        }
+        grid[i][j] = Infinity
+        for (const adj of dir) {
+            const [p,q] = [adj[0] + i, adj[1] + j]
+            if (0 <= q && 0 <= p && p < grid.length && q < grid.length) {
+                if (grid[p][q] !== Infinity) {
+                    minHeap.enqueue([p,q, grid[p][q]])
+                }  
+            }
+        }
+    }
+    return currMax
+};
