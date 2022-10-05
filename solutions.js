@@ -3961,3 +3961,86 @@ var swimInWater = function(grid) {
     }
     return currMax
 };
+
+// 623. add one row to tree
+
+var addOneRow = function(root, val, depth) {
+    if (depth === 1) {
+        let node = new TreeNode(val, root)
+        return node
+    }
+    depth--
+    depth--
+    const helper = (node, val, currDep) => {
+        if (!node) { return }
+        if (currDep === 0) {
+            let left = new TreeNode(val, node.left)
+            let right = new TreeNode(val, null, node.right)
+            node.left = left
+            node.right = right
+            return
+        } else {
+            currDep--
+            helper(node.left, val, currDep)
+            helper(node.right, val, currDep)
+        }
+    }
+    helper(root,val,depth)
+    return root
+};
+
+// 787 cheapest flights within k stops
+// use heap to travel along min path
+// mark traveled airports with how many flights it took to get there
+// if we arrive at the same airport with a lower flight count 
+var findCheapestPrice = function(n, flights, src, dst, k) {
+    let connections = {}
+    for (const [from, to, price] of flights) {
+        if (!connections[from]) {
+            connections[from] = new Map()
+        }
+        connections[from].set(to, price)
+    }
+    let visited = {}
+    // heap element [current, numFlights, price]
+    let minHeap = new MinPriorityQueue({priority: a => a[2]})
+    minHeap.enqueue([src, 0, 0])
+    while(minHeap.size()) {
+        let [currAirport, numFlights, currPrice] = minHeap.dequeue().element
+        if (currAirport === dst && numFlights <= k+1) {
+            return currPrice
+        } else if (k + 1 < numFlights) {
+            continue
+        }
+        if (visited[currAirport] < numFlights) continue
+        visited[currAirport] = numFlights
+        let destinations = connections[currAirport]?.keys()
+        if (!destinations) continue 
+        for (const destination of destinations) {
+            const price = currPrice + connections[currAirport].get(destination)
+            minHeap.enqueue([destination, numFlights+1, price])
+        }
+    }
+    return -1
+};
+
+
+
+// 70. climbing stairs
+// using memoization to prevent having to climb 
+// multiple times on high n
+var climbStairs = function(n) {
+    let dp = []
+    const helpClimb = (k) => {
+        if (k <= 3) return k
+        if (dp[k]) return dp[k]
+        
+        let oneStep = helpClimb(k-1)
+        let twoStep = helpClimb(k-2)
+        
+        dp[k] = oneStep + twoStep
+        return dp[k]
+    }
+    
+    return helpClimb(n)
+};
