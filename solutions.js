@@ -4044,3 +4044,14 @@ var climbStairs = function(n) {
     
     return helpClimb(n)
 };
+
+// 746. min cost climbing stairs
+var minCostClimbingStairs = function(cost) {
+    let dp = Array(cost.length)
+    dp[cost.length] = 0
+    
+    for (let j = cost.length -1; 0 <= j; j--) {
+        dp[j] = cost[j] + Math.min(dp[j+1], dp[j+2] || 0)
+    }
+    return Math.min(dp[0], dp[1])
+};
