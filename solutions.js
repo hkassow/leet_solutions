@@ -4055,3 +4055,113 @@ var minCostClimbingStairs = function(cost) {
     }
     return Math.min(dp[0], dp[1])
 };
+
+// 300. longest increasing subsequence 
+
+var lengthOfLIS = function(nums) {
+    let monoStack = []
+    let max = 0 
+    
+    for (const num of nums) {
+        
+        if (monoStack.length === 0 || monoStack.at(-1) < num) {
+            monoStack.push(num)
+        } else {
+            let replace = bst(monoStack, num)
+            monoStack[replace] = num
+        }
+        if (max < monoStack.length) {
+            max = monoStack.length
+        }
+    }
+    return max
+};
+var bst = (array, target) => {
+    let min = 0
+    let max = array.length
+    let mid
+    
+    while (min <= max) {
+        mid = min + Math.floor((max - min)/2)
+        
+        if (array[mid] === target) {
+            return mid
+        }
+        
+        if (array[mid] < target ) {
+            min = mid + 1
+        } else {
+            max = mid - 1
+        }
+    }
+    return (target <= array[min])? min: min+1
+}
+
+
+
+// 732. my calender III
+// object in javascrip is a treemap aslong as keys => 0
+// we iterate between the keys each key will be the total of how many start - how many end on this key
+// so iterate along all keys and record max value
+
+var MyCalendarThree = function() {
+    this.tm = {}
+    this.max = 0
+};
+
+MyCalendarThree.prototype.book = function(start, end) {
+    this.tm[start] = (this.tm[start] || 0 ) + 1
+    this.tm[end] = (this.tm[end] || 0 ) - 1
+    
+    let k = 0
+    for (const key in this.tm) {
+        k += this.tm[key]
+        if (this.max < k) {
+            this.max = k
+        }
+    }
+    return this.max
+    
+};
+
+
+// 309. best time to buy and sell stock with cooldown
+// there are only 3 states buy sell cooldown
+// buy numbers inserted as negatives so look for min value 
+
+var maxProfit = function(prices) {
+    let dp = 0
+    let prevMaxBuy = -prices[0]
+    let prevMaxSell = -Infinity
+    let prevMaxRest = 0
+    
+    while (dp < prices.length) {
+        let newMaxBuy = Math.max(prevMaxBuy, prevMaxRest - prices[dp])
+
+        let newMaxRest = Math.max(prevMaxRest, prevMaxSell)
+
+        let newMaxSell = prevMaxBuy + prices[dp]
+
+
+        prevMaxBuy = newMaxBuy
+        prevMaxSell = newMaxSell
+        prevMaxRest = newMaxRest
+        dp++
+    }
+    return Math.max(prevMaxSell, prevMaxRest)
+};
+
+
+// 518. coin change II
+var change = function(amount, coins) {
+    let dp = Array(amount+1).fill(0)
+    dp[0] = 1 
+    
+    for (const coin of coins) {
+        
+        for (let j = coin; j <= amount; j++) {
+            dp[j] = (dp[j] || 0 ) + dp[j-coin] 
+        }
+    }
+    return dp[amount]
+};
