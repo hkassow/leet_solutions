@@ -4368,3 +4368,45 @@ var canCompleteCircuit = function(gas, cost) {
     }
     return start
 };
+
+
+// 846. hand of straights
+var isNStraightHand = function(hand, groupSize) {
+    if (hand.length%groupSize !== 0) return false
+    let numFreq = {}
+    for (let i = 0; i < hand.length; i++) {
+        if (!numFreq[hand[i]]) {
+            numFreq[hand[i]] = 0
+        }
+        numFreq[hand[i]] ++
+    }
+    let keys = Object.keys(numFreq)
+    let i = 0
+    while (i < keys.length) {
+        for (let j = keys[i]; j < Number(keys[i])+groupSize; j++) {
+            if (!numFreq[j]) return false
+            numFreq[j]--
+        }
+        while (numFreq[keys[i]] === 0) {
+            i++
+        }
+    }
+    return true
+}
+
+// 1899. merge triplets to form target triplet
+// since we use the max we will only choose triplets where all values are less than or equal to target triplet
+var mergeTriplets = function(triplets, target) {
+    let currTrip = [1,1,1]
+    
+    for (const trip of triplets) {
+        if (trip[0] <= target[0] && trip[1] <= target[1] && trip[2] <= target[2]) {
+            currTrip = [Math.max(trip[0], currTrip[0]), Math.max(trip[1], currTrip[1]), Math.max(trip[2], currTrip[2])]
+        }
+        if (currTrip[0] === target[0] && currTrip[1] === target[1] && currTrip[2] === target[2]) {
+            return true
+        }
+    }
+    
+    return false
+};
