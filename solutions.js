@@ -4165,3 +4165,113 @@ var change = function(amount, coins) {
     }
     return dp[amount]
 };
+
+// 494. target sum
+// use dp so we dont repeat tracks
+var findTargetSumWays = function(nums, target) {
+    let dp = {}
+   
+    
+    let res = 0
+    
+    const calculate = (index, sum) => {
+        
+        if (dp[JSON.stringify([index,sum])] !== undefined) return dp[JSON.stringify([index,sum])]
+        if (index === nums.length) return sum === target? 1 : 0
+        let min = calculate(index+1, sum-nums[index])
+        let max = calculate(index+1, sum+nums[index])
+        
+        dp[JSON.stringify([index,sum])] = max+min
+        return dp[JSON.stringify([index,sum])]
+    }
+    
+    return calculate(0,0)
+};
+
+// 16. 3sum closest
+
+var threeSumClosest = function(nums, target) {
+    let closest = -Infinity
+    nums = nums.sort((a,b) => a-b)
+    for (let i = 0; i < nums.length - 2 ; i++) {
+        let j = i+1
+        let k = nums.length - 1
+        
+        while ( j < k) {
+            let sum = nums[i] + nums[j] + nums[k]
+            if (Math.abs(target - sum) < Math.abs(target - closest)) {
+                closest = sum
+            }
+            
+            if (closest === target) return target
+            
+            if (sum < target) {
+                j++
+            } else {
+                k--
+            }
+        }
+    }
+     return closest
+ };
+
+// 97. interleaving string 
+// dp[i][j] currently interleaved s1 up to i-1 and s2 up to j-1
+ var isInterleave = function(s1, s2, s3) {
+    let dp = Array(s1.length+1).fill().map(() => Array(s2.length+1))
+    if (s1.length + s2.length !== s3.length) return false
+    for (let i = 0; i <= s1.length; i++) {
+        for (let j = 0; j <= s2.length; j++) {
+            if (i === 0 && j === 0) {
+                dp[i][j] = true
+            }
+            else if (i === 0) {
+                dp[i][j] = dp[i][j-1] && s3[j-1] === s2[j-1]
+            }
+            else if (j === 0) {
+                dp[i][j] = dp[i-1][j] && s3[i-1] === s1[i-1]
+            }
+            else {
+                dp[i][j] = (dp[i-1][j] && s3[i+j-1] === s1[i-1]) || (dp[i][j-1] && s3[i+j-1] === s2[j-1])
+            }
+        }
+    }
+     return dp[s1.length][s2.length]
+ };
+
+
+// 329. longest increasing path in a matrix
+// use memoization to prevent arriving at a node recalculating its max path
+ var longestIncreasingPath = function(matrix) {
+    let dp = Array(matrix.length).fill().map(() => Array(matrix[0].length).fill(-1))
+    
+    
+    const travel = (i, j, min) => {
+        if (matrix[i][j] <= min) return 0
+        if (dp[i][j] !== -1) return dp[i][j]
+        
+        let longestPathFromPoint = 0
+        
+        for (const adj of [[1,0], [0,1], [-1,0], [0,-1]]) {
+            const [p,q] = [adj[0] + i, adj[1] + j]
+            if (0 <= p && 0 <= q && q < matrix[0].length && p < matrix.length) {
+                let pathFromAdj = travel(p,q, matrix[i][j])
+                if (longestPathFromPoint < pathFromAdj) {
+                    longestPathFromPoint = pathFromAdj
+                }
+            }
+        }
+        dp[i][j] = longestPathFromPoint + 1
+        return dp[i][j]
+    }
+    let max = 0
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[0].length; j++) {
+            let currMaxPathFrom = travel(i,j, -Infinity)
+            if (max < currMaxPathFrom) {
+                max = currMaxPathFrom
+            }
+        }
+    }
+    return max
+};
