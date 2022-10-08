@@ -4130,25 +4130,20 @@ MyCalendarThree.prototype.book = function(start, end) {
 // buy numbers inserted as negatives so look for min value 
 
 var maxProfit = function(prices) {
-    let dp = 0
-    let prevMaxBuy = -prices[0]
-    let prevMaxSell = -Infinity
-    let prevMaxRest = 0
+    let buyState = -prices[0]
+    let sellState = -Infinity
+    let restState =  0
     
-    while (dp < prices.length) {
-        let newMaxBuy = Math.max(prevMaxBuy, prevMaxRest - prices[dp])
-
-        let newMaxRest = Math.max(prevMaxRest, prevMaxSell)
-
-        let newMaxSell = prevMaxBuy + prices[dp]
-
-
-        prevMaxBuy = newMaxBuy
-        prevMaxSell = newMaxSell
-        prevMaxRest = newMaxRest
-        dp++
+    for (let j = 0; j < prices.length; j++) {
+        
+        let newBuy = Math.max(buyState, restState - prices[j])
+        let newRest = Math.max(restState, sellState)
+        let newSell = buyState + prices[j]
+        buyState = newBuy
+        restState = newRest
+        sellState = newSell
     }
-    return Math.max(prevMaxSell, prevMaxRest)
+     return Math.max(sellState, restState)
 };
 
 
@@ -4274,4 +4269,102 @@ var threeSumClosest = function(nums, target) {
         }
     }
     return max
+};
+
+
+// 72. edit distance 
+
+var minDistance = function(word1, word2) {
+    let dp = Array(word2.length+1).fill().map(() => Array(word1.length+1))
+    
+    for (let i = 0; i <= word2.length; i++) {
+        dp[i][0] = i 
+    }
+    for (let j = 0; j <= word1.length; j++) {
+        dp[0][j] = j
+    }
+    
+    
+    for (let i = 1; i <= word2.length; i++ ) {
+        for (let j = 1; j <= word1.length; j++) {
+            if (word1[j-1] === word2[i-1]) {
+                dp[i][j] = dp[i-1][j-1]
+            } else {
+                dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1])
+            }
+        }
+    }
+    return dp[word2.length][word1.length]
+};
+
+
+// 53. maximum subarray
+
+var maxSubArray = function(nums) {
+    let runningSum = 0
+    let maxSum = nums[0]
+    
+    
+    for (const num of nums) {
+        runningSum = Math.max(runningSum + num, num)
+        
+        if (maxSum < runningSum) {
+            maxSum = runningSum
+        } 
+    }
+    return maxSum
+};
+
+
+// 55. jump game
+
+var canJump = function(nums) {
+    let maxInd = 0
+    for (let i = 0; i < nums.length; i++) {
+        if (maxInd < i) return false
+        if (maxInd < nums[i] + i) {
+            maxInd = nums[i] + i
+        } 
+    }
+    return true
+};
+
+// 45. jump game II
+
+var jump = function(nums) {
+    let dp = Array(nums.length).fill(Infinity)
+    dp[0] = 0
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== 0) {
+           for (let j = i+1; j <= i+nums[i]; j++) {
+               dp[j] = Math.min(dp[j], dp[i]+1)
+           } 
+        }
+        
+    }
+    return dp[nums.length-1]
+};
+
+// 134. gas station
+// check if circuit is possible
+// find index 
+var canCompleteCircuit = function(gas, cost) {
+    let gasTotal = gas.reduce((a,b) => a+b)
+    let costTotal = cost.reduce((a,b) => a+b)
+    if (gasTotal < costTotal) return -1
+    
+    let start = 0
+    let tank = 0
+    
+    for (let i = 0; i < gas.length; i++) {
+        
+        tank += gas[i] - cost[i]
+        
+        if (tank < 0) {
+            tank = 0
+            start = i+1
+        }
+    }
+    return start
 };
