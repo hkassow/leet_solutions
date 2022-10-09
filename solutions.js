@@ -4410,3 +4410,187 @@ var mergeTriplets = function(triplets, target) {
     
     return false
 };
+
+// 763. partition labels
+
+var partitionLabels = function(s) {
+    let letterFreq = {}
+    for (let letter of s) {
+        letterFreq[letter] = (letterFreq[letter] || 0 ) + 1
+    }
+    let lp = 0
+    let rp = 0
+    let partition = []
+    while (rp < s.length) {
+        let currWindow = []
+        while (currWindow.length || lp === rp) {
+            currWindow.push(s[rp])
+            letterFreq[s[rp]]--
+            while (letterFreq[currWindow.at(-1)] === 0 ) {
+                currWindow.pop()
+            }
+            rp++
+        }
+        partition.push(rp-lp)
+        lp = rp
+    }
+    return partition
+};
+
+// 678. valid parenthesis string
+
+var checkValidString = function(s) {
+    let minOpenCount = 0
+    let maxOpenCount = 0
+    for (const char of s) {
+        if (char === '(') {
+            minOpenCount++
+            maxOpenCount++
+        }
+        if (char === ')') {
+            maxOpenCount--
+            if (0 < minOpenCount ) {
+                minOpenCount--
+            }
+            if (maxOpenCount < 0) return false
+        }
+        if (char === '*') {
+            if (0 < minOpenCount ) {
+                minOpenCount--
+            }
+            maxOpenCount++
+        }
+    }
+    return minOpenCount === 0 
+};
+
+
+// 653. two sum iv - input is a bst
+// traditional two sum approact
+
+var findTarget = function(root, k) {
+    let sums = {}
+    const travel = (node) => {
+        if (!node) return
+        if (sums[k-node.val]) return true
+        sums[node.val] = true
+        if (travel(node.left)) return true
+        if (travel(node.right)) return true
+        return false
+    }
+    return travel(root)
+};
+
+// 495. teemo attacking
+
+var findPoisonedDuration = function(timeSeries, duration) {
+    let timePoisoned = 0
+    let expireTime = 0
+    let startTime = 0
+    
+    for (const time of timeSeries) {
+        if (time < expireTime) {
+            timePoisoned -= (expireTime - time)
+        } 
+        timePoisoned += duration
+        startTime = time
+        expireTime = time + duration
+    }
+    
+    return timePoisoned
+};
+
+
+// 435. non-overlapping intervals
+
+var eraseOverlapIntervals = function(intervals) {
+    let dp = Array(intervals.length + 1)
+    dp[0] = 0
+    let pastInt = [-Infinity, -Infinity]
+    intervals = intervals.sort((a,b) => a[0] - b[0] === 0? a[1] - b[1]: a[0] - b[0])
+    for (let j = 1; j <= intervals.length; j++) {
+        if (pastInt[1] <= intervals[j-1][0]) {
+            pastInt = intervals[j-1]
+            dp[j] = dp[j-1]
+        } else {
+            dp[j] = dp[j-1] + 1
+            pastInt[1] = Math.min(intervals[j-1][1], pastInt[1])
+        }
+    }
+    return dp[intervals.length]
+};
+
+
+// 73. set matrix zeroes
+// not constanst space 
+
+var setZeroes = function(matrix) {
+    const columns = {}
+    const rows = {}
+    
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[0].length; j++) {
+            if (matrix[i][j] === 0) {
+                columns[j] = true
+                rows[i] = true
+            }
+        }
+    }
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j <matrix[0].length; j++) {
+            if (columns[j] || rows[i]) {
+                matrix[i][j] = 0
+            }
+        }
+    }
+};
+
+
+// 202. happy number
+
+var isHappy = function(n) {
+    let foundSum = {}
+    
+    const helpTravel = (sum) => {
+        if (sum === 1 || 0) return true
+        if (foundSum[sum]) return false
+        else {foundSum[sum] = true}
+        let str = sum.toString()
+        let squaredSum = 0
+        for (let i = 0; i < str.length; i++) {
+            let num = str[i]
+            squaredSum += parseInt(num) * parseInt(num)
+        }
+        return helpTravel(squaredSum)
+    }
+    return helpTravel(n)
+};
+
+
+// 66. plus one
+// using bigInt to avoid int overflow
+// would be possible to also iterate from the back of the array 
+// keeping carry over
+var plusOne = function(digits) {
+    digits = BigInt(digits.join('')) + 1n
+    return digits.toString().split('').map(Number)
+};
+
+// iterative solution
+var plusOne = function(digits) {
+    let carry = 1
+    for (let i = digits.length - 1; 0 <= i; i--) {
+        if (carry) {
+            digits[i]++
+            carry = 0
+        }
+        if (digits[i] < 10) {
+            return digits
+        } else {
+            carry = 1
+            digits[i] = 0
+        }
+    }
+    digits.unshift(1)
+    return digits
+};
