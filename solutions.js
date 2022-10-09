@@ -4594,3 +4594,19 @@ var plusOne = function(digits) {
     digits.unshift(1)
     return digits
 };
+
+
+// 50. pow(x,n)
+// iterative solution 
+var myPow = function(x, n) {
+    if (n === 0 || x === 1 ) return 1
+    if (x === -1) return (n%2)? -1: 1
+    if (n < 0) return myPow(1/x, -n)
+    let pow = 1
+    while (0 < n) {
+        if (pow === 0) return 0
+        pow *= x
+        n--
+    }
+    return pow
+};
