@@ -807,7 +807,12 @@ var spiralOrder = function(matrix) {
 // then we take next num and concat it with every subset already in our subset and add those to the subsets
 // [[], [1], [2], [1,2]]
 // also there is a recursive solution using backtracking (push + pop your dependency array so you dont re-add numbers)
-
+// second solution 
+// looks at bits
+// for length 3 array like [1,2,3] there are 8 subarrays 2^3
+// 000
+// 001
+// 010.... etc using this we can generate all sub arrays
 var subsets = function(nums) {
     let powerSet = [[]]
     
@@ -819,6 +824,23 @@ var subsets = function(nums) {
         }
     }
     return powerSet
+};
+
+// using bits
+var subsets = function(nums) {
+    let length = 1<<nums.length
+    let sets = Array(length).fill().map(() => Array())
+    for (let i = 1; i < length; i++) {
+        let bits = i.toString(2)
+        let pointer = 0
+        for (let j = bits.length - 1; 0 <= j; j--) {
+            if (bits[j] === '1') {
+                sets[i].push(nums[pointer])
+            }
+            pointer++
+        }
+    }
+    return sets
 };
 
 
