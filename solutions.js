@@ -4610,3 +4610,88 @@ var myPow = function(x, n) {
     }
     return pow
 };
+
+
+
+// 1328. break a palindrome
+var breakPalindrome = function(palindrome) {
+    if (palindrome.length === 1) return ""
+    
+    for (let i = 0; i < Math.floor(palindrome.length/2); i++) {
+        if (palindrome[i] !== 'a') {
+            palindrome = palindrome.substring(0,i) + 'a' + palindrome.substring(i+1)
+            return palindrome
+        }
+    }
+    palindrome = palindrome.substring(0, palindrome.length-1) + 'b'
+    return palindrome
+};
+
+
+
+// 1351. count negative numbers in a sorted matrix
+
+var countNegatives = function(grid) {
+    let res = 0
+    let mid = 0
+    for (let i = 0; i < grid.length; i++) {
+        let min = 0
+        let max = mid || grid[i].length -1
+        while (min <= max) {
+            mid = (min + Math.floor((max-min)/2))
+            if (grid[i][mid] < 0 && (0 <= grid[i][mid-1] || mid === 0 )) {
+                res += grid[i].length - mid
+                break
+            }        
+            if (0 <= grid[i][mid]) {
+                min = mid + 1
+            } else {
+                max = mid
+            }
+        }
+    }
+    return res
+};
+
+// 1837. sum of digits n base k
+var sumBase = function(n, k) {
+    
+    let kbased = (k === 10)? `${n}`:(n >>> 0).toString(k)
+    
+    let sum = 0
+    
+    for (let i = 0; i < kbased.length ; i++) {
+        sum += parseInt(kbased[i])
+    }
+    return sum
+};
+
+// 1963. minimum number of swaps to make the string balanced
+// could use 2 pointers but it is faster to just count the swap when it needs to happen, 
+// rebalance our counter and continue without the swap
+var minSwaps = function(s) {
+    let swaps = 0
+    let openBrackets = 0
+    //let closestOpen = s.length - 1
+    for (let i = 0; i < s.length; i++) {
+        //if (closestOpen < i) return swaps
+        if (s[i] === '[') {
+            openBrackets++
+        }  else {
+            openBrackets--
+        }
+        
+        if (openBrackets < 0) {
+            // let j = closestOpen
+            // while (s[j] !== '[') {
+            //     j--
+            // }
+            // closestOpen = j-1
+            // s[i] = '['
+            // s[j] = ']'
+            openBrackets += 2
+            swaps++
+        }
+    }
+    return swaps
+};
