@@ -4717,3 +4717,35 @@ var minSwaps = function(s) {
     }
     return swaps
 };
+
+// 334. increasing triplet subsequence
+var increasingTriplet = function(nums) {
+    let max = nums.at(-1)
+    for (let j = nums.length - 1; 0 <= j; j--) {
+        if (nums[j] < max) continue
+        max = nums[j]
+        nums[j] = false
+    }
+    let min = Infinity
+    for (let i =0; i < nums.length - 1; i++) {
+        if (nums[i] === false) continue
+        if (min < nums[i]) return true
+        min = Math.min(min, nums[i])
+    }
+    return false
+};
+
+
+// 976. largest perimeter triangle
+// for 3 lengths 
+// successful triangle if c < a+b
+var largestPerimeter = function(nums) {
+    nums.sort((a,b) => a-b);
+    
+    for (let j = nums.length -1; 2 <= j; j--) {
+        if (nums[j] < (nums[j-1] + nums[j-2])) {
+            return nums[j] + nums[j-1] + nums[j-2]
+        }
+    }
+    return 0
+}
