@@ -643,6 +643,25 @@ var sortColors = function(nums) {
         }
     }
 };
+// if number is 2 we move it forward
+// if number is 0 we move it back
+// continue until we reach the 2s 
+var sortColors = function(nums) {
+    let leftP = 0
+    let rightP = nums.length - 1
+    
+    for (let i = 0; i<=rightP; i++) {
+        while (i < rightP && nums[i] === 2) {
+            [nums[i], nums[rightP]] = [nums[rightP], nums[i]]
+             rightP--
+        }
+        while (leftP < i && nums[i] === 0) {
+            [nums[i], nums[leftP]] = [nums[leftP], nums[i]]
+            leftP++
+        } 
+    }
+      
+  };
 
 // 139. word break
 // we travel along every possible slice of our word if its in our word dic
@@ -4962,4 +4981,294 @@ var isSubsequence = function(s, t) {
     
  };
 
- 
+
+ // 58. length of last word
+
+ var lengthOfLastWord = function(s) {
+    s = s.trim().split(' ')
+    return s.at(-1).length
+};
+
+// 14. longest common prefix
+// using reduce to turn array into single element
+var longestCommonPrefix = function(strs) {
+    if (strs.length === 1) return strs[0]
+    return strs.reduce((prev, next) => {
+        let i = 0
+        while (i < prev.length && next[i] === prev[i]) {
+            i++
+        }
+        return prev.substring(0,i)
+    })
+};
+// same thing without using reduce and just storing the prefix outside our loop
+var longestCommonPrefix = function(strs) {
+    if (strs.length === 1) return strs[0]
+    let longestPre = strs[0]
+    
+    for (const str of strs) {
+        if (longestPre === '') return longestPre
+        let i = 0
+        
+        while (i < str.length && str[i] === longestPre[i]) {
+            i++
+        }
+        longestPre = longestPre.substring(0, i)
+    }
+    return longestPre
+};
+
+
+// 118. pascal triangle
+
+var generate = function(numRows) {
+    let pascal = [[1]]
+    for (let i = 1; i < numRows; i++) {
+        let row = Array(i+1)
+        for (let j = 0; j <= i; j++) {
+            if (j === 0 || j === i) {
+                row[j] = 1
+            } else {
+                row[j] = pascal[i-1][j-1] + pascal[i-1][j]
+            }
+        }
+        pascal.push(row)
+    }
+    return pascal
+};
+
+// 27. remove element
+var removeElement = function(nums, val) {
+    let k = 0
+    for (const num of nums){
+        if (num !== val) {
+            nums[k] = num
+            k++
+        }
+    }
+    return k
+};
+
+// 929. unique email addresses
+
+var numUniqueEmails = function(emails) {
+    let uniqueEmails = new Set()
+    
+    for (let email of emails) {
+        let index = email.indexOf('+')
+        let atIndex = email.indexOf('@')
+        let domain = email.substring(atIndex)
+        if (index !== -1) {
+            email = email.substring(0,index)
+        } else {
+            email = email.substring(0, atIndex)
+        }
+        email = email.replace(/\./g, '')
+        uniqueEmails.add(email+domain)
+    }
+    return uniqueEmails.size
+};
+
+// 205. isomorphic strings 
+// since each chara can only map to 1 other chara we must keep track of the map both ways
+// ie. from t: a => b from s: b => a
+var isIsomorphic = function(s, t) {
+    let map = {}
+    let taken = {}
+    for (let i = 0 ; i < s.length; i++) {
+        if (!map[s[i]] && !taken[t[i]]) {
+            map[s[i]] = t[i]
+            taken[t[i]] = true
+        }
+        if (map[s[i]] !== t[i]) return false
+    }
+    return true
+}; 
+
+
+// 605. can place flowers
+// greedy approach
+var canPlaceFlowers = function(flowerbed, n) {
+    for (let i = 0; i < flowerbed.length; i++) {
+        
+        if (flowerbed[i] !== 1 && flowerbed[i-1] !== 1 && flowerbed[i+1] !== 1) {
+            n--
+            flowerbed[i] = 1
+        }
+        if (n <= 0) return true
+    }
+    return false
+};
+
+
+// 169. majority element
+// since we are looking for element that occurs more than half the time
+// if we subtract every other element from the majority elements count it will still have a count greater than 1
+var majorityElement = function(nums) {
+    let max = nums[0] 
+    let count = 0
+    
+    for (let num of nums) {
+        if (num === max) {
+            count += 1
+        } else if (count === 0) {
+            max = num
+            count = 1
+        } else {
+            count -= 1
+        }
+    }
+    return max
+};
+
+
+// 496. next greater element i
+
+var nextGreaterElement = function(nums1, nums2) {
+    let nextGreater = {}
+    let monoStack = []
+    for (let i = 0; i < nums2.length; i++) {
+        while (monoStack.length !== 0 && monoStack.at(-1) < nums2[i]) {
+            let num = monoStack.pop()
+            nextGreater[num] = nums2[i]
+        }
+        nextGreater[nums2[i]] = -1
+        monoStack.push(nums2[i])
+    }
+    
+    let ans = [] 
+    for (const num of nums1) {
+        ans.push(nextGreater[num])
+    }
+    return ans
+};
+
+// 724. find pivot index 
+// 1991. find the middle index in array
+// start with sum of every element except the first
+var pivotIndex = function(nums) {
+    let index = 0
+    let rightSum = 0
+    let leftSum = 0
+    for (let i = 1; i < nums.length; i++) {
+        rightSum += nums[i]
+    }
+    
+
+    while (index <= nums.length) {
+        if (leftSum === rightSum) return index
+        leftSum += nums[index]
+        index++
+        rightSum -= nums[index]
+    }
+    return -1
+};
+
+
+// 448. find all numbers disappeared in an array
+// convert every found index to negative
+// travel through array and add positive index's to ans array
+// this problem is trivial without the extra constraints 
+var findDisappearedNumbers = function(nums) {
+    for (let i = 0; i < nums.length; i++) {
+        let num = Math.abs(nums[i])
+        nums[num-1] = - Math.abs(nums[num-1]) 
+    }
+    let ans = []
+    for (let i = 0; i < nums.length; i++) {
+        if (0 < nums[i]) {
+            ans.push(i+1)
+        }
+    }
+    return ans
+}
+
+
+// 1189. maximum number of balloons
+// return the limiting letter
+var maxNumberOfBalloons = function(text) {
+    let letterFreq = {'a': 0, 'b':0, "l":0, 'n':0, 'o':0}
+    for (const letter of text) {
+        if (letterFreq[letter] !== undefined) {
+            letterFreq[letter]++
+        }
+    }
+
+    return Math.min(letterFreq['b'], letterFreq['a'], letterFreq['n'], Math.floor(letterFreq['l']/2), Math.floor(letterFreq['o']/2))
+};
+
+
+// 290. word pattern
+
+var wordPattern = function(pattern, s) {
+    let patternToString = {}
+    let stringToPattern = {}
+    
+    s = s.split(' ')
+    if (pattern.length !== s.length) return false
+    for (let j = 0; j < pattern.length; j++) {
+        if (patternToString[pattern[j]]) {
+            let string = patternToString[pattern[j]]
+            if (string !== s[j]) return false
+        } else {
+            if (stringToPattern[s[j]]) return false
+            patternToString[pattern[j]] = s[j] 
+            stringToPattern[s[j]] = pattern[j]
+        }
+    }
+    return true
+};
+
+
+// 535. encode and decode tinyurl
+// take a random string and use that as your short url
+// if the random string is already used by a different url retry
+class TinyUrl {
+    constructor () {
+        this.codeToUrl = {}
+        this.urlToCode = {}
+        this.map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    } 
+    encode (longUrl) {
+        let code = ''
+        for (let i = 0; i < 7; i++) {
+           let random = Math.floor(Math.random() * 62)
+           code += this.map[random]
+        }
+        if (this.codeToUrl[code]) {
+           return this.encode[longUrl]
+        }
+        this.codeToUrl[code] = longUrl
+        this.urlToCode[longUrl] = code
+        return code
+    }
+    decode (shortUrl) {
+        return this.codeToUrl[shortUrl]
+    }
+
+}
+
+
+// 554. brick wall
+// every path will be height of the wall - how many edges the path travels through
+// so we increment the edge count for every edge for every row
+// [[1], [1], [1]] will have no edges 
+// [[2], [2], [1,1]] will have no edges until the last row which will have an edge at position 1 
+var leastBricks = function(wall) {
+    let width = wall[0].reduce((sum, next) => sum +next)
+    let edges = {}
+    let maxEdges = 0
+    for (let i = 0; i < wall.length; i++) { 
+        let sum = 0
+        for (let j = 0; j < wall[i].length; j++) {
+            sum += wall[i][j]
+            if (sum < width) {
+                edges[sum] = (edges[sum] || 0) + 1
+                if (maxEdges < edges[sum]) {
+                    maxEdges = edges[sum]
+                }
+             }
+        }
+    }
+    return wall.length - maxEdges
+};
