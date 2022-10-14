@@ -4905,3 +4905,61 @@ var deleteMiddle = function(head) {
     slow.next = slow.next.next
     return head
 }; 
+
+
+// 1299. replace elements with greatest element on right side
+
+var replaceElements = function(arr) {
+    let max = -1
+    for (let j = arr.length -1; 0 <= j; j--) {
+        let val = arr[j]
+        arr[j] = max
+        max = Math.max(val, max)
+    }
+    return arr
+};
+
+
+// 392. is subsequence
+// two pointer solution much faster 
+var isSubsequence = function(s, t) {
+    let sp = 0
+    let tp = 0
+    
+    while (sp < s.length) {
+       while (tp < t.length && s[sp] !== t[tp]) {
+           tp++
+       }
+       if (t[tp] === s[sp]) {
+           tp++
+           sp++
+       } else {
+           return false
+       }
+    }
+     return true
+ };
+// dp solution
+var isSubsequence = function(s, t) {
+    let dp = Array(s.length+1).fill().map(() => Array(t.length+1))
+    
+    for (let i = 0; i <= s.length; i++) {
+        dp[i][0] = false
+    }
+     for (let j = 0; j <= t.length; j++) {
+         dp[0][j] = true
+     }
+     for (let i = 1; i <= s.length; i++) {
+         for (let j = 1; j <= t.length; j++) {
+             if (s[i-1] === t[j-1]) {
+                 dp[i][j] = dp[i-1][j-1]
+             } else {
+                 dp[i][j] = dp[i][j-1]
+             }
+         }
+     }
+     return dp[s.length][t.length]
+    
+ };
+
+ 
