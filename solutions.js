@@ -4749,3 +4749,159 @@ var largestPerimeter = function(nums) {
     }
     return 0
 }
+
+
+// 237. delete node in a linked list
+// not given head node, and since list is not doubly linked we cant access prev node
+// so instead of deleting the node by accessing the prev node, we shift the next node down to become our deleted node
+var deleteNode = function(node) {
+    node.val = node.next.val
+    node.next = node.next?.next || null  
+};
+
+
+// 2013. detect squares
+// used JSON.stringify and parse to store arrays directly
+// couldve stored arrays by their x index
+class DetectSquares {
+    constructor() {
+        this.points = {}
+    }
+    add(point) {
+        point = JSON.stringify(point)
+        this.points[point] = (this.points[point] || 0) + 1
+    }
+    count(point) {
+        let count = 0
+        for (let addedPoint of Object.keys(this.points)) {
+            addedPoint = JSON.parse(addedPoint)
+            if (addedPoint[1] === point[1] && point[0] !== addedPoint[0]) {
+                let dist = addedPoint[0] - point[0]
+                let corner10 = JSON.stringify([point[0], point[1]-dist])
+                let corner11 = JSON.stringify([addedPoint[0], addedPoint[1]-dist])
+                let corner20 = JSON.stringify([point[0], point[1]+dist])
+                let corner21 = JSON.stringify([addedPoint[0], addedPoint[1]+dist])
+
+
+                if (this.points[corner10] && this.points[corner11]) {
+                    count += (this.points[corner10] * this.points[corner11] * this.points[JSON.stringify(addedPoint)])
+                }
+                if (this.points[corner20] && this.points[corner21]) {
+                    count += this.points[corner20] * this.points[corner21] * this.points[JSON.stringify(addedPoint)]
+                }
+            }
+        }
+        return count
+    }
+};
+
+// 136. single number
+// use XOR a^a = 0 a^0 = a
+// since XOR is transitive we dont need to sort 
+var singleNumber = function(nums) {
+    let res = 0
+    for (const num of nums) {
+        res = res^num
+    }
+    return res
+};
+
+
+// 191. number of 1 bits
+// 
+var hammingWeight = function(n) {
+    let count = 0
+    while (n !== 0) {
+        if (n & 1) {
+            count++
+        }
+        n = n >>> 1
+        
+    }
+    return count
+};
+
+// 338. counting bits
+
+var countBits = function(n) {
+    let ans = [0]
+    let twoPow = 1
+    let count = 0
+    
+    for (let i = 1; i <= n; i++) { 
+        if (i === twoPow*2) {
+            twoPow = twoPow * 2
+        }
+        ans.push(ans[i-twoPow] + 1)
+    }
+    return ans
+};
+
+// 190. reverse bits
+var reverseBits = function(n) {
+    n = (((n >> 1) & 0x55555555) | ((n & 0x55555555) << 1));
+    n = (((n >> 2) & 0x33333333) | ((n & 0x33333333) << 2));
+    n = (((n >> 4) & 0x0f0f0f0f) | ((n & 0x0f0f0f0f) << 4));
+    n = (((n >> 8) & 0x00ff00ff) | ((n & 0x00ff00ff) << 8));
+    n = ((n >>> 16) | (n << 16));
+    return n >>> 0
+};
+// 268. missing number 
+// using bit operations 
+// remmember a ^ a = 0
+var missingNumber = function(nums) {
+    let num = nums.length
+    for (let i = 0; i < nums.length; i++) {
+        num = nums[i] ^ num ^ i
+    }
+    return num
+};
+
+// sum all numbers in nums
+// sum all numbers from 0-n
+// compare
+var missingNumber = function(nums) {
+    let sum = nums.length * (nums.length + 1) / 2
+    let numsSum = 0
+    for (const num of nums) {
+        numsSum += num
+    }
+    return sum - numsSum
+}
+
+// 7. reverse integer
+
+var reverse = function(x) {
+    let sign = 1
+    if (x < 0) {
+        sign = -1
+        x *= -1
+    }
+    let max = 2**31
+    let sum = 0
+    while (x) {
+        let newDigit = x%10
+        sum*= 10
+        sum+= newDigit
+        x = Math.floor(x/10)
+    }
+    sum *= sign
+    return (sum < max && -max < sum)? sum: 0
+};
+
+
+// 2095. delete the middle node of a linked list
+
+var deleteMiddle = function(head) {
+    let fast = head.next
+    let slow = head
+    if (!fast) return null
+    while (fast) {
+        fast = fast?.next?.next
+        if (fast) {
+            slow = slow.next
+        }
+    }
+    slow.next = slow.next.next
+    return head
+}; 
