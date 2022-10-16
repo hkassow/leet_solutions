@@ -5272,3 +5272,142 @@ var leastBricks = function(wall) {
     }
     return wall.length - maxEdges
 };
+
+
+// 122. best time to buy and sell stock ii
+
+var maxProfit = function(prices) {
+    let currBuy = -Infinity
+    let currSell = 0
+    
+    for (const price of prices) {
+        let prevBuy = currBuy
+        let prevSell = currSell
+        
+        currBuy = Math.max(prevBuy, prevSell - price)
+        currSell = Math.max(prevSell, prevBuy + price)
+    }
+    return currSell
+};
+
+
+// 714. best time to buy and sell stock with transaction fee
+// very similar to other buy and sell stock problems
+// we only need to add the transation fee to one equation
+var maxProfit = function(prices, fee) {
+    let hold = -Infinity
+    let noHold = 0
+    
+    for (const price of prices) {
+        let prevHold = hold
+        let prevNoHold = noHold
+        
+        hold = Math.max(prevHold, prevNoHold - price - fee)
+        noHold = Math.max(prevNoHold, prevHold + price)
+    }
+    return noHold
+};
+
+
+// 560. subarray sum equals to k
+var subarraySum = function(nums, k) {
+    let sum = 0
+    let prevSums = {0: 1}
+    let ans = 0
+    
+    for (const num of nums) {
+        sum += num
+        
+        if (prevSums[sum-k]) {
+            ans += prevSums[sum-k]
+        }
+        prevSums[sum] = (prevSums[sum] || 0) + 1
+    }
+    return ans
+};
+
+
+// 1930. unique length-3 palindromic subsequences
+// record first and last occurence of every letter
+// if a letter only has 1 occurence we wont consider
+// count all unique characters between first and last occurence of each letter that occurs more than once
+var countPalindromicSubsequence = function(s) {
+    let letterPosition = {}
+    
+    for (let i = 0; i < s.length; i++) {
+        const letter = s[i]
+        if (!letterPosition[letter]) {
+            letterPosition[letter] = [i,i]
+        }
+        letterPosition[letter][1] = i
+    }
+    let ans = 0
+
+    for (const key of Object.keys(letterPosition)) {
+        let min = letterPosition[key][0]
+        let max = letterPosition[key][1]
+        
+        if (min === max) continue
+        let x = new Set(s.substring(min+1, max)).size
+        ans += x  
+    }
+    return ans
+};
+
+// 2001 number of pairs of interchangeable rectangles
+
+var interchangeableRectangles = function(rectangles) {
+    let ratio = {}
+    let res = 0
+    for (let i = 0; i < rectangles.length; i++) {
+        const rectangle = rectangles[i]
+        let r = rectangle[0]/rectangle[1]
+        
+        if (!ratio[r]) {
+            ratio[r] = 0
+        }
+        res += ratio[r]
+        ratio[r]++
+    }
+    return res
+};
+
+// 2002. maximum product of the length of two palindromic subsequences
+// backtracking solution on each index we explore s[index] for either string 1, string 2, or neither
+var maxProduct = function(s) {
+    let res = 1
+    const isPali = (str) => {
+        let left = 0
+        let right = str.length - 1
+        while (left <= right) {
+            if (str[left] !== str[right]) return false
+            left++
+            right--
+        }
+        return true
+    }
+    
+    const backTrack = (str1, str2, i) => {
+        if (i === s.length) {
+            if (isPali(str1) && isPali(str2)) {
+                res = Math.max(res, str1.length * str2.length)
+            }
+            return
+        }
+        
+        str1.push(s[i])
+        backTrack(str1, str2, i+1)
+        str1.pop()
+        
+        str2.push(s[i])
+        backTrack(str1, str2, i+1)
+        str2.pop()
+        
+        backTrack(str1, str2, i+1)
+    }
+    
+    let array1 = []
+    let array2 = []
+    backTrack(array1, array2, 0)
+    return res
+};
