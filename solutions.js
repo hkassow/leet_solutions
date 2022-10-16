@@ -5376,38 +5376,70 @@ var interchangeableRectangles = function(rectangles) {
 // backtracking solution on each index we explore s[index] for either string 1, string 2, or neither
 var maxProduct = function(s) {
     let res = 1
-    const isPali = (str) => {
-        let left = 0
-        let right = str.length - 1
-        while (left <= right) {
-            if (str[left] !== str[right]) return false
-            left++
-            right--
+    const isPali = (array) => {
+        let lp = 0
+        let rp = array.length -1
+        while (lp <= rp) {
+            if (array[lp] !== array[rp]) {
+                return false
+            }
+            lp++
+            rp--
         }
         return true
     }
-    
-    const backTrack = (str1, str2, i) => {
-        if (i === s.length) {
-            if (isPali(str1) && isPali(str2)) {
+    const backTrack = (str1, str2, index) => {
+        if (index === s.length) {
+            if ((str1.length * str2.length > res) && isPali(str1) && isPali(str2)) {
                 res = Math.max(res, str1.length * str2.length)
             }
-            return
+        } else {
+            str1.push(s[index])
+            backTrack(str1, str2, index+1)
+            str1.pop()
+           
+            str2.push(s[index])
+            backTrack(str1, str2, index+1)
+            str2.pop()
+           
+            backTrack(str1, str2, index+1)
         }
-        
-        str1.push(s[i])
-        backTrack(str1, str2, i+1)
-        str1.pop()
-        
-        str2.push(s[i])
-        backTrack(str1, str2, i+1)
-        str2.pop()
-        
-        backTrack(str1, str2, i+1)
     }
-    
-    let array1 = []
-    let array2 = []
-    backTrack(array1, array2, 0)
+    backTrack([], [], 0)
     return res
+};
+
+
+// 28. find the index of the first occurence in a string
+
+var strStr = function(haystack, needle) {
+    
+    for (let i = 0; i < haystack.length; i++) {
+        if (haystack[i] === needle[0]) {
+            
+            
+            if (haystack.substring(i, i+needle.length) === needle) return i
+        }
+    }
+    return -1
+};
+
+
+// 179. largest number 
+// sort by combining two numbers and choosing the larger combo
+// (31, 30) => (3130 > 3031)
+var largestNumber = function(nums) {
+    nums = nums.map((a) => a.toString()).sort((a,b) => {
+        let ba = a+b
+        let ab = b+a
+        return ab-ba
+    }).join('')
+    let trailingZero = 0
+    while (nums[trailingZero] == 0) {
+        trailingZero++
+    }
+    nums = nums.substring(trailingZero)
+    
+    if (nums.length === 0) return "0"
+    return nums
 };
