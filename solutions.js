@@ -5508,3 +5508,52 @@ var checkSubarraySum = function(nums, k) {
     }
     return false
 };
+
+// 187. repeated dna sequences
+
+var findRepeatedDnaSequences = function(s) {
+    let seen = new Set()
+    let repeated = new Set()
+    for (let i = 0; i+9 < s.length; i++) {
+        let str = s.substring(i, i+10) 
+        if (seen.has(str)) repeated.add(str)
+        
+        seen.add(str)
+    }
+    return [...repeated]
+};
+
+
+// 380. insert delete getRandom o(1)
+// array + map 
+// array for random output
+// map to keep track on index for insert + remove
+// on removal of a value we move the last element in our array to the index of the value to remove
+// then we remove the last element
+class RandomizedSet {
+    constructor () {
+        this.valToPos = new Map()
+        this.posToVal = []
+    }
+    insert (val) {
+        if (this.valToPos.has(val)) return false
+        this.valToPos.set(val, this.posToVal.length)
+        this.posToVal.push(val)
+        return true 
+    }
+    remove (val) {
+        if (!this.valToPos.has(val)) return false
+    
+        let position = this.valToPos.get(val)
+        let tail = this.posToVal.at(-1);
+        this.posToVal[position] = tail
+        this.valToPos.set(tail, position)
+        this.valToPos.delete(val)
+        this.posToVal.pop()
+        return true
+    }
+    getRandom () {
+        let rand = Math.floor(Math.random() * this.posToVal.length)
+        return this.posToVal[rand]
+    }
+}
