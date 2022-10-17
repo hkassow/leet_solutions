@@ -5443,3 +5443,68 @@ var largestNumber = function(nums) {
     if (nums.length === 0) return "0"
     return nums
 };
+
+// 1832. check if the sentence is pangram
+
+var checkIfPangram = function(sentence) {
+    //     if (sentence.length < 26) return false
+    //     let letters = {}
+        
+    //     for (const letter of sentence) {
+    //         letters[letter] = true
+    //     }
+    //     return Object.keys(letters).length === 26
+    return new Set(sentence.split('')).size === 26
+};
+
+
+// 523. continuous subarray sum
+// smart math solution
+// if a previous sum matches our current sum at index (i)
+// and previous sum was added at index (j)
+// that means sum from i to j === multiple of k
+// [3,5,4,2] k = 6
+// [3,2,0,2] <= prefix sums%k i = 3, j = 1 => sum from 1 to 3 === divisible by 6
+var checkSubarraySum = function(nums, k) {
+    let sum = 0
+    let prefix = 0
+    const prevSums = {}
+    
+    for (let i = 0; i < nums.length; i++) {
+        sum += nums[i]
+        
+        sum %= k
+        
+        if (prevSums[sum]) return true
+        
+        
+        prevSums[prefix] = true
+        prefix = sum
+    }
+    return false
+};
+// big backtrack soltuion 
+var checkSubarraySum = function(nums, k) {
+    let dp = Array(nums.length)
+    dp[nums.length -1] = 0
+    for (let j = nums.length -2; 0 <= j; j--) {
+        dp[j] = (dp[j+1] + nums[j+1])%k
+        if (dp[j]%k === 0 && j !== nums.length -2) {
+            return true
+        }
+    }
+    const backtrack = (index, sum) => {
+        if (index === nums.length) return false
+        sum += nums[index]
+        if (sum%k === 0) return true
+        if (sum + dp[index] < k) return false
+        if (backtrack(index+1, sum)) return true
+    }
+    
+    for (let i = 0; i <= nums.length - 2; i++) {
+        let sum = nums[i] + nums[i+1]
+        if (sum%k === 0) return true
+        if (backtrack(i+2, sum)) return true
+    }
+    return false
+};
