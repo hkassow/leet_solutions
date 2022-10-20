@@ -5557,3 +5557,629 @@ class RandomizedSet {
         return this.posToVal[rand]
     }
 }
+
+
+// 1461. check if a string contains all binary codes of size k
+
+var hasAllCodes = function(s, k) {
+    let codes = 2**k
+    let codesHas = new Set()
+    
+    for (let i = 0; i+k-1 < s.length; i++) {
+        let str = s.substring(i, i+k)
+        codesHas.add(str)
+        if (codesHas.size === codes) return true
+    }
+    return false
+};
+
+
+// 304. range sum query 2d - immutable
+
+class NumMatrix{
+    constructor (matrix) {
+        this.dp = Array(matrix.length+1).fill().map(() => Array(matrix[0].length + 1).fill(0))
+        for (let i = 1; i <= matrix.length; i++) {
+            for (let j = 1; j <= matrix[0].length; j++) {
+                this.dp[i][j] = matrix[i-1][j-1] + this.dp[i-1][j] + this.dp[i][j-1] - this.dp[i-1][j-1]
+            }
+        }  
+    }
+    sumRegion (row1, col1, row2, col2) {
+        return this.dp[row2+1][col2+1] - this.dp[row1][col2+1] - this.dp[row2+1][col1] + this.dp[row1][col1] 
+    }
+}
+
+
+// 303. range sum query 
+class NumArray {
+    constructor (nums) {
+        this.nums = nums
+        for (let i = 1; i < nums.length; i++) {
+            this.nums[i] += this.nums[i-1]
+        }   
+    }
+    sumRange (left, right) {
+        if (left === 0) return this.nums[right]
+        return this.nums[right] - this.nums[left-1]
+    }
+}
+
+
+// 665. non-decreasing array
+// greedy approach 
+// everytime we run into an instance where the next integer is less than our current integer
+// we compare our next int to our prev int
+// if next int is equal or larger we can change our current int to behave
+// if not we must change our next int
+var checkPossibility = function(nums) {
+    nums.push(Infinity)
+    let prev = -Infinity
+    let curr 
+    let next
+    let changes = 0
+    
+    for (let i = 0; i < nums.length-1; i++) {
+        curr = nums[i]
+        next = nums[i+1]
+        if (next < curr) {
+            if (next < prev) nums[i+1] = curr
+            else nums[i] = prev
+            changes++
+            if (changes === 2) return false
+        } else {
+            prev = curr
+        }
+    }
+    return true
+};
+
+
+
+// 38. count and say
+
+var countAndSay = function(n) {
+    
+    const travel = (i, str) => {
+        if (i === 1) return travel(i+1, '1')
+        if (n < i) return str
+        
+        let newStr = ''
+        for (let j = 0; j < str.length; j++) {
+            let num = str[j]
+            let count = 0
+            while (j < str.length && str[j] === num) {
+                j++
+                count++
+            }
+            j--
+            newStr += `${count}${num}`
+        }
+        return travel(i+1, newStr)
+    }
+    return travel(1, '')
+ };
+
+
+// 41. first missing positive
+// iterate through nums moving positive integers into their respective spots
+// note we only consider positive integers that are inside the array length
+// this is because we need 1...n+1 inside an array of length n 
+var firstMissingPositive = function(nums) {
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] <= 0) continue
+        if (nums.length < nums[i]) continue
+        let num = nums[i]
+        while (0 < num && num <= nums.length && num !== i+1 && num !== nums[num-1]) {
+            nums[i] = nums[num-1]
+            nums[num-1] = num
+            num = nums[i]
+        }
+    }
+
+    for (let i = 0; i <nums.length; i++) {
+        if (nums[i] !== i+1) return i+1
+    }
+    return nums.length+1
+};
+
+
+
+// 680. valid palindrome ii
+// check if s is palindrome 
+// if we run into letters that dont equal eachother 
+// try shift either of our pointers by one and checking if that would make a palindrome
+// if shifting by one wont result in palindrome then we would need to delete more than one 
+var validPalindrome = function(s) {
+    const isValiPali = (l, r) => { 
+        while (l <= r) {
+            if (s[l] !== s[r]) return false
+            l++
+            r--
+        }
+        return true
+    } 
+    let lp = 0
+    let rp = s.length-1
+    while (lp <= rp) {
+        if (s[lp] !== s[rp]) {
+            if (isValiPali(lp+1, rp)) return true
+            if (isValiPali(lp, rp-1)) return true
+            return false
+        }
+        lp++
+        rp--
+    }
+    return true
+};
+
+
+// 1984. minimum difference between highest and lowest of k scores
+// trivial after sorting the array just compare every window's max and min 
+var minimumDifference = function(nums, k) {
+    if (k === 1) return 0
+    let ans = Infinity
+    nums = nums.sort((a,b) => a-b)
+    for (let i = 0; i + k -1 < nums.length; i++) {
+        ans = Math.min(ans, nums[i+k-1] - nums[i])
+    }
+    return ans
+}; 
+
+
+
+// 344. reverse string
+var reverseString = function(s) {
+    for (let i = 0; i < Math.floor(s.length/2); i++) {
+        [s[i], s[s.length - i - 1]] = [s[s.length - i - 1], s[i]];
+    }
+};
+
+
+// 88. merge sorted array
+
+
+var merge = function(nums1, m, nums2, n) {
+    let p1 = m - 1
+    let p2 = n - 1
+    let sortedP = m + n - 1
+    
+    while (0 <= p1 && 0 <= p2) {
+        if (nums1[p1] < nums2[p2]) {
+            nums1[sortedP] = nums2[p2]
+            p2--
+        } else {
+            nums1[sortedP] = nums1[p1]
+            p1--
+        }
+        sortedP--
+    }
+    
+    while (0 <= p2) {
+        nums1[sortedP] = nums2[p2]
+        p2--
+        sortedP--
+    } 
+};
+
+
+// 283. move zeroes 
+
+var moveZeroes = function(nums) {
+    let lp = 0
+    const swap = (l, r) => {[nums[l], nums[r]] = [nums[r], nums[l]]}
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] != 0){
+            swap(lp, i)
+            lp++
+        }
+    }
+};
+
+
+// 26.  remove duplicates from sorted array
+var removeDuplicates = function(nums) {
+    let dups = 0
+    let prev = Infinity
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] === prev) dups++
+        else (nums[i-dups] = nums[i])
+        prev = nums[i]
+    }
+    nums.splice(nums.length - dups)
+}; 
+
+
+// 1498. number of subsequences that satisfy the given sum condition
+var numSubseq = function(nums, target) {
+    nums.sort((a,b) => a-b)
+    let lp = 0
+    let rp = nums.length - 1
+    let res = 0
+    while ((nums[lp] + nums[rp]) > target && lp < rp) {
+            rp--
+    }
+    let powers = allPow(2, rp-lp,1000000007)
+    
+    while (nums[lp]*2 <= target && lp < nums.length) {
+        while ((nums[lp] + nums[rp]) > target && lp < rp) {
+            rp--
+        }
+        res += powers[rp-lp];
+        lp++
+    }
+    
+   
+    return res%1000000007
+};
+
+let allPow = function(power, exp, mod) {
+    let powers = [1]
+    let res = 1
+    while (0 < exp) {
+        res *= power
+        res %= mod
+        powers.push(res)
+        exp--
+    }
+    return powers
+}
+
+
+// 189. rotate array
+// using reverse
+
+// nums = "----->-->"; k =3
+// result = "-->----->";
+// reverse "----->-->" we can get "<--<-----"
+// reverse "<--" we can get "--><-----"
+// reverse "<-----" we can get "-->----->"
+
+var rotate = function(nums, k) {
+    const reverse = (l,r) => {
+        while (l < r) {
+           [nums[l], nums[r]] = [nums[r], nums[l]];
+           l++
+           r--
+        }
+    }
+    k %= nums.length
+    reverse(0, nums.length -1)
+    reverse(0, k-1)
+    reverse(k, nums.length -1)
+};
+
+// keep shifting an element k spaces until we've shifted every element
+// consider [1,2,3,4] and k = 1
+// on the first pass we shift every element so we can exit [4,1,2,3]
+// consider now [1,2,3,4] and k = 2
+// on first pass we get [3,2,1,4] since k && length of array arent co-prime we have a cycle
+// so we must start another shift cycle starting from the index 1
+// this produces [3,4,1,2] and 4 shifts so we can exit
+var rotate = function(nums, k) {
+    let n = nums.length
+    let count = 0
+    if (n < k) {
+        k = k%n
+    }
+    if (n === 1 || k === n) return nums  
+    const shift = (stop, num, index) => {
+        const hold = nums[index]
+        if (count === n) return
+        count++
+        nums[index] = num
+        if (stop !== index) {
+            shift(stop, hold, (index+k)%n)
+        }
+    }
+    for (let i = 0; i < k; i++) {
+        shift(i, nums[i], i+k)
+    }
+    
+};
+
+
+// 1968. array with elements not equal to average of neighbors
+
+var rearrangeArray = function(nums) {
+    for (let i = 1; i < nums.length - 1; i++) {
+        if ((nums[i-1] + nums[i+1])/2 === nums[i]) {
+            [nums[i], nums[i+1]] = [nums[i+1], nums[i]]
+        }
+    }
+    for (let j = nums.length - 1; 0 < j; j--) {
+        if ((nums[j-1] + nums[j+1])/2 === nums[j]) {
+            [nums[j], nums[j-1]] = [nums[j-1], nums[j]]
+        }
+    }
+    return nums
+};
+
+
+
+// 881. boats to save people
+
+var numRescueBoats = function(people, limit) {
+    people.sort((a,b) => a-b)
+    let l = 0
+    let r = people.length - 1
+    let res = 0
+  
+    while ( l < r) {
+        if (people[r] + people[l] > limit) {
+            res++
+            r--
+        } else {
+            l++
+            r--
+            res++
+        }
+    }
+    return res + r-l + 1
+};
+
+
+
+// 1838. frequency of the most frequent element 
+// sliding window with criteria that our window satisfies maxElemet * length < window Sum + k
+// this criteria is just making sure that we can turn all elements inside our window into the max element
+var maxFrequency = function(nums, k) {
+    nums.sort((a,b) => a - b)
+    
+    
+    let lp = 0
+    let rp = 0
+    let sum = 0
+    let max = 0
+    
+    while (rp < nums.length) {
+        sum += nums[rp]
+        
+        while (sum + k < nums[rp]*(rp-lp+1)) {
+            sum -= nums[lp]
+            lp++
+        }
+        max = Math.max(max, rp-lp+1)
+        rp++
+    }
+    return max
+};
+
+
+// 692. top k frequent words
+// o(n logn) because we are sorting n elements
+// can reduce sorts by looping through and creating buckets 
+// then loop through and grab the last buckets until we have reached k words
+// then sort
+
+var topKFrequent = function(words, k) {
+    let frequency = {}
+    
+    for (const word of words) {
+        frequency[word] = (frequency[word] || 0) + 1
+    }
+    
+    let sorted = Object.keys(frequency).sort((a,b) => {
+        if (frequency[a] === frequency[b]) {
+            if (a < b) return -1
+        } else {
+            return frequency[b] - frequency[a]
+        }
+    }).slice(0, k)
+    return sorted
+};
+
+
+// using buckets
+// o(n logK) speed because now on average we only have to sort k elements
+var topKFrequent = function(words, k) {
+    let frequency = {}
+    let buckets = []
+    let mostFreq = []
+
+    for (const word of words) {
+        frequency[word] = (frequency[word] || 0) + 1
+    }
+    
+    for (const [key,value] of Object.entries(frequency)) {
+        if (!buckets[value]) {
+            buckets[value] = []
+        }
+        buckets[value].push(key)
+    }
+    
+    for (let j = buckets.length; 0 <=j; j--) {
+        if (buckets[j]) {
+            buckets[j].sort((a,b) => a > b? -1:1 )
+            while (buckets[j].length && mostFreq.length < k) {
+                mostFreq.push(buckets[j].pop())
+            }
+        }
+    }
+    return mostFreq
+};
+
+
+
+// 209. minimum size subarray sum
+
+var minSubArrayLen = function(target, nums) {
+    let l = 0
+    let r = 0
+    let minSize = Infinity
+    let sum = 0
+    while (r < nums.length) {
+        sum += nums[r]
+       
+        while (target <= sum ) {
+            minSize = Math.min(minSize, r-l+1)
+            sum -= nums[l]
+            l++
+        }
+        r++
+    }
+    return minSize === Infinity? 0: minSize
+};
+
+
+// 682. baseball game
+
+var calPoints = function(operations) {
+    let stack = []
+    for (const operation of operations) {
+        if (operation.match(/([0-9])/)) {
+            stack.push(+operation)
+        }
+        else if (operation === '+') {
+            stack.push(stack.at(-1) + stack.at(-2))
+        }
+        else if (operation === 'D') {
+            stack.push(stack.at(-1)*2)
+        }
+        else {
+            stack.pop()
+        }
+    }
+    return stack.length? stack.reduce((sum, next) => sum + next): 0
+};
+
+// 225. implement stack using queues
+// QUEUE ONLY HAS push to back and remove from front
+// so we mush do some magic on pop and top to get the last element
+class MyStack {
+    constructor() {
+        this.stack = []
+    }
+    push(x) {
+        return this.stack.push(x)
+    }
+    pop() {
+        for (let i = 0; i < this.stack.length - 1; i++) {
+            this.stack.push(this.stack.shift())
+        }
+        return this.stack.shift()
+    }
+    top() {
+        let ele = this.pop()
+        
+        this.stack.push(ele)
+        return ele
+    }
+    empty() {
+        return this.stack.length === 0
+    }
+}
+
+
+// 901. online stock span
+
+class StockSpanner {
+    constructor() {
+        this.prices = []
+    }
+    next (price) {
+        let span = [price, 1]
+        while (this.prices.length && this.prices.at(-1)[0] <= price) {
+            span[1] += this.prices.at(-1)[1]
+            this.prices.pop()
+        }
+        this.prices.push(span)
+        return span[1] 
+    }
+}
+
+// 735. asteroid collision 
+var asteroidCollision = function(asteroids) {
+    let stack = []
+    
+    for (const asteroid of asteroids) {
+        if (asteroid < 0) {
+            while (stack.length && stack.at(-1) < asteroid*-1 && 0 < stack.at(-1)) {
+                stack.pop()
+            }
+            
+            if (stack.length && stack.at(-1) === asteroid*-1) {
+                stack.pop()
+            } 
+            else if (!stack.length || stack.at(-1) < 0) stack.push(asteroid)
+            
+        } else {
+            stack.push(asteroid)
+        }
+    }
+    return stack
+};
+
+// 71. simplify path 
+var simplifyPath = function(path) {
+    let stack = ['/']
+    path = path.split('/')
+    
+    for (const directory of path) {
+        if (directory === '.' || directory === '') continue
+        else if (directory === '..' ) {
+            if (stack.length === 1) continue
+            else stack.pop()
+        }
+        else {
+            if (stack.length === 1) {
+                stack.push(directory)
+            } else {
+                stack.push('/' + directory)
+            }
+        }
+        
+    }
+    return stack.join('')
+};
+
+
+// 12. integer to roman
+
+var intToRoman = function(num) {
+    let val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+    let numeral = ["M", 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I']
+    let roman = ''
+    
+    for (let i = 0; i <numeral.length; i++) {
+        
+        while (val[i] <= num) {
+            num -= val[i]
+            roman += numeral[i]
+        }
+    }
+    return roman
+};
+
+
+// 394. decode string 
+
+var decodeString = function(s) {
+    let stack = []
+    let currStr = ''
+    let currNum = 0
+    for (const c of s) {
+        if (c === '[') {
+            stack.push(currStr)
+            stack.push(currNum)
+            currNum = 0
+            currStr = ''
+        }
+        else if ( c === ']') {
+            let val = stack.pop()
+            let str = stack.pop()
+            let repeated = ''
+            for (let i = 0; i < val; i++) {
+                repeated += currStr
+            }
+            currStr = str + repeated
+        }
+        else if (c.match(/[0-9]/)) {
+            currNum = currNum*10 + +c
+        }
+        else {
+            currStr += c
+        }
+    }
+    return currStr
+};
