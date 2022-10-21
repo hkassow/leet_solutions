@@ -6183,3 +6183,211 @@ var decodeString = function(s) {
     }
     return currStr
 };
+
+
+// 402. remove k digits
+var removeKdigits = function(num, k) {
+    let stack = []
+    
+    for (const c of num) {
+        if (!stack.length && c != 0) {
+            stack.push(c)
+        }
+        else {
+            while (c < stack.at(-1) && 0 < k) {
+                stack.pop()
+                k--
+            }
+            
+            if (c != 0) {
+                stack.push(c)
+            } else if (stack.length) {
+                stack.push(c)   
+            }
+        }
+    }
+    while (0 < k) {
+        stack.pop()
+        k--
+    }
+    if (!stack.length) stack.push(0)
+    return stack.join('')
+};
+
+
+// 1209. remove all adjacent duplicates in string ii
+// use stack to keep track of current letter, if current letter ever reaches k count we pop it 
+var removeDuplicates = function(s, k) {
+    let stack = []
+    for (let i = 0; i < s.length; i++) {
+        if (!stack.length) stack.push([s[i], 1])
+        else if (stack.at(-1)[0] === s[i]) {
+            stack.at(-1)[1]++
+            if (stack.at(-1)[1] === k) stack.pop()
+        }
+        else {
+            stack.push([s[i], 1])
+        }
+    }
+    
+    let str = ''
+    
+    for (const [letter, count] of stack) {
+        for (let i = 0; i < count; i++) {
+            str += letter
+        }
+    }
+    return str
+};
+
+
+// 456. 132 pattern 
+var find132pattern = function(nums) {
+    let stack = []
+    let middle = -Infinity
+    
+    for (let j = nums.length - 1; 0 <= j; j--) {
+        while (stack.length && stack.at(-1) < nums[j]) {
+            middle = Math.max(middle, stack.pop())
+        }
+        stack.push(nums[j])
+        if (nums[j] < middle) return true
+    }
+    return false
+};
+
+// 895. maximum frequency stack
+class FreqStack {
+    constructor() {
+        this.stack = []
+        this.valToFreq = {}
+    }
+    push(val) {
+        this.valToFreq[val] = (this.valToFreq[val] || 0) + 1
+        if (!this.stack[this.valToFreq[val]-1]) {
+            this.stack[this.valToFreq[val] - 1] = []
+        }
+        this.stack[this.valToFreq[val] - 1].push(val)  
+    }
+    pop () {
+        let popped = this.stack.at(-1).pop()
+        this.valToFreq[popped]--
+        if (!this.stack.at(-1).length) {
+            this.stack.pop()
+        }
+        return popped 
+    }
+}
+
+// 35. search insert position
+
+var searchInsert = function(nums, target) {
+    let l = 0
+    let r = nums.length -1
+    let mid
+    while (l <= r) {
+        mid = l + Math.floor((r-l)/2)
+        if (nums[mid] === target) {
+            return mid
+        } 
+        else if (nums[mid] < target) {
+            l = mid + 1
+        } 
+        else {
+            r = mid - 1
+        }
+    }
+    return l
+};
+
+// 374. guess number higher or lower
+
+var guessNumber = function(n) {
+    let low = 1
+    let high = n
+    let mid 
+    while (low <= high) {
+        mid = low + Math.floor((high - low)/2)
+        let val = guess(mid)
+        if (val === 0) return mid
+        else if (val < 0 ) high = mid - 1
+        else low = mid + 1
+    }
+    return low
+};
+
+// 441. arranging coins
+
+var arrangeCoins = function(n) {
+    let low = 1
+    let high = n
+    let mid 
+    let sum
+    while (low <= high) {
+        mid = low + Math.floor((high - low)/2)
+        sum = (mid* (mid+1))/2
+        if (sum === n) return mid
+        if (sum < n) low = mid + 1
+        else high = mid - 1
+    }
+    return (low* (low+1)/2 < sum)? low: low-1
+};
+
+
+// 977. squares of a sorted array
+// since array is sorted we just need to comapre left and right pointer to get the larger element
+var sortedSquares = function(nums) {
+    let squares = Array(nums.length)
+    
+    let left = 0
+    let right = nums.length - 1
+    for (let p = nums.length -1; 0 <= p; p--) {
+        if (nums[left]*nums[left] < nums[right] * nums[right]) {
+            squares[p] = nums[right] * nums[right]
+            right --
+        } 
+        else {
+            squares[p] = nums[left] * nums[left]
+            left++
+        }
+    }
+    return squares
+};
+
+
+// 367. valid perfect square
+// binary search
+var isPerfectSquare = function(num) {
+    let low = 0
+    let high = num
+    let mid 
+    while (low <= high) {
+        mid = low + Math.floor((high - low)/2)
+        if (mid*mid === num) return true
+        else if (mid*mid < num) low = mid + 1
+        else high = mid - 1
+    }
+    return false
+};
+// trying every square up to num
+var isPerfectSquare = function(num) {
+    let square = 1
+    let twos = 3
+    while (square <= num) {
+        if (square === num) return true
+        square += twos
+        twos += 2
+    }
+    return false
+};
+
+// 219. contains duplicate ii
+
+var containsNearbyDuplicate = function(nums, k) {
+    let dup = {}
+    for (let i = 0; i < nums.length; i++) {
+        if (dup[nums[i]] !== undefined && i - dup[nums[i]] <= k) return true
+        dup[nums[i]] = i
+    }
+    return false
+};
