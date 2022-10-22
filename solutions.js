@@ -6391,3 +6391,65 @@ var containsNearbyDuplicate = function(nums, k) {
     }
     return false
 };
+
+
+// 1898. maximum number of removable characters
+// binary search on removable array
+var maximumRemovals = function(s, p, removable) {
+    
+    const isSubWithRemoved = (removed) => {
+        let pp = 0
+        
+        for (let i = 0; i < s.length; i++) {
+            if (s[i] === p[pp] && !removed.has(i)) {
+                pp++
+            }
+            
+            if (pp === p.length) return true
+        }
+        return false
+    }
+    
+    let l = 0
+    let r = removable.length - 1
+    let mid
+    
+    while (l <= r) {
+        mid = l + Math.floor((r-l)/2)
+        
+        let removed = new Set(removable.slice(0, mid+1))
+        if (isSubWithRemoved(removed)) {
+            l = mid + 1
+        } else {
+            r = mid - 1
+        }
+    }
+    return l
+    
+};
+
+
+// 116. populating next right pointers in each node
+// bfs 
+var connect = function(root) {
+    if (!root) return null
+    let queue = new Queue()
+    queue.enqueue(root)
+    while (queue.size()) {
+        
+        let nextLevel = new Queue()
+        let currNode 
+        while (queue.size()) {
+            currNode = queue.dequeue()
+            if (queue.front()) {
+                currNode.next = queue.front()
+            }
+            if (currNode.left) {
+                nextLevel.enqueue(currNode.left)
+                nextLevel.enqueue(currNode.right)
+            }
+        }
+        queue = nextLevel
+    }
+    return root
+};
