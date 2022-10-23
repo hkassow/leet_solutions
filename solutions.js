@@ -6594,3 +6594,251 @@ var subArrayGCD = function(array, k){
     }
     return true
 }
+
+
+// 203. remove linked list elements
+
+var removeElements = function(head, val) {
+    while (head && head.val === val) {
+        head = head.next
+    }
+    
+    let node = head
+    
+    while (node && node.next) {
+        if (node.next.val === val) {
+            node.next = node.next.next
+        }
+        else {
+            node = node.next
+        }
+    }
+    return head
+};
+
+
+// 234. palindrome linked list
+// using fast + slow pointer to get slow pointer at mid point
+// reverse right half of list
+// now compare two linked lists, one starting from head and one from head
+// this solution uses o(n) time and o(1) space
+var isPalindrome = function(head) {
+    let slow = head
+    let fast = head
+    
+     while (fast && fast.next) {
+         slow = slow.next
+         fast = fast.next.next
+     }
+     let prev = slow
+     slow = slow.next
+     prev.next = null
+     
+     while (slow) {
+         let temp = slow.next
+         slow.next = prev
+         prev = slow
+         slow = temp
+     }
+     fast = head
+     slow = prev
+     while (slow) {
+         if (fast.val !== slow.val) return false
+         fast = fast.next
+         slow = slow.next
+     }
+     return true
+ };
+
+
+ // 83. remove dupliaces from sorted list
+
+ var deleteDuplicates = function(head) {
+    let node = head
+    while (node && node.next) {
+        if (node.next.val === node.val) {
+            node.next = node.next.next
+        } else {
+            node = node.next
+        }
+    }
+    return head
+};
+
+
+
+// 160. intersection of two linked lists
+
+
+var getIntersectionNode = function(headA, headB) {
+    let tail = headA
+    while (tail.next) {
+        tail = tail.next
+    }
+    tail.next = headB
+    
+    let fast = headA
+    let slow = headA
+    
+    while (fast && fast.next) {
+        slow = slow.next
+        fast = fast.next.next
+        if (slow === fast) break
+    }
+    
+    if (!fast || !fast.next) {
+        tail.next = null
+        return
+    }
+    slow = headA
+    
+    while (slow !== fast) {
+        slow = slow.next
+        fast = fast.next
+    }
+    tail.next = null
+    return slow
+};
+
+
+// 24. swap nodes in pairs
+var swapPairs = function(head) {
+    if (!head) return head
+    let temp = new ListNode('sentinel', head)
+    let i = head 
+    let j = head.next
+    if (j) head = j
+    while (j) {
+        i.next = j.next;
+        j.next = i;
+        temp.next = j
+        temp = i
+        i = i.next
+        j = (i)? i.next: null
+        
+    }
+    return head
+};
+
+// 1239. maximum length of a concatenated string with unique characters
+
+var maxLength = function(arr) {
+    let dp = ['']
+    
+    for (const str of arr) {
+        let a = new Set(str)
+        if (a.size < str.length) continue
+        for (const sub of dp) {
+            if ((str+sub).length === new Set(str+sub).size) {
+                dp.push(str+sub)
+            }
+        }
+    }
+    let longestStr = dp.reduce((a,b) => {
+        if (a.length < b.length) {
+            return b
+        } else return a})
+    return longestStr.length
+};
+
+
+
+// 148. sort list
+//merge sort on linked list
+// find middle 
+// sort left and right
+// merge
+var sortList = function(head) {
+    if (!head || !head.next) return head
+    let slow = head
+    let fast = head.next
+    while (fast && fast.next) {
+        fast = fast.next.next
+        slow = slow.next
+    }
+    
+    let mid = slow.next
+    slow.next = null
+    let left = sortList(head)
+    let right = sortList(mid)
+    let sentinel = new ListNode('sentinel')
+    let currNode = sentinel
+    
+    while (left && right) {
+        if (left.val < right.val) {
+            currNode.next = left
+            left = left.next
+        } else {
+            currNode.next = right
+            right = right.next
+        }
+        currNode = currNode.next
+    }
+    if (left) {
+        currNode.next = left
+    }
+    if (right) {
+        currNode.next = right
+    }
+    return sentinel.next
+}
+
+
+// 86. partition list
+
+var partition = function(head, x) {
+    let less = new ListNode('sentinel')
+    let lessP = less
+    let greater = new ListNode('sentinel')
+    let greaterP = greater
+    let currNode = head
+    while (currNode) {
+        if (currNode.val < x) {
+            lessP.next = currNode
+            lessP = currNode
+            
+        } else {
+            greaterP.next = currNode
+            greaterP = currNode
+        }
+        currNode = currNode.next
+    }
+    
+    
+    head = less.next || greater.next
+    lessP.next = greater.next
+    greaterP.next = null
+    return head
+};
+
+
+// 61. rotate list
+// find length of list, k mod length
+// have a lead pointer and another pointer thats k distance away
+// move tail to head
+// and set new tail to have no next node
+var rotateRight = function(head, k) {
+    if (!head || !head.next) return head
+    let size = 0
+    let currNode = head
+    while (currNode) {
+        size++
+        currNode = currNode.next
+    }
+    k = k%size
+    if (k === 0) return head
+    let leadNode = head
+    currNode =head
+    while (0 < k) {
+        leadNode = leadNode.next
+        k--
+    }
+    while (leadNode.next) {
+        leadNode = leadNode.next
+        currNode = currNode.next
+    }
+    leadNode.next = head
+    head = currNode.next
+    currNode.next = null
+    return head
+};
