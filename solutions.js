@@ -1252,48 +1252,37 @@ var kthSmallest = function(root, k) {
 // sliding window 
 var minWindow = function(s, t) {
     let letterFreq = {}
-    let count = 0
-    
-    let [leftMin, rightMin] = [-1, s.length]
-    
-    let [leftW, rightW] = [0, 0]
-    
-    
-    for (const letter of t) {
-        if (!letterFreq[letter]) {
-            letterFreq[letter] = 0
-        }
-        letterFreq[letter]++
-        count++
+    let l = 0
+    let r = 0
+    let count = t.length
+    let min = [-1,-1]
+    for (const c of t) {
+        letterFreq[c] = (letterFreq[c] || 0) + 1
     }
-    
-    
-    
-    while (rightW < s.length) {
-        
-        if (t.includes(s[rightW])) {
-            letterFreq[s[rightW]]--
-            if (0 <= letterFreq[s[rightW]]) {
+    while (r < s.length) {
+        if (letterFreq[s[r]] !== undefined) {
+            letterFreq[s[r]] --
+            if (0 <= letterFreq[s[r]]) {
                 count--
-                while (count===0) {
-                    if (t.includes(s[leftW])) {
-                        letterFreq[s[leftW]]++
-                        if (0 < letterFreq[s[leftW]]) {
-                            count++
-                            if ((rightW - leftW) < (rightMin - leftMin)) {
-                                
-                                [rightMin, leftMin] = [rightW, leftW]
-                            }
-                        }
-                    }
-                    leftW++
-                }
             }
         }
-        rightW++
+        
+        while (count === 0) {
+            if (min[0] === -1 || r-l < min[1] - min[0]) {
+                min = [l,r]
+            }
+            if (letterFreq[s[l]] !== undefined) {
+                letterFreq[s[l]]++
+                if (0 < letterFreq[s[l]]) {
+                    count++
+                }
+            }
+            l++
+        }
+        r++
     }
-    if (leftMin === -1) return ""
-    return s.substring(leftMin, rightMin+1)
+    if (min[0] === -1) return ""
+    return s.substring(min[0], min[1] + 1)
 };
 
 
@@ -6453,3 +6442,155 @@ var connect = function(root) {
     }
     return root
 };
+
+// dfs connecting childs before calling recurssion 
+var connect = function(root) {
+    if (root === null || root.left === null) return root 
+    root.left.next = root.right
+    root.right.next = root.next? root.next.left: null
+    
+    connect(root.right)
+    connect(root.left)
+    return root
+};
+
+// 1268 search suggestions system
+var suggestedProducts = function(products, searchWord) {
+    products.sort()
+    let res = Array(searchWord.length).fill().map(() => [])
+    let l = 0
+    let r = products.length -1 
+    for (let i = 0; i < searchWord.length; i++) {
+        while (l <= r && products[l][i] !== searchWord[i]) {
+            l++    
+        }
+        while (l <= r && products[r][i] !== searchWord[i]) {
+            r--
+        }
+        
+        for (let j = l; j < l+3 && j <= r; j++) {
+            res[i].push(products[j])
+        }
+    }
+    return res
+};
+
+
+// 2448. minimum cost to make array equal
+// JAVASCRIPT SOLUTION DOES NOT WORK CORRECTLY BECAUSE Of INTEGER OVERFLOW
+// EVEN USING BIGINT THE CONVERSION DOES NOT WORK
+// the problem uses binary search on range of (min int of nums, max int of nums)
+var minCost = function(nums, cost) {
+    let max = Math.max(...nums)
+    let min = Math.min(...nums) 
+    var convexFun = function (x){
+        let ans = 0
+        for (let i = 0; i < nums.length; i++) {
+            ans += Math.abs(x-nums[i]) * cost[i]
+        }
+       return ans
+    }
+    let mid
+    let res = Infinity
+    while (min < max) {
+        mid = min + Math.floor((max- min)/2)
+       
+        let [midf, midf2] = [convexFun(mid), convexFun(mid+1)]
+        res = Math.min(midf, midf2, res)
+        if (midf < midf2) {
+            max = mid
+        } 
+        else {
+            min = mid + 1
+        }
+    }
+    return res
+};
+
+
+// 2449. minimum number of operations to make arrays similar
+// consider only odd array = [1,3,3] target [1,1,5]
+// since we are guranteed a solution exists then we must have half our array over and half our array under
+// we take the abs of every difference between array and target 
+// since we can increment by 2 each time the sum can be halved
+// and since we do 2 operations at one time the number of operations is actually 1/4th (1/2 * 1/2)
+// now the original question has both even and odds in the array, but since we are de/incrementing by 2 each time
+// the evens and odds will never turn into eachother, so we can consider each array seperately 
+var makeSimilar = function(nums, target) {
+    let numsOdd = []
+    let numsEven = []
+    let targetOdd = []
+    let targetEven = []
+    nums.sort((a,b) => a-b)
+    target.sort((a,b) => a-b)
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i]%2) {
+            numsOdd.push(nums[i])
+        } else {
+            numsEven.push(nums[i])
+        }
+        if (target[i]%2) {
+            targetOdd.push(target[i])
+        } else {
+            targetEven.push(target[i])
+        }
+    }
+    let sumOdd = 0
+    let sumEven = 0
+    for (let i = 0; i < numsOdd.length; i++) {
+        sumOdd += Math.abs(numsOdd[i] - targetOdd[i])
+    }
+    for (let i = 0; i < numsEven.length; i++) {
+          sumEven += Math.abs(numsEven[i] - targetEven[i])
+    }
+    return (sumOdd + sumEven)/4
+};
+
+
+
+// 2446. determine if two events have conflict
+
+var haveConflict = function(event1, event2) {
+    event1[0] = event1[0][0] + event1[0][1] + event1[0][3] + event1[0][4]
+    event2[0] = event2[0][0] + event2[0][1] + event2[0][3] + event2[0][4]
+    
+    event1[1] = event1[1][0] + event1[1][1] + event1[1][3] + event1[1][4]
+    event2[1] = event2[1][0] + event2[1][1] + event2[1][3] + event2[1][4]
+    
+    
+    return Math.max(event1[0], event2[0]) <= Math.min(event1[1], event2[1])
+                                                                                             
+        
+};
+
+
+// 2447 number of subarrays with gcd equal to k
+// try every subarray starting from i, if every element is divisible by k
+var subarrayGCD = function(nums, k) {
+    let ans = 0
+    
+    for (let i = 0; i < nums.length ; i++) {
+        if (nums[i]%k === 0) {
+            if (nums[i] === k) ans++
+            let lp = i
+            let rp = i+1
+            let array = [nums[i]]
+            while (rp < nums.length) {
+                if (nums[rp]%k !== 0) break
+                array.push(nums[rp])
+                if (subArrayGCD(array, k)) ans++
+                rp++
+            }
+        }
+    }
+    return ans
+};
+
+var subArrayGCD = function(array, k){
+    let min = Math.min(...array)
+    for (let i = k+1; i <= min; i++) {
+        if (array.every((element) => element%i === 0)) return false
+    }
+    return true
+}
