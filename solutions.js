@@ -2228,94 +2228,58 @@ class linkedList {
 
 // 622. design circular queue
 // linked list but fed into itself
-
-
-var MyCircularQueue = function(k) {
-    this.max = k
-    this.size = 0
-    this.head
-};
-
-/** 
- * @param {number} value
- * @return {boolean}
- */
-MyCircularQueue.prototype.enQueue = function(value) {
-    if (this.size === this.max) {
-        return false
-    }
-    let node = new Node(value)
-    this.size ++
-    if (this.size === 1) {
-        this.head = node
-        this.head.next = node
-        this.head.prev = node
-    } else {
-        node.prev = this.head.prev
-        node.next = this.head
-        this.head.prev.next = node
-        this.head.prev = node
-    }
-    
-    return true
-};
-
-/**
- * @return {boolean}
- */
-MyCircularQueue.prototype.deQueue = function() {
-    if (this.size === 0) {
-        return false
-    }
-    
-    this.size--
-    let node = this.head
-    node.next.prev = node.prev
-    node.prev.next = node.next
-    this.head = node.next
-    
-    return true
-};
-
-/**
- * @return {number}
- */
-MyCircularQueue.prototype.Front = function() {
-    if (this.isEmpty()) return -1
-    return this.head.val
-};
-
-/**
- * @return {number}
- */
-MyCircularQueue.prototype.Rear = function() {
-    if (this.isEmpty()) return -1
-    return this.head.prev.val
-};
-
-/**
- * @return {boolean}
- */
-MyCircularQueue.prototype.isEmpty = function() {
-    return (!this.size)
-};
-
-/**
- * @return {boolean}
- */
-MyCircularQueue.prototype.isFull = function() {
-    return (this.size === this.max)
-};
-
-
-class Node {
-    constructor(val) {
-        this.next = null
-        this.prev = null
-        this.val =  val
+// using sentinel head and tail to prevent checking boundary conditions
+// and gives access to front and back nodes
+var LLNode = class{
+    constructor(val, next, prev) {
+        this.val = val
+        this.next = next || undefined
+        this.prev = next || undefined
     }
 }
 
+var MyCircularQueue = class {
+    constructor (k) {
+        this.head = new LLNode(-1)
+        this.tail = new LLNode(-1)
+        this.size = 0 
+        this.max = k
+        this.head.next = this.tail
+        this.tail.prev = this.head 
+    }
+    enqueue (value) {
+        if (this.size === this.max) return false
+        this.size++
+        let node = new LLNode(value)
+        node.prev = this.head
+        node.next = this.head.next
+        node.next.prev = node
+        this.head.next = node
+        return true
+    }
+    
+    dequeue (){
+        if (this.size === 0) return false
+        this.size--
+        let node = this.tail.prev
+        node.prev.next = this.tail
+        this.tail.prev = node.prev
+        return true
+    }
+
+    front(){
+        return this.tail.prev.val
+    }
+    rear() {
+        return this.head.next.val
+    }
+    isEmpty() {
+        return this.size === 0
+    }
+    isFull() {
+        return this.size === this.max
+    }
+};
 // 20. valid parentheses
 // inserting the opposite symbol 
 // when we reach a closing symbol we compare it with the expected closing bracket
@@ -3771,21 +3735,11 @@ var pacificAtlantic = function(heights) {
 
 var hasPathSum = function(root, targetSum) {
     if (!root) return false
-    const travel = (node, sum) => {
-        if (!node) return false
-        sum += node.val
-        if (sum === targetSum && !node.left && !node.right ) return true
-        
-        let left = travel(node.left, sum)
-        if (left) return true
-        
-        let right = travel(node.right, sum)
-        if (right) return true
-        
-        return false
-    }
+    if (root.val === targetSum && !root.left && !root.right) return true
     
-    return travel(root, 0)
+    if (hasPathSum(root.left, targetSum - root.val)) return true
+    if (hasPathSum(root.right, targetSum - root.val)) return true
+    return false
 };
 
 
@@ -6841,4 +6795,113 @@ var rotateRight = function(head, k) {
     head = currNode.next
     currNode.next = null
     return head
+};
+
+
+// 147. insertion sort list
+
+var insertionSortList = function(head) {
+    let sentinel = new ListNode('sentinel')
+    
+    let currNode = head
+    let temp = sentinel
+    while (currNode) {
+        if (!temp.next || currNode.val < temp.next.val) temp = sentinel
+        while (temp.next && temp.next.val < currNode.val) {
+            temp = temp.next
+        }
+        let hold = currNode.next
+        currNode.next = temp.next
+        temp.next = currNode
+        currNode = hold
+    }
+    return sentinel.next
+};
+
+
+// 94. binary tree inorder traversal
+// recursive
+var inorderTraversal = function(root) {
+    const helper = (root, arr) => {
+        if (!root) return arr
+        helper(root.left, arr)
+        arr.push(root.val)
+        helper(root.right, arr)
+        return arr
+    }
+    return helper(root, [])
+};
+//iterative
+var inorderTraversal = function(root) {
+    if (!root) return []
+    let ans = []
+    let queue = []
+    queue.push(root)
+    
+    while (queue.length) {
+        let node = queue.pop()
+        if (node.left) {
+            queue.push(node)
+            queue.push(node.left)
+            node.left = null
+        } else {
+            ans.push(node.val)
+            if (node.right) {
+                queue.push(node.right)
+            }
+        }
+    }
+    return ans
+};
+
+
+// 108. convert sorted array to binary search tree
+// the middle element will always be the root
+var sortedArrayToBST = function(nums) {
+    if (nums.length === 0) {
+        return null
+    } else if (nums.length === 1) {
+        let root = new TreeNode(nums[0])
+        return root
+    }
+    let mid = Math.floor(nums.length/2)
+    let left = sortedArrayToBST(nums.slice(0, mid))
+    let right = sortedArrayToBST(nums.slice(mid+1))
+    let root = new TreeNode(nums[mid], left, right)
+    return root
+};
+
+
+// 617. merge two binary trees
+var mergeTrees = function(root1, root2) {
+    if (root1 && root2) {
+        root1.val += root2.val
+        root1.left = mergeTrees(root1.left, root2.left)
+        root1.right = mergeTrees(root1.right, root2.right)
+    } else if (!root1) {
+        return root2
+    }
+    return root1
+};
+
+// 606. construct string from binary tree
+
+var tree2str = function(root) {
+    if (!root) return 
+    let str = `${root.val}`
+    
+    if (root.left || root.right) {
+        if (root.right && root.left) {
+            str += `(${tree2str(root.left)})`
+            str += `(${tree2str(root.right)})`
+        }
+        else if (root.right) {
+            str += '()'
+            str += `(${tree2str(root.right)})`
+        }
+        else {
+            str += `(${tree2str(root.left)})`
+        }
+    }
+    return str
 };
