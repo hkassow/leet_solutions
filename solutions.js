@@ -6905,3 +6905,254 @@ var tree2str = function(root) {
     }
     return str
 };
+
+// 96. unique binary search trees
+// to find num trees n we consider each potential root 1..n
+// consider 1,2,3,4,5
+// root at 1 means 2,3,4,5 will be on the right side
+// the potental trees for 2,3,4,5 is the same as trees for 1,2,3,4
+// thus each root has potential trees of  PT(mid - 1) * PT(n-mid) (where PT === potential trees)
+var numTrees = function(n) {
+    let dp = Array(n+1).fill(0)
+    dp[0] = dp[1] = 1
+    
+    for (let i = 2; i <= n; i++) {
+        for (let j = 1; j <= i; j++ ) {
+            dp[i] += dp[j-1]*dp[i-j]
+        }
+    }
+    return dp[n]
+}
+var numTrees = function(n) {
+    let cache = {}
+    const countTrees = (low, high) => {
+        if (high <= low) return 1
+        let total = 0
+        if (cache[high-low]) return cache[high-low]
+        for (let i = low; i <= high; i++) {
+            total += countTrees(low, i-1)*countTrees(i+1, high)
+        }
+        return cache[high-low] = total
+    }
+    return countTrees(1,n)
+};
+
+// 129. sum root to leaf numbers
+
+var sumNumbers = function(root) {
+    let array = []
+    
+    const travel = (root, num) => {
+        if (!root) return
+        
+        num += root.val
+        if (!root.left && !root.right) array.push(num)
+        else {
+            travel(root.left, num)
+            travel(root.right, num)
+        }
+    }
+    travel(root, '')
+    return array.reduce((a,b) => +a + +b)
+};
+
+// 337. house robber iii
+// keep track of largest chain and largest chain that allows current node
+// on each recurssion our left and right arrays can mix with eachother because they are not directly linked
+var rob = function(root) {
+    const helper = (root) => {
+        if (!root) return [0, 0]
+        if (!root.left && !root.right) return [root.val, 0]
+        let left = helper(root.left)
+        let right = helper(root.right)
+        return [root.val+left[1]+right[1], Math.max(left[1] + right[1], left[0] + right[0], left[1]+right[0], right[1] + left[0])]
+    }
+    return Math.max(...helper(root))
+};
+
+// 951. flip equivalent binary trees
+
+var flipEquiv = function(root1, root2) {
+    if (!root1 && !root2) return true
+    if (!root1 || !root2) return false
+    if (root1.val !== root2.val) return false
+    
+    if (root1.left?.val !== root2.left?.val) {
+        return flipEquiv(root1.left, root2.right) && flipEquiv(root1.right, root2.left)
+    } else {
+        return flipEquiv(root1.left, root2.left) && flipEquiv(root1.right, root2.right)
+    }
+};
+
+// 1993. operation on tree
+var Node = class {
+    constructor (val) {
+        this.val = val
+        this.child = []
+        this.parent = null
+        this.locked = false
+    }
+}
+var LockingTree = class {
+    constructor (parent) {
+        this.parents = Array(parent.length)
+        let node = new Node(0)
+        this.parents[0] = node
+        for (let i = 1; i < parent.length; i++) {
+            if (this.parents[i]) {
+                node = this.parents[i]
+            } else {
+                node = new Node(i)
+            }
+             if (!this.parents[parent[i]]) {
+                this.parents[parent[i]] = new Node(parent[i])
+            }
+            node.parent = this.parents[parent[i]]
+
+            this.parents[i] = node
+            node.parent.child.push(node)
+        }
+    }
+    lock (num, user) {
+        if (this.parents[num].locked) return false
+        this.parents[num].locked = user
+        return true
+    }
+    unlock (num, user) {
+        if (this.parents[num].locked !== user) return false
+        this.parents[num].locked = false
+        return true
+    }
+    upgrade (num, user) {
+        if (this.parents[num].locked) return false
+        let node = this.parents[num]
+        let ancestor = node.parent
+        while (ancestor) {
+            if (ancestor.locked) return false
+            ancestor = ancestor.parent
+        }
+        const isChildLocked = (root) => {
+            if (!root) return false
+            if (root.locked) return true
+            if (root.child.length === 0) return false
+            for (const node of root.child) {
+                if (isChildLocked(node)) return true
+            }
+            return false
+        }
+        if (!isChildLocked(node)) return false
+        const unlockChild = (root) => {
+            if (!root) return
+            root.locked = false
+            if (root.child.length === 0) return
+            for (const node of root.child) {
+                unlockChild(node)
+            }
+        }
+        unlockChild(node);
+        node.locked = user;
+        return true
+    }
+};
+
+
+// 513. find bottom left value
+
+var findBottomLeftValue = function(root) {
+    let ans = 0
+    let count = -1
+    const helpFind = (node, depth) => {
+        if (!node) return false
+        if (count < depth) {
+            ans = node.val
+            count = depth
+        }
+        depth++
+        helpFind(node.left, depth)
+        helpFind(node.right, depth)
+    }
+    helpFind(root, 0)
+    return ans
+};
+
+// 669. trim a binary search tree
+
+var trimBST = function(root, low, high) {
+    if (!root) return root
+    if (root.val < low) {
+        return trimBST(root.right, low, high)
+    }
+    if (high < root.val) {
+        return trimBST(root.left, low, high)
+    }
+    
+    root.left = trimBST(root.left, low, high)
+    root.right = trimBST(root.right, low, high)
+    return root
+};
+
+// 538. convert bst to greater tree
+var convertBST = function(root) {
+    let sum = 0
+    const helpTravel = (root) => {
+        if (!root) return
+        helpTravel(root.right)
+        sum += root.val
+        root.val = sum
+        helpTravel(root.left)
+        
+    }
+    helpTravel(root)
+    return root
+};
+
+
+// 1834. single-threaded cpu
+// use heap to keep track of element with the smallest processing time and smallest index
+// if we reach a point where we need to idle we set our current time to the next soonest element
+var getOrder = function(tasks) {
+    tasks = tasks.map((a, index) =>  [...a, index])
+    tasks.sort((a,b) => b[0] - a[0])
+    let ans = []
+    let minPrio = new MinPriorityQueue({compare: (a, b) => a[1] - b[1] || a[2] - b[2]})
+    let p = tasks.length - 1
+    let currTime = tasks[p][0]
+
+    while (tasks.length || minPrio.size()) {
+        while (tasks.length && tasks[p][0] <= currTime) {
+            minPrio.enqueue(tasks.pop())
+            p--
+        }
+        
+        if (minPrio.size() === 0) {
+            currTime = tasks[p][0]
+        } else {
+            let next = minPrio.dequeue()
+            ans.push(next[2])
+            currTime += next[1]
+        }
+       
+    }
+    return ans
+};
+
+
+// 1845. seat reservation manager
+// only need the prio queue if we unreserve a seat
+// otherwise we can just process the seats in order 1,2,3,4,5....
+var SeatManager = class{ 
+    constructor(n) {
+        this.previousSeats = new MinPriorityQueue({compare: (a,b) => a-b})
+        this.currSeat = 1 
+    }
+    reserve () {
+        if (this.previousSeats.size()) {
+            return this.previousSeats.dequeue()
+        } else {
+            return this.currSeat++
+        }
+    }
+    unreserve (seatNumber) {
+        this.previousSeats.enqueue(seatNumber)
+    }
+};
