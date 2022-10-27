@@ -6675,7 +6675,8 @@ var swapPairs = function(head) {
 };
 
 // 1239. maximum length of a concatenated string with unique characters
-
+// comparing length of str to size of set [set will contain only unique characters]
+// if its valid str the lengths should match up
 var maxLength = function(arr) {
     let dp = ['']
     
@@ -7515,3 +7516,111 @@ var largestOverlap = function(img1, img2) {
     }
     return res 
 };
+
+
+// 1849. splitting a string into descending consecutive values
+// simple backtracking problem checking if next value is 1 away from our most recent number
+var splitString = function(s) {
+    
+    const helpSplit = (i, numbers) => {
+        if (i < 0 && 2 <= numbers.length) return true
+        if (i < 0) return false
+        let num = ''
+        for (; 0 <= i; i--) {
+            num = s[i] + num
+            if (numbers.length === 0 || numbers.at(-1) == +num-1) {
+                if (numbers.length !== 0) {
+                    while (s[i-1] === 0) {
+                        i--
+                    }
+                }
+                numbers.push(num)
+                if (helpSplit(i-1, numbers )) return true
+                numbers.pop()
+            }
+        }
+        return false
+    }
+    return helpSplit(s.length - 1, [])
+};
+
+
+// 1980. find unique binary string
+// try every number from 0 => n**2, use padStart to get the proper length
+var findDifferentBinaryString = function(nums) {
+    nums = new Set(nums)
+    let pow = nums.size**2
+    for (let i = 0; i <= pow; i++) {
+        let x = i.toString(2).padStart(nums.size, '0')
+        if (!nums.has(x)) return x
+    }
+};
+
+
+// 698. partition to k equal sum subsets
+// same problem as matchsticks to a square except we have k sides instead of 4
+// simulating building every side
+var canPartitionKSubsets = function(nums, k) {
+    let sum  = nums.reduce((a,b) => a+b)
+    if (sum%k) return false
+    let side = sum/k
+    nums.sort((a,b) => b-a)
+    if (nums[0] > side) return false
+    const buildSquare = (i,space,edges) => {
+        if (edges === k) return true
+        for (; i < nums.length; i++) {
+            if (space < nums[i]) continue
+            let val = nums[i]
+            nums[i] = side + 1
+            if (space === val) {
+                if (buildSquare(1, side, edges+1)) return true
+            } else {
+                if (buildSquare(i+1, space - val, edges)) return true
+            }
+            nums[i] = val
+            while (val === nums[i+1]) {
+                i++
+            }
+        }
+        return false
+    }
+    return buildSquare(0, side, 0)
+};
+
+
+// 52. n-queens ii
+// we dont ever have to check if a queen is on the same horizontal row as another queen because we are building our board 1 queen on each row
+// thus we just need to check that every queen is on a different column and that their diagonals dont intercept
+// if j is position of queen then we just need to check j-x && j+x for every row in our current board
+var totalNQueens = function(n) {
+    let res = 0
+    
+    const tryQueens = (k, board) => {
+        if (k === n) {
+            res++
+            return
+        }
+        for (let j = 0; j < n; j++) {
+            if (isValid(board,k,j)) {
+                board.push(j)
+                tryQueens(k+1,board)
+                board.pop()
+            }
+        }
+    }
+    tryQueens(0, [])
+    return res
+};
+
+var isValid = function(queens, k, j){
+    for (const queen of queens) {
+        if (queen === j) return false
+    }
+    
+    for (let x = 1; x <= k; x++) {
+        let queen = queens[k-x]
+        if (j-x === queen) return false
+        if (j+x === queen) return false
+    }
+    return true
+}
