@@ -7156,3 +7156,362 @@ var SeatManager = class{
         this.previousSeats.enqueue(seatNumber)
     }
 };
+
+
+
+// 1882. process tasks using servers
+// idle servers are processed using weight then index
+// active servers are processed using time then weight then index
+// if we dont have any idle servers we pull from active server
+var assignTasks = function(servers, tasks) {
+    servers = servers.map((ele, index) => [ele, index, 0])
+    let idleServers = new MinPriorityQueue({compare: (a,b) => a[0] - b[0] || a[1] - b[1]})
+    let activeServers = new MinPriorityQueue({compare: (a,b) => a[2] - b[2] || a[0] - b[0] || a[1] - b[1]})
+    let tasksP = 0
+    let ans = []
+    for (const server of servers) {
+        idleServers.enqueue(server)
+    }
+    while (tasksP < tasks.length) {
+        while (activeServers.size() && activeServers.front()[2] <= tasksP) {
+            idleServers.enqueue(activeServers.dequeue())
+        }
+        
+        let nextServer = idleServers.dequeue() || activeServers.dequeue()
+        let nextTask = tasks[tasksP]
+        nextServer[2] = Math.max(nextServer[2], tasksP) + nextTask
+        ans.push(nextServer[1])
+        activeServers.enqueue(nextServer)
+        tasksP++
+    }
+    return ans
+};
+
+
+// 1985. find the kth largest integer in the array
+// using max prio queue
+// faster solution uses quick select, grab an element, check how many elements are smaller if its nums.length - k then we found our answer
+var kthLargestNumber = function(nums, k) {
+    let mp = new MaxPriorityQueue({compare: (b,a) => {
+        if (a.length - b.length) return a.length - b.length
+        else {
+            let i = 0 
+            while (i < a.length && a[i] === b[i]) {
+                i++
+            }
+            return a[i] - b[i] || 0
+        }
+    }})
+    for (const num of nums) {
+        mp.enqueue(num)
+    }
+    while (1 < k) {
+        mp.dequeue()
+        k--
+    }
+    return mp.dequeue()
+};
+
+
+// 767. reorganize string
+// o(n) time
+// find longest character and place it on as many even index as we can 
+// then go to every other index and place the next character
+// consider 'aaabbbc' => a:3 b:3 c:1
+// take a as longests => [a,/,a,/,a,/,/]
+// => next b or c does not matter => [a,/,a,/,a,/,c]
+// => [a,b,a,b,a,b,c]
+var reorganizeString = function(s) {
+    let max = -1
+    let freq = {}
+    for (const c of s) {
+        freq[c] = (freq[c] || 0) + 1
+        if (max === -1 || freq[max] < freq[c]) {
+            max = c
+        }
+    }
+    if ((s.length+1)/2 < freq[max]) return ''
+    let str = Array(s.length)
+    let idx = 0
+    while (freq[max]) {
+        str[idx] = max
+        freq[max]--
+        idx += 2
+    }
+    for (const key of Object.keys(freq)) {
+        while (freq[key]) {
+            if (s.length <= idx) {
+                idx = 1
+            }
+            str[idx] = key
+            freq[key]--
+            idx += 2
+        }
+    }
+    return str.join('')
+};
+
+
+// using maxPrio queue
+// takes the most frequent letter and adds it to the string 
+// if the last letter is the same as the most frequent we must pop an additional element
+var reorganizeString = function(s) {
+    let mp = new MaxPriorityQueue({priority: (a) => a[1]})
+    let freq = {}
+    for (const c of s) {
+        freq[c] = (freq[c] || 0) + 1
+    }
+    for (const [key, value] of Object.entries(freq)) {
+        mp.enqueue([key, value])
+    }
+    let str = ''
+    while (mp.size()) {
+        let maxLetter = mp.dequeue().element[0]
+        freq[maxLetter]--
+        if (str[str.length - 1] === maxLetter) {
+            if (mp.size() === 0) return ""
+            let filler = mp.dequeue().element[0]
+            str += filler
+            freq[filler]--
+            if (freq[filler]) {
+                mp.enqueue([filler, freq[filler]])
+            }
+        }
+        str += maxLetter
+        if (freq[maxLetter]) {
+            mp.enqueue([maxLetter, freq[maxLetter]])
+        }
+    }
+    return str
+}
+
+
+
+// 1094 car pooling
+// heap to keep track of the soonest destination
+// process the trips in order of starting point 
+// keep track of how many people we have in a car
+// each location we check if we can remove people from the car
+// then check if we have too many people in the car
+var carPooling = function(trips, capacity) {
+    trips.sort((a,b) => a[1] - b[1] || a[2] - b[2])
+    let mp = new MinPriorityQueue({priority: (a) => a[2]})
+    let people = 0
+    let location = trips[0][1]
+    let p = 0
+    while (p < trips.length) {
+        location = trips[p][1]
+        while (mp.size() && mp.front().priority <= location) {
+            people -= mp.dequeue().element[0]
+        }
+        people += trips[p][0]
+        if (capacity < people) return false
+        mp.enqueue(trips[p])
+        p++
+    }
+    return true
+};
+
+
+
+// 1405. longest happy string
+var longestDiverseString = function(a, b, c) {
+    let str = ''
+    let freq = {'a': a, 'b': b, 'c':c}
+    while (freq['a'] || freq['b'] || freq['c']) {
+        let x = returnHighest(freq['a'], freq['b'], freq['c'])
+        if (str.length && str[str.length - 1] === x[0]) {
+            if (freq[x[1]] === 0) return str
+            freq[x[1]]--
+            str += x[1]
+        }
+        if (freq[x[0]] < 2) {
+            freq[x[0]]--
+            str += x[0]
+        } else {
+            freq[x[0]] -= 2
+            str += x[0]
+            str += x[0]
+        }
+    }
+    return str
+};
+
+// manually checking to avoid having to sort, not sure if this saves a lot of time since we would only be sorting 3 elements 
+var returnHighest = (a,b,c) => {
+    if (b <= a && c <= a) {
+        if (c <= b) return ['a', 'b', 'c']
+        else return ['a', 'c', 'b']
+    }
+    if (a <= b && c <= b) {
+        if (c <= a) return ['b', 'a', 'c']
+        else return ['b', 'c', 'a']
+    }
+    else {
+        if (b <= a) return ['c', 'a', 'b']
+        else return ['c', 'b', 'a']
+    }
+}
+
+
+
+// 77. combinations
+
+var combine = function(n, k) {
+    let ans = []
+    
+    const helpCombine = (l, array, k) => {
+        if (k === 0) {
+            ans.push([...array])
+            return 
+        }
+        for (let i = l; i <= n-k+1; i++) {
+            
+            array.push(i)
+            helpCombine(i+1, array, k-1)
+            array.pop()
+        }
+    }
+    helpCombine(1, [], k)
+    return ans
+};
+
+
+// 47. permuations ii 
+// use nums[i] === nums[i+1] to prevent uniques
+// nums[i] = 'x' to prevent using the same value twice
+// 47. permuations ii 
+// use nums[i] === nums[i+1] to prevent uniques
+// nums[i] = 'x' to prevent using the same value twice
+var permuteUnique = function(nums) {
+    nums.sort((a,b) => a-b)
+    let ans = []
+    const helpPermute = (arr) => {
+        if (arr.length === nums.length) {
+            ans.push([...arr])
+            return
+        }
+        for (let i = 0; i < nums.length; i++)  {
+            if (nums[i] === 'X' || nums[i] === nums[i+1]) continue
+            let num = nums[i]
+            nums[i] = 'X'
+            arr.push(num)
+            helpPermute(arr)
+            nums[i] = num
+            arr.pop()
+        }
+    }
+    helpPermute([])
+    return ans
+};
+
+
+// 93. restore ip addresses
+// iterate from the back trying possible values 
+var restoreIpAddresses = function(s) {
+    let ans = []
+    let n = s.length
+    
+    const helpRestore = (index, arr, k) => {
+        if (index < 0 && k === 0) {
+            ans.push([...arr].reverse().join('.'))
+        } 
+        
+        if (index < 0 || k === 0) return
+        let str = ''
+        
+        for (let j = index; 0 <= j; j--) {
+            if (str.length === 3) break
+            str = s[j] + str
+            if (s[j] == 0 && str.length !== 1) continue
+            if (str.length === 3 && (2 < s[j] || 255 < str)) continue
+            arr.push(str)
+            helpRestore(j - 1, arr, k-1)
+            arr.pop()
+        }
+    }
+    helpRestore(n - 1, [], 4)
+    return ans
+};
+
+
+// 473. matchsticks to square
+// we only need to check if 3 sides equal 
+var makesquare = function(matchsticks) {
+    let sum = matchsticks.reduce((a,b) => a+b)
+    matchsticks.sort((a,b) => a-b)
+    if (sum%4 !== 0) return false
+    let side = sum/4
+    if (side < matchsticks.at(-1)) return false
+    const trySquare = (a,b,c,d) => {
+        if (side === a && a === b && a === c) return true
+        if (side < a || side < b || side < c || side < d || matchsticks.length === 0) return false
+        let value = matchsticks.pop()
+        if (trySquare(a+value,b,c,d)) return true
+        if (trySquare(a,b+value,c,d)) return true
+        if (trySquare(a,b,c+value,d)) return true
+        if (trySquare(a,b,c,d+value)) return true
+        matchsticks.push(value)
+        return false
+    }
+    let x = matchsticks.pop()
+    let y = matchsticks.pop()
+    return trySquare(x+y,0,0,0) || trySquare(x,y,0,0)
+};
+// building each side naturally instead of trying all possiblities
+var makesquare = function(matchsticks) {
+    let sum = matchsticks.reduce((a,b) => a+b)
+    matchsticks.sort((a,b) => b-a)
+    if (sum%4 !== 0) return false
+    let side = sum/4
+    if (side < matchsticks[0]) return false
+    const trySquare = (i, space, k) => {
+        if (k === 3) return true
+        for (; i < matchsticks.length; i++) {
+            let val = matchsticks[i]
+            let j = i
+            if (space < val) continue
+            
+            matchsticks[j] = side + 1
+            if (val === space) {
+                if (trySquare(1, side, k+1)) return true
+            } else {
+                if (trySquare(i+1, space - val, k)) return true
+            }
+            matchsticks[j] = val
+            while(val === matchsticks[i+1]) {
+                i++
+            }
+        }
+        return false
+    }
+    return trySquare(0, side, 0)
+};
+
+
+// 835. image overlap
+// get every [i,j] pair with value 1
+// then compare every pair from img1 with every pair in img2 storing the [p,q] shift we would need to make img1 pair line up with img2 pair
+var largestOverlap = function(img1, img2) {
+    let LA = []
+    let RA = []
+    let n = img1.length 
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            if (img1[i][j] === 1) LA.push([i,j])
+            if (img2[i][j] === 1) RA.push([i,j])
+        }
+    }
+    let counts = {}
+    let res = 0
+    let str
+    let val
+    for (let i of LA) {
+        for (let j of RA) {
+            str = `${i[0]-j[0]},${i[1]-j[1]}`
+            val = counts[str] = (counts[str] || 0) + 1
+            res = Math.max(val, res)
+        }
+    }
+    return res 
+};
