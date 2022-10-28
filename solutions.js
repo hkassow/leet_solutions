@@ -7823,3 +7823,145 @@ var isHappy = (board, row,col, dir) => {
     }
     return false
 }
+
+
+// 934. shortest bridge
+// find our first island and mark all the land with 2's so we can differentiate from second island and first island
+// from our first island we expand outwards using breadth search "building bridges" only on nearby water
+// when we come accross a 1 we know this is the second island and can end our search
+
+var shortestBridge = function(grid) {
+    
+    let dirs = [[1,0], [0,1], [-1,0], [0,-1]]
+    const expandIsland = (i,j, array) => {
+        grid[i][j] = 2
+        array.push([i,j])
+        for (const dir of dirs) {
+            let [p,q] = [i+dir[0], j+dir[1]]
+            if (0 <= p && 0 <= q && p < grid.length && q < grid[0].length && grid[p][q] === 1) {
+                expandIsland(p,q, array)
+            }
+        }
+        return array
+    }
+    const buildBridges = (array) => {
+        let dist = 0
+        while (array.length) {
+            let nextBreadth = []
+            while (array.length) {
+                let [i,j] = array.pop()
+                for (const dir of dirs) {
+                    let [p,q] = [i+dir[0], j+dir[1]]
+                    if (0 <= p && 0 <= q && p < grid.length && q < grid[0].length) {
+                        if (grid[p][q] === 1) return dist
+                        else if (grid[p][q] === 2) continue
+                        else {
+                            grid[p][q] = 2
+                            nextBreadth.push([p,q])
+                        }
+                    }
+                }
+            }
+            dist++
+            array = nextBreadth
+        }
+    }
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid.length; j++) {
+            if (grid[i][j] === 1) {
+                let firstIsland = expandIsland(i,j, [])
+                return buildBridges(firstIsland)
+            }
+        }
+    }
+};
+
+
+
+// 684. redundant connection
+// "brute force solution" try to traverse the graph without a certain edge
+// if we have no cycles this edge is the answer
+// must iterate from the back of edges to get the last input
+var findRedundantConnection = function(edges) {
+    let graph = {}
+    
+    for (const [a,b] of edges) {
+        if (!graph[a]) graph[a] = new Set()
+        if (!graph[b]) graph[b] = new Set()
+        graph[a].add(b)
+        graph[b].add(a)
+    }
+    
+    const hasCycle = (root, from, visited) => {
+        if (visited[root]) return true
+        visited[root] = true        
+        for (const edge of graph[root].values())  {
+            if (edge !== from) {
+                if (hasCycle(edge, root, visited)) return true
+            }
+        }
+        return false
+    }
+    
+    for (let j = edges.length - 1; 0 <= j; j--) {
+        let [a,b] = edges[j]
+        graph[a].delete(b)
+        graph[b].delete(a)
+        
+        if (!hasCycle(a, -1, {}) && !hasCycle(b, -1, {})) {
+            return [a,b]
+        }
+        graph[a].add(b)
+        graph[b].add(a)
+    }
+}
+
+// using union find ie. grouping every common edge 
+// we also make use of rank, which group has the most common edges
+// if we run into an edge where our edges are already grouped we know this edge is redundant
+var findRedundantConnection = function(edges) {
+    let parent = Array(edges.length+1).fill(-1)
+    let rank = Array(edges.length+1).fill(0)
+    
+    const find = (x) => {
+        if (parent[x] === -1) return x
+        
+        parent[x] = find(parent[x])
+        return parent[x]
+    }
+    
+    const union = (x,y) => {
+        let root_x = find(x)
+        let root_y = find(y)
+        
+        if (root_y === root_x) return true
+        
+        if (rank[root_x] < rank[root_y]) {
+            rank[root_y]++
+            parent[root_x] = root_y
+        } else {
+            rank[root_x]++
+            parent[root_y] = root_x
+        }
+        return false
+    }
+    for (const [a,b] of edges) {
+        if (union(a,b)) return [a,b]
+    }
+}
+
+
+// 1553 minimum number of days to eat n oranges
+// have to use greedy approach as trying to eat 1 orange at a time is too slow
+// only eat in groups of 2 or 3 and include remainders
+var minDays = function(n) {
+    let dp = {}
+    dp[0] = 0
+    dp[1] = 1
+    const helper = (i) => {
+        if (dp[i] !== undefined) return dp[i]
+        dp[i] = Math.min(helper(Math.floor(i/2)) + i%2, helper(Math.floor(i/3)) + i%3) + 1
+        return dp[i]
+    }
+    return helper(n)
+};
