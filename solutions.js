@@ -7624,3 +7624,202 @@ var isValid = function(queens, k, j){
     }
     return true
 }
+
+// 463. island perimeter
+// check every point and check if its next to water
+// could use stack to try only the land pieces to save time on larger matrix
+var islandPerimeter = function(grid) {
+    let res = 0
+    let dir = [[0,1], [1,0], [0,-1], [-1,0]]
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            if (grid[i][j] === 1) {
+                for (const move of dir) {
+                    let [p,q] = [i + move[0], j + move[1]] 
+                    if (p < 0 || q < 0 || p === grid.length || q === grid[0].length || grid[p][q] === 0) {
+                        res ++
+                    }
+                }
+            }
+        }
+    }
+    return res
+};
+
+
+// 953. verifying an alien dictionary
+var isAlienSorted = function(words, order) {
+    let alien = {} 
+    for (let i = 0; i < order.length; i++) {
+        alien[order[i]] = i
+    }
+    
+    for (let i = 0; i < words.length - 1; i++) {
+        let word1 = words[i]
+        let word2 = words[i+1]
+        let p = 0
+        while (p < word1.length) {
+            if (alien[word1[p]] < alien[word2[p]]) {
+                break
+            }
+            if (alien[word1[p]] === alien[word2[p]]) {
+                p++
+            } else {
+                return false
+            }
+        }
+    }
+    return true
+};
+
+
+// 1905. count sub islands
+
+var countSubIslands = function(grid1, grid2) {
+    let res = 0
+    
+    for (let i = 0; i < grid2.length; i++) {
+        for (let j = 0; j < grid2[0].length; j++) {
+            if (grid2[i][j] === 1) {
+                if (extendSubIsland(grid1, grid2, i, j)) {
+                    res++
+                }
+            }
+        }
+    }
+    return res
+};
+
+var extendSubIsland = function(grid1, grid2, i,j) {
+    let dir = [[1,0], [-1,0], [0,1], [0,-1]]
+    
+    let stack = []
+    stack.push([i,j])
+    let res = true
+    while (stack.length) {
+        [i,j] = stack.pop()
+        grid2[i][j] = 'x'
+        if (grid1[i][j] !== 1) res = false
+        
+        for (const adj of dir) {
+            let [p,q] = [i + adj[0], j + adj[1]]
+            if (0 <= p && 0 <= q && p < grid2.length && q < grid2[0].length && grid2[p][q] === 1) {
+                stack.push([p,q])
+            }
+        }
+    }
+    return res
+}
+
+
+// 1466. reorder routes to make all paths lead to the city zero
+
+var minReorder = function(n, connections) {
+    let graph = {}
+    let visited = {}
+    for (const [a,b] of connections) {
+        if (!graph[a]) graph[a] = []
+        if (!graph[b]) graph[b] = []
+        
+        graph[a].push([b,1])
+        graph[b].push([a,0])
+    }
+    let res = 0
+    const dfs = (i) => {
+        if (visited[i]) return 
+        visited[i] = true
+        for (const connection of graph[i]) {
+            if (!visited[connection[0]]) res += connection[1]
+            dfs(connection[0])
+        }
+    }
+    dfs(0)
+    return res
+};
+
+
+// 752. open the lock
+var openLock = function(deadends, target) {
+    deadends = new Set(deadends)
+    let visited = {}
+    let stack = []
+    stack.push("0000")
+    let res = -1
+    while (stack.length) {
+        let nextBreadth = []
+        res++
+        while (stack.length) {
+            let val = stack.pop()
+            if (visited[val] || deadends.has(val)) continue
+            visited[val] = true
+            if (val == target) return res
+            for (let i = 0; i < 4; i++) {
+                let newVal = val.split('')
+                newVal[i]--
+                if (newVal[i] < 0) newVal[i] = 9
+                nextBreadth.push(newVal.join(''))
+                newVal[i] = val[i]
+                newVal[i]++
+                if (9 < newVal[i]) newVal[i] = 0
+                nextBreadth.push(newVal.join(''))
+            }
+        }
+        stack = nextBreadth
+    }
+    return -1
+};
+
+
+// 802. find eventual safe states
+var eventualSafeNodes = function(graph) {
+    let res = {}
+    let cycled = {}
+    const hasCycle = (root) => {
+        if (cycled[root]) return true
+        if (res[root]) return false
+        cycled[root] = true
+        for (const adj of graph[root]) {
+            if (hasCycle(adj)) return true
+        }
+        delete cycled[root]
+        res[root] = true
+        return false
+    }
+    
+    for (let i = 0; i < graph.length; i++) {
+        if (!hasCycle(i)) res[i] = true
+    }
+    return Object.keys(res)
+};
+
+
+// 1958. check if move is legal
+// try every possible direction for our line
+// if we run into '.' we stop our line
+// if we run into same color we check if our line is length 3 or longer 
+// if it fails this test we have a line that goes WW or BB
+// else our line is WBW or BWB
+var checkMove = function(board, rMove, cMove, color) {
+    board[rMove][cMove] = color
+    let dirs = [[1,0], [-1,0], [0,1], [0,-1], [1,1], [1,-1], [-1,-1], [-1, 1]]
+    
+    for (const dir of dirs) {
+        if (isHappy(board, rMove, cMove, dir)) return true
+    }
+    return false
+};
+
+var isHappy = (board, row,col, dir) => {
+    let start = board[row][col]
+    let [i,j] = [row+dir[0], col+dir[1]]
+    while (0 <= i && 0 <= j && i < 8 && j < 8) {
+        if (board[i][j] === '.') return false
+        if (board[i][j] === start){
+            if ( 2 <= Math.max(Math.abs(row-i), Math.abs(col-j))) return true
+            return false
+        }
+        i+= dir[0]
+        j+= dir[1]
+    }
+    return false
+}
