@@ -885,29 +885,29 @@ var rightSideView = function(root) {
 // expanding about the even and odd centers 
 
 var longestPalindrome = function(s) {
-    let [lp, rp] = [0, 0]
+    let [lp, rp] = [0,0]
     
-    const findLongestPali = (i,j) => {
-        while ((s[i] === s[j]) && (0 <= i) && (j < s.length)) {
+    const longestPali = (i,j) => {
+        while (0 <= i && j < s.length && s[i] === s[j]) {
             i--
             j++
         }
-        return [i+1, j]
+        i++
+        j--
+        return [i,j]
     }
-    
-    for (let center=0; center < s.length; center++ ) {
-        
-        let odd = findLongestPali(center, center)
-        let even = findLongestPali(center, center+1)
-        
-        if ((rp-lp) < (odd[1] - odd[0])) {
-            [lp, rp] = odd
-        }
-        if ((rp-lp) < (even[1] - even[0])) {
+    for (let i = 0; i < s.length; i++) {
+        if (s.length - i < (rp - lp)/2) break
+        let even = longestPali(i,i+1)
+        let odd = longestPali(i,i)
+        if (rp - lp < even[1] - even[0]) {
             [lp, rp] = even
         }
+        if (rp - lp < odd[1] - odd[0]) {
+            [lp, rp] = odd
+        }
     }
-    return s.slice(lp, rp)
+    return s.substring(lp, rp+1)
 };
 
 // 62. unique paths
@@ -7964,4 +7964,114 @@ var minDays = function(n) {
         return dp[i]
     }
     return helper(n)
+};
+
+
+
+// 120. triangle
+
+var minimumTotal = function(triangle) {
+    for (let i = 0; i < triangle.length - 1; i++) {
+        
+        let x = Array(triangle[i+1].length).fill(Infinity) 
+        for (let j = 0; j < triangle[i].length; j++) {
+            
+            x[j] = Math.min(x[j], triangle[i+1][j] + triangle[i][j])
+            x[j+1] = Math.min(x[j+1], triangle[i+1][j+1] + triangle[i][j])
+        }
+        triangle[i+1] = x
+    }
+    return Math.min(...triangle.at(-1))
+};
+
+
+// 2454 next greater element iv
+
+var secondGreaterElement = function(nums) {
+    let monoStack1 = []
+    let monoStack2 = new MinPriorityQueue({priority: (a) => a[0]})
+    let res = Array(nums.length).fill(-1)
+    for (let i = 0; i < nums.length; i++) {
+        const num = nums[i]
+        while (monoStack2.size() && monoStack2.front().element[0] < num) {
+            res[monoStack2.dequeue().element[1]] = num
+        }
+        while (monoStack1.length && monoStack1.at(-1)[0] < num) {
+            monoStack2.enqueue((monoStack1.pop()))
+        }
+        monoStack1.push([num, i])
+    }
+    return res
+};
+
+// 2451 odd string difference
+
+var oddString = function(words) {
+    let array = {}
+    for (const word of words) {
+        let diff = ''
+        for (let j = 1; j < word.length; j++) {
+            diff += (word[j].charCodeAt() - word[j-1].charCodeAt()).toString() + ','
+        }
+        if (!array[diff]) array[diff] = []
+        array[diff].push(word)
+    }
+    for (const key of Object.keys(array)) {
+        if (array[key].length === 1) {
+            return array[key][0]
+        }
+    }
+};
+
+// 2452 words within two edits of dictionary
+var twoEditWords = function(queries, dictionary) {
+    let res = []
+    
+    let queryCode = queries.map((a) => a.split('').map((a) => a.charCodeAt()))
+    dictionary = dictionary.map((a) => a.split('').map((a) => a.charCodeAt()))
+    
+    for (let i = 0; i < queries.length; i++) {
+        let code = queryCode[i]
+        for (const dicCode of dictionary) {
+            let bool = true
+            let edits = 0
+            for (let j = 0; j < code.length; j++) {
+                if (dicCode[j] !== code[j]) {
+                    edits++
+                }
+                if (2 < edits) {
+                    bool = false
+                    break
+                }
+            }
+            if (bool && edits <= 2) {
+                res.push(queries[i])
+                break
+            }
+        }
+    }
+    return res
+};
+
+// 2453 destroy sequential targets
+
+var destroyTargets = function(nums, space) {
+    let possible = {}
+    let maxMod = 0
+    possible[0] = []
+    for (const num of nums) {
+        if (!possible[num%space]) possible[num%space] = []
+        possible[num%space].push(num)
+        if (possible[maxMod].length <= possible[num%space].length) {
+            maxMod = num%space
+        }
+    }
+    let len = possible[maxMod].length
+    let min = Infinity
+    for (const pos of Object.values(possible)) {
+        if (pos.length === len) {
+            min = Math.min(min, ...pos)
+        }
+    }
+    return min
 };
