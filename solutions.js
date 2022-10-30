@@ -8075,3 +8075,40 @@ var destroyTargets = function(nums, space) {
     }
     return min
 };
+
+
+// 1293. shortest path in a grid with obstacles elimination
+// BFS on every move we check if we have arrived there with more obstacle deletes, this means a shorter/safer path got here first
+// note this check also prevents moving if we have -1 removes 
+var shortestPath = function(grid, k) {
+    let traveled = Array(grid.length).fill().map(() => Array(grid[0].length).fill(-1))
+    let dirs = [[1,0], [0,1], [-1,0], [0,-1]]
+    let m = grid.length - 1
+    let n = grid[0].length - 1
+    let queue = []
+    let moves = 0
+    queue.push([0,0,k])
+    while (queue.length) {
+        
+        let nextBreadth = []
+        
+        while (queue.length) {
+            let [i,j,r] = queue.pop()
+            if (r <= traveled[i][j]) continue
+            
+            if (grid[i][j] === 1) r--
+            
+            
+            if (i === m && j === n) return moves
+            traveled[i][j] = r
+            
+            for (const dir of dirs) {
+                if (0 <= i+dir[0] && 0 <= j+dir[1] && i+dir[0] <= m && j+dir[1] <= n)
+                nextBreadth.push([i+dir[0], j+dir[1], r])
+            }
+        }
+        queue = nextBreadth
+        moves++
+    }
+    return -1
+};
