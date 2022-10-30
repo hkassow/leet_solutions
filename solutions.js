@@ -8095,7 +8095,7 @@ var shortestPath = function(grid, k) {
         while (queue.length) {
             let [i,j,r] = queue.pop()
             if (r <= traveled[i][j]) continue
-            
+
             if (grid[i][j] === 1) r--
             
             
@@ -8111,4 +8111,155 @@ var shortestPath = function(grid, k) {
         moves++
     }
     return -1
+};
+
+// 2458. height of binary tree after subtree removal queries
+// find depth and height of every node
+// when we remove a node (query) we check all other nodes at this depth
+// choosing the one with the max height 
+// then our result for that query is simply depth + max height
+// consider a trivial case
+//           1 
+//         2  3
+//        4    
+// if we remove 2 
+// we check all other nodes at the same height => 3 which has height 0 so we return 1 (depth) + 0 (max height)
+// if we remove 3 
+// we check 2 so we return 1 (depth) + 1 (max height)
+var treeQueries = function(root, queries) {
+    
+    let depths = {}
+    let nodeToHeight = {}
+    
+    const heightFinder = (depth, node) => {
+        if (!node) return 0
+        if (!depths[depth]) depths[depth] = []
+        depths[depth].push(node.val)
+        let height = 0
+        if (node.left || node.right) {
+            height = Math.max(heightFinder(depth+1, node.left), heightFinder(depth+1, node.right)) + 1
+        }
+        nodeToHeight[node.val] = [height, depth]
+        return height
+    }
+    heightFinder(0, root)
+    let res = []
+    for (const query of queries) {
+        let depth = nodeToHeight[query][1]
+        
+        if (depths[depth].length === 1) {
+            res.push(depth-1)
+        } else {
+            let max = 0
+            for (const val of depths[depth]) {
+                if (val !== query) {
+                    max = Math.max(nodeToHeight[val][0], max)
+                }
+            }
+            res.push(depth+max)
+        }
+    }
+    return res
+};
+
+// 2456. most popular video creator
+// keep track of every video for every creator
+// and keep track of who is most popular
+// then just loop through all creators to find the ones who are most popular
+// and loop through their videos to find the one that is most popular (if 2 equal then find lexigraphical lowest)
+var mostPopularCreator = function(creators, ids, views) {
+    let creatorCount = {}
+    let creatorVid = {}
+    let maxPop = 0
+    for (let i = 0; i < creators.length; i++) {
+        creatorCount[creators[i]] = (creatorCount[creators[i]] || 0 ) + views[i]
+        if (!creatorVid[creators[i]]) creatorVid[creators[i]] = []
+        creatorVid[creators[i]].push([ids[i], views[i]])
+        if (maxPop < creatorCount[creators[i]]) {
+            maxPop = creatorCount[creators[i]]
+        }
+    }
+    
+    let res = []
+    
+    for (const c of Object.keys(creatorCount)) {
+        if (maxPop === creatorCount[c]) {
+            let max = 0
+            let maxVid = 'z'
+            for (let vid of creatorVid[c]) {
+                if (max < vid[1] || (max === vid[1] && vid[0] < maxVid)) {
+                    max = vid[1]
+                    maxVid = vid[0]
+                }
+            }
+            res.push([c, maxVid])
+        }
+    }
+    return res
+};
+
+// 2457. minimum addition to make integer beautiful 
+// add up the digits of n until we reach a point where we will be larger than the target
+// then we try to increment the digit before the problem digit by 1 and check again if our num is beauitful
+// note when we are trying we turn every digit from the problem digit onward into 0
+// continue to decrement i until i === 0 or we have a beautiful number
+// if i === 0 its a situation like target = 3 and n = 9
+// so we turn n into 10 ( ie; 09 => 10)
+var makeIntegerBeautiful = function(n, target) {
+    let res = 0
+    let str = n.toString()
+    let sum = 0
+    let i = 0
+    for (;i < str.length; i++) {
+        if (target < sum + Number(str[i])) break
+        sum += +str[i]
+    }
+    if (i === str.length) return 0
+    
+    
+    while (i !==0 ) {
+        let x = str.slice(0,i-1) + (+str[i-1] + 1).toString()
+        if (isBeautiful(x, str, target)) {
+            while (x.length !== str.length) {
+                x += '0'
+            }
+            if (0 < +x - n) return +x - n
+        }
+        i--
+    }
+    
+    if (i === 0) {
+        let y = '1'
+        while (y.length -1 !== str.length) {
+            y += '0'
+        }
+        return +y - n
+    }
+}
+
+var isBeautiful = function (x, str, target){
+    while (x.length !== str.length) {
+        x += '0'
+    }
+    let res = 0
+    
+    for (let i = 0 ; i < str.length; i++) {
+        res += +x[i]
+        if (target < res) return false
+    }
+    return true
+}
+
+
+// 2455. average value of even numbers that are divisible by three
+var averageValue = function(nums) {
+    let x = 0
+    let xCount = 0
+    for (const num of nums) {
+        if (num%3 === 0 && num%2 === 0){
+            x += num
+            xCount++
+        }
+    }
+    return Math.floor(x/xCount) || 0
 };
