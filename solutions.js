@@ -8263,3 +8263,93 @@ var averageValue = function(nums) {
     }
     return Math.floor(x/xCount) || 0
 };
+
+// 740. delete and earn
+var deleteAndEarn = function(nums) {
+    let values = Array(10001).fill(0)
+    
+    for (const num of nums) {
+        values[num] += num
+    }
+    
+    let take = 0
+    let skip = 0
+    
+    for (let i = 0; i < 10001; i++) {
+        const takeI = skip + values[i]
+        const skipI = Math.max(skip, take)
+        take = takeI
+        skip = skipI
+    }
+    return Math.max(take, skip)
+};
+
+// 279. perfect squares
+// bottom up dp
+// the "math heavy" solution is probably much faster but involves knowing that 
+// every number can be written as sum of 1,2,3, or 4 perfect squares
+var numSquares = function(n) {
+    let dp = Array(n+1).fill(Infinity)
+    dp[0] = 0
+    for (let i = 1; i*i <= n; i++) {
+        const square = i*i
+        for (let j = square; j <=n; j++) {
+            
+            dp[j] = Math.min(dp[j], dp[j-square] + 1)
+        }
+    }
+    return dp[n]
+};
+
+// 377. combination sum iv
+// bottum up dp
+// consider every number from 1 to target
+// on every number consider all possible nums that can reach this sum
+var combinationSum4 = function(nums, target) {
+    let dp = Array(target+1).fill(0)
+    dp[0] = 1
+    
+    for (let i = 1; i < dp.length; i++) {
+        for (const num of nums) {
+            if (0 <= i-num) {
+                dp[i] += dp[i-num]
+            }
+        }
+    }
+    return dp[target]
+};
+
+
+// 1856 maximum subarray min-product
+// must be careful with large int so wrap everything in BigInt
+// when we pop a number we know every number from popped index and our current index is greater than our number
+// and we know that from our popped index the next index in the stack is the first index that has a number that is smaller than our popped number
+// so we can take the sum of all numbers from our current index to the top index of the stack (if there is no top index then that means every number before our popped index was larger so we take the entire sum)
+// then we multiple these numbers by the smallest number in the sum, which would be our popped number
+// compare to current max
+var maxSumMinProduct = function(nums) {
+    let res = 0n
+    nums.push(-1)
+    let dp = Array(nums.length+1).fill(0)
+    
+    for (let i = 0; i < nums.length; i++) {
+        dp[i+1] = dp[i] + nums[i] 
+    }
+    
+    let stack = []
+    for (let i = 0; i < nums.length; i++) {
+        const num = nums[i]
+        while (stack.length && num < nums[stack.at(-1)]) {
+            let j = stack.pop()
+            
+            let sum = BigInt(dp[i] - dp[(stack.length === 0)? 0: stack.at(-1)+1])
+            let minProd = BigInt(nums[j]) * sum
+            
+            if (res < minProd) {
+                res = minProd
+            }
+        }
+        stack.push(i)
+    }
+    return res%BigInt(1000000007)
+};
