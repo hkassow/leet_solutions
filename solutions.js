@@ -8353,3 +8353,35 @@ var maxSumMinProduct = function(nums) {
     }
     return res%BigInt(1000000007)
 };
+
+// 983. minimum cost for tickets
+var mincostTickets = function(days, costs) {
+    let lastDay = days.at(-1)
+    let dp = Array(lastDay+1).fill().map(() => [false, 0])
+    
+    for (const day of days) {
+        dp[day][0] = true
+    }
+    
+    for (let i = days[0]; i <= lastDay; i++) {
+        if (!dp[i][0]) dp[i][1] = dp[i-1][1]
+        else {
+            dp[i][1] = Math.min(dp[i-1][1] + costs[0], dp[Math.max(0, i-7)][1] + costs[1], dp[Math.max(0, i-30)][1] + costs[2])
+        }
+    }
+    return dp[lastDay][1]
+}; 
+
+// 766. toeplitz matrix
+// for follow - ups we only need at most 2 columns overlapping
+var isToeplitzMatrix = function(matrix) {
+    let set = {}
+    
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[0].length; j++) {
+            if (set[i-j] === undefined) set[i-j] = matrix[i][j]
+            if (matrix[i][j] !== set[i-j]) return false
+        }
+    }
+    return true
+};
