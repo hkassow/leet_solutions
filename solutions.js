@@ -4257,6 +4257,9 @@ var threeSumClosest = function(nums, target) {
 
 
 // 72. edit distance 
+// dp[i][j] is min edits to achieve 0.....j in word2 with 0.....i in word1
+// if our word1[i-1] === word2[j-1] we dont need to do any adjustments and simply grab the min distance with 0.....j-1 in word2 with 0....i-1 in word1
+// if we dont have ^ then we need to insert,delete, or replace which results in 1 + min of our surrounding dp's
 
 var minDistance = function(word1, word2) {
     let dp = Array(word2.length+1).fill().map(() => Array(word1.length+1))
@@ -8552,7 +8555,7 @@ var minPathSum = function(grid) {
 };
 
 // 221. maximal square
-// only try values where we can get a new max saves a lot of time
+// only try values where we can get a new max saves a lot of timea
 var maximalSquare = function(matrix) {
     let max = 0
     
@@ -8585,3 +8588,93 @@ var expandSquare = function(matrix, i,j, max) {
     }
     return x*x
 }
+
+
+
+// 115. distinct subsequences
+// our dp[i][j] how many subsequences of s from 0....j contain 0....i of t
+// if empty set "" dp[0][i] we can only have 1 choice, choose no letters from s
+// then we iterate along every letter combination, if s[j-1] === t[i-1]
+// we take how many subsequcnes arrive at dp[i] without including letter j 
+// and add them to how many subsequences were arrived at dp[i-1] without including letter j
+var numDistinct = function(s, t) {
+    let dp = Array(t.length+1).fill().map(() => Array(s.length+1).fill(0))
+    dp[0] = Array(s.length+1).fill(1)
+    
+    for (let i = 1; i <= t.length; i++) {
+        for (let j = 1; j <= s.length; j++) {
+           if (t[i-1] === s[j-1]) {
+               dp[i][j] = dp[i-1][j-1] + dp[i][j-1]
+           } else {
+               dp[i][j] = dp[i][j-1]
+           }
+        }
+    }
+    return dp[t.length][s.length]
+ };
+
+// 1911. maximum alternating subsequence sum
+// even keeps track of largest sequence
+// odd keep tracks of the largest sequence that allows for a next digit
+var maxAlternatingSum = function(nums) {
+    let even = 0 
+    let odd = 0 
+    for (const num of nums) {
+        even = Math.max(even, odd+num)
+        odd = even - num
+    }
+    return even
+};
+
+
+
+// 1220. count vowels permutation
+// use big int because of large numbers
+// only need to hold the previous values and not the whole matrix since length n only depends on length n-1 strings
+var countVowelPermutation = function(n) {
+    let res = [0,0,0,0,0]
+    let prev = [1n,1n,1n,1n,1n]
+    for (let i = 2; i <= n; i++) {
+        
+        res[0] = prev[1]
+        res[1] = prev[0] + prev[2]
+        res[2] = prev[0] + prev[1] + prev[3] + prev[4]
+        res[3] = prev[2] + prev[4]
+        res[4] = prev[0]
+        prev = [...res]
+      
+        
+    }
+    return prev.reduce((sum, a) => sum+a)%1000000007n
+};
+// using mod is much faster than big int... js bigint must be slow?
+// here is solution with useful naming convetion
+var countVowelPermutation = function(n) {
+    let a = 1,
+        e = 1,
+        i = 1,
+        o = 1,
+        u = 1,
+        tempA,
+        tempE,
+        tempI,
+        tempO,
+        tempU,
+        mod = 1000000007
+   
+    for (let j = 1; j < n; j++) {
+        tempA = e
+        tempE = a + i
+        tempI = e + a + o + u
+        tempO = i + u
+        tempU = a
+        a = tempA%mod
+        e = tempE%mod
+        i = tempI%mod
+        o = tempO%mod
+        u = tempU%mod
+    }
+    
+
+    return (a+e+i+o+u)%mod
+};
