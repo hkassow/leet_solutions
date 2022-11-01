@@ -8355,6 +8355,7 @@ var maxSumMinProduct = function(nums) {
 };
 
 // 983. minimum cost for tickets
+// dp, on each day we look back 1,7,30 days and choose the cheapest cost
 var mincostTickets = function(days, costs) {
     let lastDay = days.at(-1)
     let dp = Array(lastDay+1).fill().map(() => [false, 0])
@@ -8385,3 +8386,202 @@ var isToeplitzMatrix = function(matrix) {
     }
     return true
 };
+
+
+// 343. integer break
+
+var integerBreak = function(n) {
+    let val = 1
+    if (n === 2) return 1
+    if (n === 3) return 2
+    while (4 < n || n === 3) {
+        n -= 3
+        val*= 3
+    }
+    
+
+    // could replace this with another while loop that just subtracts 2 and multiples by 2
+    if (n == 2) {
+        val *=2 
+    } else if (n === 4) {
+        val *= 4
+    }
+    return val
+};
+
+
+
+// 673. number of longest increasing subsequence
+// dp on every number len[i] = longest subsequence ending at this num[i]
+// cnt[i] = how many subsequences of len[i] end at i 
+// for every current number we check every previous number 
+// and adjust our cnt/len accordingly 
+var findNumberOfLIS = function(nums) {
+    let len = Array(nums.length+1).fill(1)
+    let cnt = Array(nums.length+1).fill(1)
+    let max  = 1
+    for (let i = 1; i < nums.length; i++) {
+        for (let j = 0; j < i; j++) {
+            if (nums[j] < nums[i]) {
+                
+                if (len[i] < len[j] + 1) { //found a new longest subsequence for this index, must change the count to match this count
+                    len[i] = len[j]+1
+                    cnt[i] = cnt[j]
+                }
+                else if (len[i] === len[j]+1) { // found a long subsequence that matches our current longest at our index, so we add to our current count
+                    cnt[i] += cnt[j]
+                }
+            }
+            max = Math.max(max, len[i])
+        }
+    }
+    
+    let count = 0
+    for (let i = 0; i < nums.length; i++) {
+        if (len[i] === max) count += cnt[i]
+    }
+    return count
+};
+
+
+// 691. stickers to spell word
+// 2nd solution is very similar to first but with more optimization
+// here we count get every sticker's letter frequency
+// then on every helper function call we are trying to form some string
+// we look at all of our stickers, skipping the ones that do not have 
+
+var minStickers = function(stickers, target) {
+    let dp = {}
+    let freqs = []
+    target = target.split('').sort().join('')
+    for (let i = 0; i < stickers.length; i++) {
+        freqs[i] = {}
+        for (let c of stickers[i]) {
+            freqs[i][c] = (freqs[i][c] || 0) + 1
+        }
+    }
+    dp[""] = 0
+    helper(freqs, dp, target)
+    return dp[target] === Infinity? -1: dp[target]
+}
+
+var helper = function(freqs, dp, target) {
+    if (dp[target] !== undefined) return dp[target]
+    
+    const tar = {}
+    for (const c of target) {
+        tar[c] = (tar[c] || 0) + 1
+    }
+    let res = Infinity
+    for (let i = 0; i < freqs.length; i++) {
+        if (!freqs[i][target[0]]) continue
+        let newTar = ''
+        for (let c = 0; c < 26; c++) {
+            const char = String.fromCharCode(c+97)
+            if (!tar[char]) continue
+            for (let j = 0; j < tar[char] - (freqs[i][char] || 0); j++) {
+                newTar = newTar.concat(char)
+            }
+        }
+        const ans = helper(freqs, dp, newTar) + 1
+        res = Math.min(ans, res)
+    }
+    dp[target] = res
+    return res
+}
+
+
+// 877. stone game
+var stoneGame = function(piles) {
+    let dp = {}
+    const helper = (id, i,j, count) => {
+        if (dp[`${i},${j}`] !== undefined) return dp[`${i},${j}`]
+        if (j < i) return 0
+        let next = Math.abs(id-1)    
+        
+        if (id === 1) {
+            dp[`${i},${j}`] = Math.max(piles[i] + helper(next, i+1, j), piles[j] + helper(next, i, j-1))
+        } else {
+            dp[`${i},${j}`] = Math.min(-piles[i] + helper(next, i+1, j), -piles[j] + helper(next, i, j-1))
+        }
+        return dp[`${i},${j}`]
+    }
+    let res = helper(1,0,piles.length-1,0)
+    return 0 < res
+}; 
+
+
+// 1706. where will the ball fall
+var findBall = function(grid) {
+    let res = Array(grid[0].length)
+    const dfs = (i, j, k) => {
+        if (i === grid.length && 0 <=j && j < grid[0].length) {
+            res[k] = j
+            return
+        }
+        if (j < 0 || j === grid[0].length || (grid[i][j] === 1 && grid[i][j+1] === -1) || (grid[i][j] === -1 && grid[i][j-1] === 1)) {
+            res[k] = -1
+            return
+        }
+        dfs(i+1, j+grid[i][j], k)
+    }
+    
+    for (let i = 0; i < grid[0].length; i++) {
+        dfs(0,i,i)
+    }
+    return res
+};
+
+
+
+// 64. minimum path sum
+var minPathSum = function(grid) {
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            if (i === 0 && j === 0) continue
+            if (j === 0) {
+                grid[i][j] += grid[i-1][j]
+            } else if (i ===0) {
+                grid[i][j] += grid[i][j-1] 
+            } else {
+                grid[i][j] += Math.min(grid[i-1][j], grid[i][j-1])
+            }
+        }
+    }
+    return grid[grid.length-1][grid[0].length - 1]
+};
+
+// 221. maximal square
+// only try values where we can get a new max saves a lot of time
+var maximalSquare = function(matrix) {
+    let max = 0
+    
+    for (let i = 0; i < matrix.length; i++) {
+        if (i < Math.sqrt(max)) continue
+        for (let j = Math.sqrt(max); j < matrix[0].length; j++) {
+            if (matrix[i][j] === '1') {
+                const res = expandSquare(matrix, i, j, max)
+                max = Math.max(res, max)
+            }
+        }
+    }
+    return max
+};
+         
+var expandSquare = function(matrix, i,j, max) {
+    let x = 1
+    let [p,q] = [i-1, j-1]
+    if (i - Math.sqrt(max) < 0 || j - Math.sqrt(max) < 0) return 0
+    while (0 <= q && 0 <= p) {
+        for (let row = p; row <= i; row++) {
+            if (matrix[row][q] !== '1') return x*x
+        }
+        for (let col = q; col <= j; col++) {
+            if (matrix[p][col] !== '1') return x*x
+        }
+        p--
+        q--
+        x++
+    }
+    return x*x
+}
