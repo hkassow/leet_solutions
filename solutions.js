@@ -8678,3 +8678,56 @@ var countVowelPermutation = function(n) {
 
     return (a+e+i+o+u)%mod
 };
+
+
+// 1866. number of ways to rearrange sticks with k sticks visible
+// dp[i][j] means we have i sticks and we have j of them visible
+// cant make more sticks visible than the amount of sticks
+// on each [i][j] we have the new largest stick and we want to achieve j visible sticks
+// well if we look at [i-1][j-1] and use our largest stick there we have j visible sticks ==> resulting in [i-1][j-1] combinations
+// we could also choose [i-1][j] and choose ANY stick from this (i-1) pile and put it behind our current stick resulting in j number stick again ==> resulting in (i-1) * [i-1][j] combinations
+var rearrangeSticks = function(n, k) {
+    let mod = 1000000007
+    let dp = Array(n+1).fill().map(() => Array(k+1).fill(0))
+    dp[0][0] = 1
+    for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <=k; j++ ) {
+            if (i < j) break
+            dp[i][j] = (dp[i-1][j-1] + (i-1) * dp[i-1][j])%mod
+        }
+    }
+    return dp[n][k]
+};
+
+
+
+// 10. regular expression matching
+// if we arrive at a character that has "*" next in our pattern
+// we try using it 0 times first, then we keep iterating trying it i times as long as the character is continually found in s
+// otherwise we just match normally if s[sp] !== p[pp] then weve stop our current iteration
+var isMatch = function(s, p) {
+    const tryMatch = (sp, pp) => {
+        if (pp === p.length && sp === s.length) return true
+        if (p.length <= pp ) return false
+        if (p[pp+1] === '*') {
+            return tryMatch(sp, pp+1)    
+        }
+        else if (s[sp] === p[pp] || p[pp] === '.') {
+            return tryMatch(sp+1,pp+1)
+        } 
+        else if (p[pp] === '*') {
+            let i = sp
+            let star = p[pp-1]
+            const zeroMatches = tryMatch(i, pp+1)
+            if (zeroMatches) return true
+            while ((i < s.length && (s[i] === star || star === '.')) || i === s.length ) { 
+                i++
+                const imatches = tryMatch(i, pp+1)
+                if (imatches) return true
+            }
+        } 
+    
+        return false
+    }
+    return tryMatch(0,0)
+};
