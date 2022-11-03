@@ -8731,3 +8731,68 @@ var isMatch = function(s, p) {
     }
     return tryMatch(0,0)
 };
+
+
+// 433. minimum genetic mutation 
+
+var minMutation = function(start, end, bank) {
+    bank = new Set(bank)
+    if (!bank.has(end)) return -1
+    let genes = ['A', 'C', 'G', 'T']
+    let queue = [start]
+    let output = 0
+    while (queue.length) {
+        
+        let nextBreadth = []
+        
+        while (queue.length) {
+            const cur = queue.pop()
+            if (cur === end) return output
+            
+            
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (genes[j] === cur[i]) continue
+                    let str = cur.substring(0,i) + genes[j] + cur.substring(i+1)
+                    if (bank.has(str)) {
+                        nextBreadth.push(str)
+                        if (str !== end) bank.delete(cur)
+                    }
+                }
+            }
+        }
+        output++
+        queue = nextBreadth
+    }
+    return -1
+};
+
+
+// 2131. longest palindrome by concatenating two letter words
+// 'ba' must have 'ab' on other side
+// 'aa' can be in the middle but we can only have one same lettered word in the middle
+// if 'aa' has even frequency we can treat it the same as 'ba'
+var longestPalindrome = function(words) {
+    let freq = {}
+    
+    for (const word of words) {
+        freq[word] = (freq[word] || 0 ) + 1
+    }
+    let dub = false
+    let count = 0
+    for (const word of Object.keys(freq))  {
+        if (!freq[word[1] + word[0]]) continue
+        if (word[1] === word[0]) {
+            if (freq[word]%2 === 0) count += freq[word]
+            else {
+                count += freq[word] - 1
+                dub = true
+            }
+        } else {
+            count += Math.min(freq[word], freq[word[1] + word[0]])
+        }
+    }
+    
+    
+    return (dub)? (count+1)*2: count*2
+};
