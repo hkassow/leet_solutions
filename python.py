@@ -197,3 +197,72 @@ class Solution:
         x = int(str(abs(x))[::-1])*sign
         
         return x if x < 2147483647 and -2147483648 < x else 0
+
+
+# 344. reverse string
+class Solution:
+    def reverseString(self, s: List[str]) -> None:
+        """
+        Do not return anything, modify s in-place instead.
+        """
+        lo = 0
+        hi = len(s) - 1
+        while lo < hi:
+            s[lo], s[hi] = s[hi], s[lo]
+            lo+= 1
+            hi-= 1
+
+# 387. first unique character in a string
+class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        dict = {}
+        
+        for char in s:
+            if char not in dict:
+                dict[char] = 0
+            dict[char] += 1
+        for i in range(len(s)):
+            if dict[s[i]] == 1:
+                return i
+        return -1
+
+# 242. valid anagram
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        dict = {}
+        if len(s) != len(t):
+            return False
+        for c in s:
+            if c not in dict:
+                dict[c] = 0
+            dict[c] += 1
+        for c in t: 
+            if c not in dict:
+                return False
+            dict[c] -= 1
+            if dict[c] == 0:
+                del dict[c]
+                
+        return True
+
+
+# 125. valid palindrome
+
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        l = 0
+        r = len(s) -1
+       
+        while l < r:
+            while l < len(s) and not s[l].isalnum():
+                l+=1
+            while 0 < r and not s[r].isalnum():
+                r-=1
+            if r < l:
+                break
+            if s[l].lower() != s[r].lower():
+                return False
+            l+=1
+            r-=1
+            
+        return True
