@@ -266,3 +266,86 @@ class Solution:
             r-=1
             
         return True
+
+# 8. string to integer (atoi)
+class Solution:
+    def myAtoi(self, s: str) -> int:
+        num = 0 
+        sign = 1
+        
+        i = 0
+        s = s.lstrip()
+        if not s:
+            return 0
+        elif s[i] == '-':
+            sign = -1
+            i+= 1
+        elif s[i] == '+':
+            i+= 1
+        while i < len(s) and s[i].isnumeric():
+            num *= 10
+            num += int(s[i])
+            i+=1
+        num *= sign
+        if num < -2147483648:
+            return -2147483648
+        if 2147483647 < num:
+            return 2147483647
+        return num
+
+# 28. find the index of the first occurence in a string
+class Solution:
+    def strStr(self, haystack: str, needle: str) -> int:
+        for i in range(len(haystack)):
+            
+            if haystack[i] == needle[0]:
+                j = 0
+                k = i
+                while j < len(needle) and k < len(haystack) and haystack[k] == needle[j]:
+                    k += 1
+                    j += 1
+                if j == len(needle):
+                    return i
+        return -1
+# 14. longest common prefix
+class Solution:
+    def longestCommonPrefix(self, strs: List[str]) -> str:
+        common = strs[0]
+        
+        for word in strs:
+            i = 0
+            while i < len(word) and i < len(common) and word[i] == common[i]:
+                i += 1
+            common = common[:i]
+        return common
+
+# 237. delete node in a linked list
+# only given the node to be deleted 
+class Solution:
+    def deleteNode(self, node):
+        """
+        :type node: ListNode
+        :rtype: void Do not return anything, modify node in-place instead.
+        """
+        node.val = node.next.val
+        node.next = node.next.next
+
+# 19. remove nth node from end of list
+class Solution:
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        if not head:
+            return
+        fast = head
+        slow = head
+        for i in range(n):
+            fast = fast.next
+        
+        if not fast:
+            return slow.next
+        while fast.next:
+            n -= 1
+            fast = fast.next
+            slow = slow.next
+        
+        slow.next = slow.next.next
+        return head

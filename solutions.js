@@ -3220,34 +3220,44 @@ WordDictionary.prototype.search = function(word) {
 // build trie
 // travel from every node, adding word if we reach a node.last
 // stop if we backtrack or if our trie does not contain any words with the current letter combination
- var findWords = function(board, words) {
+// using count to also end search early
+var findWords = function(board, words) {
     let trie = {},
         n = board[0].length,
-        m = board.length,
-        res
+        m = board.length
     
     for (const word of words) {
         let node = trie
+        node["count"] = (node["count"] || 0) + 1
         for (const letter of word) {
             if (!node[letter]) {
                 node[letter] = {}
             }
             node = node[letter]
+            node["count"] = (node["count"] || 0) + 1
         }
         node.last = word
     }
     
-    
+    let res = []
+    const remove = (word) => {
+        node = trie
+        for (const c of word) {
+            node['count'] -= 1
+            node = node[c]
+        }
+    }
     const travel = (i, j, store) => {
-        if (!store || board[i][j] === '#' || !store[board[i][j]]) return
+        if (!store || board[i][j] === '#' || !store[board[i][j]] || store["count"] === 0) return
         
         const letter = board[i][j]
         store = store[letter]
         if (store?.last) {
             res.push(store.last)
-            store.last = false  
+            remove(store.last)
+            store.last = false
+            
         }
-
         board[i][j] = '#'
         if (i+1 < m ) {
             travel(i+1, j, store)
@@ -3262,14 +3272,14 @@ WordDictionary.prototype.search = function(word) {
             travel(i, j-1, store)
         }
         board[i][j] = letter
-        
+         
     }
     for (let i = 0; i < m; i++) {
         for (let j = 0; j < n; j++) {
             travel(i, j, trie)
         }
     }
-    return [...res]
+    return res
 };
 
 
