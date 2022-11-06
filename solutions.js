@@ -8806,3 +8806,135 @@ var longestPalindrome = function(words) {
     
     return (dub)? (count+1)*2: count*2
 };
+
+
+
+// 2462. total cost to hire k workers
+// use two heaps one for left side one for right side
+// adjust the cost by the max value so that we can include the index aswell (otherwise we could pop both then compare the index)
+var totalCost = function(costs, k, candidates) {
+    let left = new MinPriorityQueue({priority: (a) => costs[a]*100000+a})
+    let right = new MinPriorityQueue({priority: (a) => costs[a]*100000+a})
+    for (let i = 0; i < candidates; i ++) {
+        left.enqueue(i)   
+    }
+    let l = candidates
+    for (let j = costs.length - 1; l-1 < j &&costs.length - candidates <= j; j--) {
+        right.enqueue(j)
+    }
+    let r = costs.length - candidates - 1
+    let cost = 0
+    for (let i = 0; i < k; i++){
+        if (right.size() === 0 || (left.size() && left.front().priority < right.front().priority)) {
+            const index = left.dequeue().element
+            cost += costs[index]
+            if (l <= r) {
+                left.enqueue(l)
+                l++
+            }
+        } else {
+            const index = right.dequeue().element
+            cost += costs[index]
+            if (l <= r) {
+                right.enqueue(r)
+                r--
+            }
+        }
+    }
+    return cost
+};
+
+// 2461. maximum sum of distinct subarrays with length k
+// sliding window keeping track of what elements are in the current window
+// only check max if we are at length k
+var maximumSubarraySum = function(nums, k) {
+    let l = 0
+    let sum = 0
+    let currSum = 0
+    let freq = {}
+    
+    for (let r = 0; r < nums.length; r++) {
+        const num = nums[r]
+        while (freq[num] || r-l+1 > k) {
+            currSum -= nums[l]
+            delete freq[nums[l]]
+            l++
+        }
+        freq[num] = true
+        currSum += num
+        if (r-l+1 === k) {
+            sum = Math.max(currSum, sum)
+        }
+    }
+    return sum
+};
+
+// 2460. apply operations to an array
+// first apply the operation
+// then move the zeroes 
+var applyOperations = function(nums) {
+    
+    
+    for (let i = 0; i < nums.length - 1; i++) {
+        if (nums[i] === nums[i+1]) {
+            nums[i+1] = 0
+            nums[i] *= 2
+        }
+    }
+    let k = 0
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== 0) {
+            [nums[i], nums[k]] = [0, nums[i]]
+            k++
+        }
+    }
+    return nums
+};
+
+// 2463. minimum total distance traveled
+// bottom up solution
+var minimumTotalDistance = function(robot, factory) {
+    robot = robot.sort((a,b) => a-b)
+    factory = factory.sort((a,b) => a[0] - b[0])
+    let n = robot.length
+    let m = factory.length
+    const dp = Array(n+1).fill(Infinity)
+    dp[n] = 0
+
+    for (let j = m-1; 0<=j; j--) {
+        for (let i = 0; i < n; i++){
+            let curr = 0
+
+            for (let k = 1; k <= Math.min(factory[j][1], n-i); k++) {
+                curr += Math.abs(factory[j][0] - robot[i+k-1])
+                dp[i] = Math.min(dp[i], dp[i+k] + curr)
+            }
+        }
+    }
+    return dp[0]
+};
+// recursion + memo
+// we try every factory as many times as we can
+// or we skip the factory 
+// k is how many robots have currently been repaired at the factory
+var minimumTotalDistance = function(robot, factory) {
+    robot = robot.sort((a,b) => a-b)
+    factory = factory.sort((a,b) => a[0] - b[0])
+    let n = robot.length
+    let m = factory.length
+    const cache = Array(n+1).fill().map(() => Array(m+1).fill().map(() => Array(n+1)))
+    const dp = (i,j,k) => {
+        if (cache[i][j][k]) return cache[i][j][k]
+        if (j === m) {
+            return Infinity
+        }
+        if (i === n) {
+            return 0
+        }
+        const res1 = dp(i, j+1, 0)
+        const res2 = (k < factory[j][1])? dp(i+1, j, k+1) + Math.abs(robot[i] - factory[j][0]): Infinity
+        cache[i][j][k] = Math.min(res1, res2)
+        return cache[i][j][k]
+    }
+    return dp(0,0,0)
+};
