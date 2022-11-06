@@ -1,3 +1,13 @@
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
+class ListNode:
+    def __init__(self, val, next=None) -> None:
+        self.val = val
+        self.next = next
+
 # 26. remove duplicates from sorted array
 
 class Solution:
@@ -439,19 +449,186 @@ class Solution:
         return True if slow == fast else False
 
 
+# 104. maximum depth of binary tree
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+        return max(self.maxDepth(root.left), self.maxDepth(root.right))+1
+
+
+
+# 98. validate binary search tree
+
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        def helperValid(min, max, root):
+            if not root:
+                return True
+            if root.val <= min or max <= root.val:
+                return False
+            return helperValid(min, root.val, root.left) and helperValid(root.val, max, root.right)
+        return helperValid(-inf, inf, root)
+
+# 101. symmetric tree
+
+class Solution:
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        
+        def helperSym(left,right):
+            if not left and not right:
+                return True
+            if not left or not right:
+                return False
+            if left.val != right.val:
+                return False
+            return helperSym(left.left, right.right) and helperSym(left.right, right.left)
+        return helperSym(root.left, root.right)
+
+
+
+# 102. binary tree level order traversal
+
+class Solution:
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        level = [root]
+        res = []
+        while level:
+            nextLevel = []
+            currLevel = []
+            for node in level:
+                currLevel.append(node.val)
+                if node.left:
+                    nextLevel.append(node.left)
+                if node.right:
+                    nextLevel.append(node.right)
+            level = nextLevel
+            if currLevel:
+                res.append(currLevel)
+        return res
+
+# 108. converted sorted array to binary search tree
+
+class Solution:
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        def helper(left, right):
+            if right < left:
+                return None
+            mid = left + (right-left)//2
+            root = TreeNode(nums[mid])
+            root.left = helper(left, mid-1)
+            root.right = helper(mid+1, right)
+            return root
+        return helper(0, len(nums)-1)
+
+
+
+# 88. merge sorted array
+
+class Solution:
+    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+        """
+        Do not return anything, modify nums1 in-place instead.
+        """
+        k = m+n-1
+        n -=1
+        m -=1
+        while 0 <= k:
+            if m < 0:
+                nums1[k] = nums2[n]
+                n-=1
+            elif n < 0:
+                nums1[k] = nums1[m]
+                m-=1
+            elif nums1[m] < nums2[n]:
+                nums1[k] = nums2[n]
+                n-=1
+            else:
+                nums1[k] = nums1[m]
+                m-=1
+            k-=1
+
+# 278. first bad version
+class Solution:
+    def firstBadVersion(self, n: int) -> int:
+        l = 1
+        r = n
+        
+        while l < r:
+            mid = l + (r-l)//2
+            if isBadVersion(mid):
+                r = mid
+            else:
+                l = mid + 1
+        return l
 
 
 
 
 
+# 70. climbing stairs
+# bottom up
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        dp = [0,1,2]
+        
+        for i in range(2,n):
+            dp.append(dp[i] + dp[i-1])
+        return dp[n]
+# recurssion and memo
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        dp = {}
+        
+        def helpClimb(n):
+            if n <= 3:
+                return n
+            if n in dp:
+                return dp[n]
+            
+            dp[n] = helpClimb(n-1) + helpClimb(n-2)
+            return dp[n]
+        
+        return helpClimb(n)
 
 
+# 121. best time to buy and sell stock
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        profit = 0
+        buy = prices[0]
+        
+        for num in prices:
+            profit = max(profit, num - buy)
+            buy = min(buy, num)
+        return profit
+            
+# 53. maximum subarray
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        res = -inf
+        curMax = 0
+        
+        for num in nums:
+            curMax += num
+            res = max(res, curMax)
+            
+            curMax = max(0, curMax)
+            
+        return res
 
+# 198. house robber
 
-
-
-
-
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        res = 0
+        dp = [0,0,0]
+        for num in nums:
+            dp.append(max(dp[-2]+num, dp[-3]+num))
+            res = max(res, dp[-1])
+        return res
 
 
 
