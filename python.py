@@ -349,3 +349,113 @@ class Solution:
         
         slow.next = slow.next.next
         return head
+
+
+# 206. reverse linked list 
+# iterative
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        cur = None
+        while head:
+            temp = head.next
+            head.next = cur
+            cur = head
+            head = temp
+        return cur
+
+# recursive
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        
+        def rec (head, node):
+            if not head:
+                return node
+            temp = head.next
+            head.next = node
+            return rec(temp, head)
+        return rec(head,None)
+
+# 21 merge two sorted lists
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        sentinel = ListNode('sentinel')
+        cur = sentinel
+        
+        while list1 and list2:
+            if list1.val <= list2.val:
+                cur.next = list1
+                list1 = list1.next
+            else:
+                cur.next = list2
+                list2 = list2.next
+            cur = cur.next
+        
+        cur.next = list1 or list2
+        return sentinel.next
+
+# 234. palindrome linked list
+class Solution:
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        slow = head
+        fast = head
+        
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        reversed = reverse(slow)
+        slow = head
+        while reversed:
+            if reversed.val != slow.val:
+                return False
+            reversed = reversed.next
+            slow = slow.next
+        return True
+def reverse(head):
+    cur = None
+    
+    while head:
+        tmp = head.next
+        head.next = cur
+        cur = head
+        head = tmp
+    return cur
+
+
+
+# 141. linked list cycle 
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        if not head:
+            return False
+        slow = head
+        fast = head.next
+        
+        while slow != fast and fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        
+        return True if slow == fast else False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
