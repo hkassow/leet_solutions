@@ -631,8 +631,120 @@ class Solution:
         return res
 
 
+# 384. shuffle an array
+
+class Solution:
+
+    def __init__(self, nums: List[int]):
+        self.og = nums
+        
+    def reset(self) -> List[int]:
+        return self.og
+    def shuffle(self) -> List[int]:
+        shuffled = []
+        used = set()
+        used.add(-1)
+        for i in range(len(self.og)):
+            j = -1
+            while j in used:
+                j = randint(0, len(self.og)-1)
+            used.add(j)
+            shuffled.append(self.og[j])
+        return shuffled
+    
+# 155. min stack
+class MinStack:
+
+    def __init__(self):
+        self.stack = []
+
+    def push(self, val: int) -> None:
+        if len(self.stack) == 0:
+            self.stack.append([val, val])
+        else:
+            self.stack.append([val, min(self.getMin(), val)])
+
+    def pop(self) -> None:
+        return self.stack.pop()[0]
+
+    def top(self) -> int:
+        return self.stack[-1][0]
+
+    def getMin(self) -> int:
+        return self.stack[-1][1]
 
 
 
+# 1323. maximum 69 number
+
+class Solution:
+    def maximum69Number (self, num: int) -> int:
+        changed = False
+        number = 0
+        for n in str(num):
+            n = int(n)
+            number *= 10
+            if n == 6 and not changed:
+                number += 9
+                changed = True
+            else:
+                number += n
+        return number
+
+# 412. fizz buzz
+# no division
+class Solution:
+    def fizzBuzz(self, n: int) -> List[str]:
+        res = []
+        fizz = 1
+        buzz = 1
+        
+        for i in range(1,n+1):
+            if fizz == 3 and buzz == 5:
+                res.append('FizzBuzz')
+                fizz = 0
+                buzz = 0
+            elif fizz == 3:
+                res.append('Fizz')
+                fizz = 0
+            elif buzz == 5:
+                res.append('Buzz')
+                buzz = 0
+            else:
+                res.append(str(i))
+            fizz += 1
+            buzz += 1
+        return res
 
 
+# 204. count primes
+
+class Solution:
+    def countPrimes(self, n: int) -> int:
+        if n < 3:
+            return 0
+        nums = [1] * n
+        nums[0] = nums[1] = 0
+        res = 0    
+        for i in range(2,int(sqrt(n)) + 1):
+            if nums[i]:
+                
+                for k in range(i*i,n,i):
+                    nums[k] = 0
+        return sum(nums)
+
+
+# 1544. make the string great
+
+class Solution:
+    def makeGood(self, s: str) -> str:
+        str = []
+
+        for c in s:
+            if len(str) == 0:
+                str.append(c)
+            elif str[-1].lower() == c.lower() and str[-1] != c:
+                str.pop()
+            else:
+                str.append(c)
+        return ''.join(str)
