@@ -748,3 +748,258 @@ class Solution:
             else:
                 str.append(c)
         return ''.join(str)
+
+# 326. power of three
+# if n is a power of three, then n will divide 3**19 
+class Solution:
+    def isPowerOfThree(self, n: int) -> bool:
+        return 0 < n and 1162261467%n == 0
+
+# 13. roman to integer
+
+class Solution:
+    def romanToInt(self, s: str) -> int:
+        translate = {'M': 1000, 'CM': 900, 'D': 500, 'CD': 400, 'C': 100, 'XC': 90, 'L':50,'XL': 40, 'X': 10, 'IX': 9,'V': 5, 'IV':4, 'I':1}
+        
+        res = 0
+        i = 0
+        while i < len(s):
+            if i < len(s)-1 and s[i] + s[i+1] in translate:
+                res += translate[s[i]+s[i+1]]
+                i += 2
+            else:
+                res+= translate[s[i]]
+                i += 1
+        return res
+
+
+# 191. number of 1 bits
+
+class Solution:
+    def hammingWeight(self, n: int) -> int:
+        bits = [int(i) for i in bin(n)[2:]]
+        return sum(bits)
+
+# 461. hamming distance
+
+class Solution:
+    def hammingDistance(self, x: int, y: int) -> int:
+        res = 0
+        while x or y:
+            if y & 1 and not x & 1:
+                res += 1
+            elif x & 1 and not y & 1:
+                res += 1
+            y = y >> 1
+            x = x >> 1
+        return res
+
+# 190. reverse bits
+class Solution:
+    def reverseBits(self, n: int) -> int:
+        str = ''
+        while n:
+            if n & 1: 
+                str += '1'
+            else:
+                str += '0'
+            n = n >> 1
+        while len(str) < 32:
+            str += '0'
+        return int(str,2)
+
+# 118. pascal's triangle
+class Solution:
+    def generate(self, numRows: int) -> List[List[int]]:
+        rows = [[1]]
+        numRows -= 1
+        while numRows:
+            nextRow = []
+            for i in range (0, len(rows[-1]) + 1):
+                if i == 0 or i == len(rows[-1]):
+                    nextRow.append(1)
+                else:
+                    nextRow.append(rows[-1][i] + rows[-1][i-1])
+            rows.append(nextRow)
+            numRows -= 1
+        return rows
+
+# 20. valid parentheses
+class Solution:
+    def isValid(self, s: str) -> bool:
+        convert = {'[':']', '{':'}', '(':')'}
+        stack = []
+        
+        for c in s:
+            if c in convert:
+                stack.append(convert[c])
+            elif len(stack) and c == stack[-1]:
+                stack.pop()
+            else:
+                return False
+        return not len(stack)
+
+# 268. missing number
+class Solution:
+    def missingNumber(self, nums: List[int]) -> int:
+        res = len(nums)
+        for i in range(len(nums)):
+            res ^= i
+            res ^= nums[i]
+        return res
+
+# 15. 3sum
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        res = []
+        
+        for i in range(len(nums)):
+            if 0 < nums[i]:
+                break
+            if 0 < i and nums[i] == nums[i-1]:
+                continue
+            j = i+1
+            k = len(nums) -1
+            while j < k:
+                sum = nums[i] + nums[j] + nums[k]
+                if sum == 0:
+                    res.append([nums[i], nums[j], nums[k]])
+                    j += 1
+                    k -= 1
+                    while j < k and nums[j-1] == nums[j]:
+                        j+=1
+                    while j < k and nums[k+1] == nums[k]:
+                        k-=1
+                elif sum < 0:
+                    j+=1
+                else:
+                    k-=1
+        return res
+
+# 73. set matrix zeroes
+class Solution:
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+        firstCol = False
+        firstRow = False
+        
+        for i in range(len(matrix)):
+            if matrix[i][0] == 0:
+                firstCol = True
+                break
+        for j in range(len(matrix[0])):
+            if matrix[0][j] == 0:
+                firstRow = True
+                break
+
+        for i in range(1,len(matrix)):
+            for j in range(1, len(matrix[0])):
+                if matrix[i][j] == 0:
+                    if matrix[0][j] != 0:
+                        for k in range(0,i):
+                            matrix[k][j] = 0
+                    if matrix[i][0] != 0:
+                         for k in range(0,j):
+                            matrix[i][k] = 0
+
+                elif matrix[0][j] == 0 or matrix[i][0] == 0:
+                    matrix[i][j] = 0
+        if firstCol:
+            for i in range(len(matrix)):
+                matrix[i][0] = 0
+        if firstRow:
+            for j in range(len(matrix[0])):
+                matrix[0][j] = 0
+
+# 49. group anagrams
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        dict = {}
+        res = []
+        for c in strs:
+            sortedC = ''.join(sorted(c))
+            if sortedC in dict:
+                res[dict[sortedC]].append(c)
+            else:
+                dict[sortedC] = len(res)
+                res.append([c])
+        return res
+
+# 3. longest substring without repeating characters
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        l = 0
+        r = 0
+        freq = {}
+        maxLen = 0
+        while r < len(s):
+            
+            while s[r] in freq:
+                del freq[s[l]]
+                l+=1
+            freq[s[r]] = True
+            maxLen = max(maxLen, r-l+1)
+            r+=1
+        return maxLen
+
+# 5. longest palindromic substring
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        
+        def tryPali(l, r):
+            
+            while 0 <= l and r < len(s) and s[l] == s[r]:
+                l-=1
+                r+=1
+            return s[l+1:r]
+        maxPali = ''
+        for i in range(len(s)):
+            
+            even = tryPali(i, i+1)
+            odd = tryPali(i, i)
+            
+            if len(maxPali) < len(even):
+                maxPali = even
+            if len(maxPali) < len(odd):
+                maxPali = odd
+        return maxPali
+
+# 334. increasing triplet subsequence 
+# remove all nums that dont have a max element to the right
+# go through every number again keeping track of the min value
+# if current number is greater than min then we know that there exists a triplet subsequence
+# otherwise it would be marked as invalid
+class Solution:
+    def increasingTriplet(self, nums: List[int]) -> bool:
+        ma = nums[-1]
+        
+        for j in range(len(nums)-1,-1,-1):
+            if nums[j] < ma: continue
+            ma = nums[j]
+            nums[j] = False
+        mi = inf
+        
+        for i in range(len(nums)-1):
+            if type(nums[i]) is not int:
+                continue
+            if mi < nums[i]:
+                return True
+            mi = nums[i]
+        return False
+
+# 901. online stock spanner
+
+class StockSpanner:
+
+    def __init__(self):
+        self.stack = []
+
+    def next(self, price: int) -> int:
+        count = 1
+        while len(self.stack) and self.stack[-1][0] <= price:
+            count += self.stack.pop()[1]
+        self.stack.append([price, count])
+        return count
