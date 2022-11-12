@@ -1003,3 +1003,264 @@ class StockSpanner:
             count += self.stack.pop()[1]
         self.stack.append([price, count])
         return count
+
+# 38. count and say
+
+class Solution:
+    def countAndSay(self, n: int) -> str:
+        res = '1'
+        
+        n -= 1
+        while n:
+            curr = ''
+            currNum = res[0]
+            count = 0
+            for c in res:
+                if c == currNum:
+                    count += 1
+                else:
+                    curr += str(count)+currNum
+                    currNum = c
+                    count = 1
+                    
+            curr += str(count)+currNum
+            n-=1
+            res = curr
+        return res
+
+# 328. odd even linked list
+# keep pointer for current odd and current even
+# also keep pointer for the first even so we can connect the two lists at the end
+class Solution:
+    def oddEvenList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if not head or not head.next:
+            return head
+        even = head.next
+        odd = head
+        evenStart = head.next
+        while odd.next and even.next:
+            odd.next = even.next
+            odd = odd.next
+
+            even.next = odd.next
+            even = even.next
+            
+        odd.next = evenStart
+        return head
+
+# 1047. remove all adjacet duplicates in string
+class Solution:
+    def removeDuplicates(self, s: str) -> str:
+        word = []
+        for c in s:
+            if len(word) and c == word[-1]:
+                word.pop()
+            else:
+                word.append(c)
+        return ''.join(word)
+
+
+# 103. binary tree zigzag level order traversal
+
+class Solution:
+    def zigzagLevelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        res = []
+        level = [root]
+        leftToRight = True
+        while level:
+            res.append([])
+            next_level = []
+            
+            while level:
+                node = level.pop()
+                res[-1].append(node.val)
+                if leftToRight:
+                    if node.left: next_level.append(node.left)
+                    if node.right: next_level.append(node.right)
+                else:
+                    if node.right: next_level.append(node.right)
+                    if node.left: next_level.append(node.left)
+            leftToRight = not leftToRight
+            level = next_level
+        return res
+                    
+# 116. populating next right pointers in each node
+class Solution:
+    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        if not root or not root.left:
+            return root
+        root.left.next = root.right
+        if root.next:
+            root.right.next = root.next.left
+        self.connect(root.left)
+        self.connect(root.right)
+        return root
+
+# 200. number of islands 
+
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        def expandIsland(grid, i,j):
+            adj = [[1,0], [-1,-0], [0,1], [0,-1]]
+            
+            paths= [[i,j]]
+            
+            while paths:
+                
+                next_paths = []
+                
+                while paths:
+                    [p,q] = paths.pop()
+                    
+                    grid[p][q] = '2'
+                    for dir in adj:
+                        if p+dir[0] < len(grid) and 0 <= p+dir[0] and q+dir[1] < len(grid[0]) and 0 <= q+dir[1] and grid[p+dir[0]][q+dir[1]] == '1':
+                            grid[p+dir[0]][q+dir[1]] = '2'
+                            next_paths.append([p+dir[0], q+dir[1]])
+                
+                paths = next_paths
+            
+        res = 0
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+               if grid[i][j] == '1':
+                res += 1
+                expandIsland(grid, i, j)
+        return res
+
+
+# 17. letter combinations of a phone number
+
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        if len(digits) == 0:
+            return []
+        
+        letters = {'2': ['a', 'b','c'], '3': ['d','e','f'], '4': ['g','h','i'], '5': ['j','k','l'], '6': ['m','n','o'], '7': ['p','q','r','s'], '8': ['t', 'u', 'v'], '9':['w','x','y','z']}
+        
+        def backtrack(i, digits, combination, res, letters):
+            if i == len(digits):
+                res.append(combination)
+                return res
+            
+            for c in letters[digits[i]]:
+                backtrack(i+1, digits, combination + c, res, letters)
+            return res
+        
+        return backtrack(0, digits, '', [], letters) 
+
+
+# 22. generate parentheses
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        
+        def backtrack(combination, o, c, res):
+            if o == 0 and c == 0:
+                res.append(combination)
+                return
+            
+            if c == o:
+                backtrack(combination+'(', o-1, c, res)
+            else:
+                if o == 0:
+                    backtrack(combination+')', o, c-1,res)
+                else:
+                    backtrack(combination+')', o, c-1,res)
+                    backtrack(combination+'(', o-1, c, res)
+        
+        res = []
+        backtrack('', n, n, res)
+        return res
+        
+
+# 78. subsets
+
+class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        dp = [[]]
+        
+        for num in nums:
+            for i in range(len(dp)):
+                new = dp[i][:]
+                new.append(num)
+                dp.append(new)
+        return dp
+
+# 79. word search
+
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        
+        
+        def travel(p, i, j, board):
+            if p == len(word):
+                return True
+            
+            neigh = [[1,0], [0,1], [-1,0], [0,-1]]
+            
+            for adj in neigh:
+                r, c = i+adj[0], j+adj[1]
+                if 0 <= c and 0 <= r and r < len(board) and c < len(board[0]) and board[r][c] == word[p]:
+                    board[r][c] = '#'
+                    res = travel(p+1, r, c, board)
+                    if res: return True
+                    board[r][c] = word[p]
+            return False
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] == word[0]:
+                    board[i][j] = '#'
+                    if travel(1, i,j, board):
+                        return True
+                    board[i][j] = word[0]
+        return False
+
+# 75. sort colors 
+class Solution:
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        blue = 0
+        red = len(nums)-1
+        i = 0
+        while i < len(nums):
+            num = nums[i]
+            if num == 1:
+                i+=1 
+                continue
+            elif num == 0 and blue < i:
+                nums[i], nums[blue] = nums[blue], nums[i]
+                blue += 1
+                i -= 1
+            elif num == 2 and i < red:
+                nums[i], nums[red] = nums[red], nums[i]
+                red -= 1
+                i -= 1
+            i += 1
+
+# 295. find median from data stream 
+# using 2 priority queues, numbers on the left are sorted using the * -1 trick because heaps in python keep track of min element
+# left list is sorted as max queue
+# right list is sorted as min queue
+# middle element will be top left element or will be the sum of both 
+class MedianFinder:
+
+    def __init__(self):
+        self.left = []
+        self.right = []
+
+    def addNum(self, num: int) -> None:
+        heappush(self.right, num)
+        if len(self.left) < len(self.right):
+            heappush(self.left, -1 * heappop(self.right))
+        if len(self.right) and self.right[0] < self.left[0]*-1:
+            heappush(self.right, -1 * heappop(self.left))
+            heappush(self.left, -1 * heappop(self.right))
+    def findMedian(self) -> float:
+        if len(self.left) == len(self.right):
+            return (self.left[0]*-1 + self.right[0])/2
+        else:
+            return self.left[0]*-1
