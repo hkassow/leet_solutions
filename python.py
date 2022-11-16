@@ -1264,3 +1264,98 @@ class MedianFinder:
             return (self.left[0]*-1 + self.right[0])/2
         else:
             return self.left[0]*-1
+
+# 215. kth largest element in an array
+# using pivot sort to find an element with k-1 elements larger than it 
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        
+
+        def pivotSort(low, high):
+            pivot = nums[high]
+            j = high
+            high = high - 1
+            
+            while low <= high:
+                if pivot <= nums[low]:
+                    nums[low], nums[high] = nums[high], nums[low]
+                    high -= 1
+                else:
+                    low += 1
+            nums[low], nums[j] = pivot, nums[low]
+            return low
+        
+        l = 0
+        r = len(nums) - 1
+        n = r - k + 1
+        
+        j = None
+        while j != n:
+            j = pivotSort(l,r)
+            if j < n:
+                l = j+1
+            else:
+                r = j-1
+        return nums[n]
+
+# 162. find peak element
+class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+        if len(nums) == 1: return 0
+        l = 0
+        r = len(nums) - 1
+        mid = None
+        while l <= r:
+            mid = l + (r-l)//2
+            if (mid == 0 and nums[mid+1] < nums[mid]) or (mid == len(nums)- 1 and nums[mid-1] < nums[mid]) or (nums[mid+1] < nums[mid] and nums[mid-1] < nums[mid]):
+                return mid
+            elif mid != len(nums)-1 and nums[mid] < nums[mid+1]:
+                l = mid+1
+            else:
+                r = mid-1
+        return mid
+                
+# 34. find first and last position of element in sorted array
+
+class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        if not nums:
+            return [-1,-1]
+        l = 0
+        r = len(nums) - 1
+        mid = None
+        while l <= r:
+            mid = l + (r-l)//2
+            
+            if nums[mid] == target and (mid == 0 or nums[mid-1] != target):
+                break
+            elif nums[mid] < target:
+                l = mid+1
+            else:
+                r = mid-1
+        
+        if mid < 0 or mid == len(nums) or nums[mid] != target:
+            return [-1,-1]
+    
+        start = mid
+        
+        l = mid
+        r = len(nums) - 1
+        
+        while l <= r:
+            mid = l + (r-l)//2
+            if nums[mid] == target and (mid == len(nums) - 1 or nums[mid+1] != target):
+                return [start, mid]
+            elif target < nums[mid]:
+                r = mid-1
+            else: 
+                l = mid+1
+        return [start, l]
+
+# 151. reverse words in a string
+class Solution:
+    def reverseWords(self, s: str) -> str:
+        s = s.split()
+        s.reverse()
+        
+        return ' '.join(s)
