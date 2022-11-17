@@ -1359,3 +1359,121 @@ class Solution:
         s.reverse()
         
         return ' '.join(s)
+
+# 2470. number of subarrays with lcm equal to k
+
+class Solution:
+    def subarrayLCM(self, nums: List[int], k: int) -> int:
+        def track(array, j, res, l):
+            if j == len(nums) or k%nums[j] != 0 or k < l:
+                return res
+            array.append(nums[j])
+            newL = math.lcm(l, nums[j])
+            if newL == k:
+                res += 1
+            return track(array, j+1, res, newL)
+    
+        res = 0
+        for i in range(len(nums)):
+            res += track([], i, 0, 1)
+        return res
+
+
+# 2471. minimum number of operations to sort a binary tree by level
+class Solution:
+    def minimumOperations(self, root: Optional[TreeNode]) -> int:
+        
+        res = 0
+        
+        
+        level = [root]
+        
+        while level:
+            next_level = []
+            
+            for node in level:
+                if node.left:
+                    next_level.append(node.left)
+                if node.right:
+                    next_level.append(node.right)
+            
+            x = sorted(next_level, key=lambda x: x.val)
+            index = {}
+            for i in range(len(x)):
+                index[x[i]] = i
+            temp = 0
+            
+            for i in range(len(x)):
+                if (x[i] != next_level[i]):
+                    res += 1
+                    temp = x[i]
+                    
+                    x[i], x[index[next_level[i]]] = x[index[next_level[i]]], x[i]
+                    index[temp] = index[next_level[i]]
+                    index[next_level[i]] = i
+            
+            level = next_level
+        return res
+
+# 2469. convert the temperature 
+
+class Solution:
+    def convertTemperature(self, celsius: float) -> List[float]:
+        return [celsius+273.15, celsius*1.8 + 32]
+
+# 1424. diagonal traverse ii
+
+class Solution:
+    def findDiagonalOrder(self, nums: List[List[int]]) -> List[int]:
+        store = {}
+        longest = len(max(nums, key=len))
+        
+        for i in range(len(nums)-1, -1, -1):
+            for j in range(len(nums[i])-1, -1, -1):
+
+                    if i+j not in store:
+                        store[i+j] = []
+                    
+                    store[i+j].append(nums[i][j])
+        i = 0
+        res = []
+        while i in store:
+            res.extend(store[i])
+            i+= 1
+        return res
+
+# 347. guess number higher or lower
+
+
+class Solution:
+    def guessNumber(self, n: int) -> int:
+        low = 1
+        high = n
+        while low <= high:
+            mid = low + (high - low)//2
+            g = guess(mid)
+            if g == 0:
+                return mid
+            elif g == -1:
+                high = mid - 1
+            else:
+                low = mid + 1
+
+# 23. merge k sorted lists
+# nodes dont accept comparison and heaps dont allow altering the native comparison
+class Solution:
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        sentinel = ListNode('sent')
+        curr = sentinel
+        hp = []
+
+        for i in range(len(lists)):
+            if lists[i]:
+                heappush(hp, (lists[i].val, i, lists[i]))
+        while hp:
+            obj = heappop(hp)
+            curr.next = obj[2]
+            if obj[2].next:
+                heappush(hp, (obj[2].next.val, obj[1], obj[2].next))
+            curr = curr.next
+        return sentinel.next
