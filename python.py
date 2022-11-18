@@ -1477,3 +1477,42 @@ class Solution:
                 heappush(hp, (obj[2].next.val, obj[1], obj[2].next))
             curr = curr.next
         return sentinel.next
+
+# 263. ugly number
+# divide number until its no longer a factor of 2,3 or 5 
+# at which case it must be equal to 1 otherwise it has another prime divisor
+class Solution:
+    def isUgly(self, n: int) -> bool: 
+        if n < 1: return False 
+        while n%5 == 0: n /= 5
+        while n%3 == 0: n /= 3
+        while n%2 == 0: n /= 2
+
+        return n == 1
+
+
+# 947. most stones removed with same row or column
+# using ~j and i to have unique keys for row and column
+class Solution:
+    def removeStones(self, stones: List[List[int]]) -> int:
+        parents = {}
+
+        def find(x):
+            if parents[x] == x:
+                return x
+            else:
+                return find(parents[x])
+        
+        for [i,j] in stones:
+            parents.setdefault(i,i)
+            parents.setdefault(~j,~j)
+            pi = find(i)
+            pj = find(~j)
+            parents[pi] = pj
+        seen = set()
+        res = 0
+        
+        for key in parents:
+            seen.add(find(key))
+        
+        return len(stones) - len(seen)
