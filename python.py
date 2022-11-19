@@ -1,3 +1,7 @@
+from heapq import heappop, heappush
+import math
+
+
 class TreeNode:
     def __init__(self, val, left=None, right=None):
             self.val = val
@@ -1516,3 +1520,49 @@ class Solution:
             seen.add(find(key))
         
         return len(stones) - len(seen)
+
+# 264. ugly number ii
+# every ugly number after 1 is of the form 2^x * 3^y * 5^z
+# enumerate all possiblities in order => using heap to keep the order correct
+# 0 is technically not an ugly but its used so we can keep the first conditional simple hence the n+1 as the exit condition
+class Solution:
+    def nthUglyNumber(self, n: int) -> int:
+        hp = [1]
+        uglies = [0]
+
+        while len(uglies) < n+1:
+            num = heappop(hp)
+            if num <= uglies[-1]:
+                continue
+            uglies.append(num)
+            if num%5 == 0:
+                heappush(hp, num*5)
+            if num%3 == 0:
+                heappush(hp, num*3)
+                heappush(hp, num*5)
+            else:
+                heappush(hp, num*2)
+                heappush(hp, num*3)
+                heappush(hp, num*5)
+                
+        return uglies[-1]
+
+# 313. super ugly number
+# same logic as ugly number ii
+# using num%prime == 0 to break out of prime list and add unique numbers to heap
+class Solution:
+    def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:
+        uglies = [0]
+        hp = [1]
+
+        while len(uglies) < n+1:
+            num = heappop(hp)
+            if num <= uglies[-1]:
+                continue
+            uglies.append(num)
+            for prime in primes:
+                heappush(hp, num * prime)
+                if num%prime == 0:
+                    break
+
+        return uglies[-1]
