@@ -1622,3 +1622,32 @@ class Solution:
                     continue
             mx = nums[i]
         return res < 2 
+
+# 1926. nearest exit from entrance in maze
+# classic bfs problem just extra careful to not exit through entrance
+class Solution:
+    def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
+        steps = 0
+
+        moves = [[entrance[0],entrance[1]]]
+
+        maze[entrance[0]][entrance[1]] = '+'
+        adj = [[1,0], [0,1], [-1,0], [0,-1]]
+
+
+        while moves:
+            next_step = []
+
+            for i,j in moves:
+                for x,y in adj:
+                    r,c = [i+x, j+y]
+                    if r < 0 or c < 0 or r == len(maze) or c == len(maze[0]):
+                        if (i == entrance[0] and j == entrance[1]):
+                            continue
+                        return steps
+                    if maze[r][c] != '+':
+                        maze[r][c] = '+'
+                        next_step.append([r,c])
+            moves = next_step
+            steps += 1
+        return -1
