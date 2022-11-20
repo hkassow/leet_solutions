@@ -1566,3 +1566,59 @@ class Solution:
                     break
 
         return uglies[-1]
+
+
+
+# 224. basic calculator 
+
+class Solution:
+    def calculate(self, s: str) -> int:
+        curr_sum = 0
+        sign = 1
+        stack = []
+        i = 0
+        while i < len(s):
+            c = s[i]
+            if c == ' ':
+                pass
+            elif c == '(':
+                stack.append(curr_sum)
+                stack.append(sign)
+                curr_sum = 0
+                sign = 1
+            elif c == ')':
+                sign = stack.pop()
+                val = stack.pop()
+                curr_sum *= sign 
+                curr_sum += val
+            elif c == '-':
+                sign = -1
+            elif c == '+':
+                sign = 1
+            else:
+                num = ''
+                while i < len(s) and c.isdigit():
+                    num += c
+                    i += 1
+                    if i != len(s):
+                        c = s[i]
+                i -= 1
+                num = int(num) * sign
+                sign = 1
+                curr_sum += num
+            i += 1
+        return curr_sum
+
+# 1909. remove one element to make the array strictly increasing
+
+class Solution:
+    def canBeIncreasing(self, nums: List[int]) -> bool:        
+        res = 0
+        mx =  nums[0]
+        for i in range(1, len(nums)):
+            if nums[i] <= mx:
+                res += 1
+                if i > 1 and nums[i] <= nums[i-2]:
+                    continue
+            mx = nums[i]
+        return res < 2 
