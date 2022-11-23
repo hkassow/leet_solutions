@@ -1925,3 +1925,21 @@ class Solution:
                 for j in range(n, o-1,-1):
                     dp[i][j] = max(dp[i][j], dp[i-z][j-o] + 1)
         return dp[m][n]
+
+
+# 900. rle iterator
+# keep track of how many elements weve called for the current pointer
+
+class RLEIterator:
+
+    def __init__(self, encoding: List[int]):
+        self.arr = encoding
+        self.pointer = 0
+        self.count = 0
+    def next(self, n: int) -> int:
+        self.count += n 
+
+        while self.pointer < len(self.arr) and self.arr[self.pointer] < self.count:
+            self.count -= self.arr[self.pointer]
+            self.pointer += 2
+        return self.arr[self.pointer+1] if self.pointer < len(self.arr) else -1
