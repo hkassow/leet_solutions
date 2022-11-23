@@ -1800,7 +1800,8 @@ class Solution:
 
 
 # 980. unique paths iii
-
+# count number of squares we need to travel, once we reach the end square check if weve traveled the required squares and increment result accordingly
+# simple backtracking algo to get all possible paths
 class Solution:
     def uniquePathsIII(self, grid: List[List[int]]) -> int:
         num_squares = 1
@@ -1838,3 +1839,89 @@ class Solution:
         
         track(0,start_ind[0], start_ind[1])
         return self.res    
+
+
+# 63. unique paths ii
+# on each tile that is not an obstacle we can grab the step count by looking up and to the left
+# only adding their step count if they are not an obstacle
+# using negative numbers to not override obstacle numbers 
+class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        if obstacleGrid[-1][-1] == 1 or obstacleGrid[0][0] == 1:
+            return 0
+        
+        self.res = 0
+        m = len(obstacleGrid)
+        n = len(obstacleGrid[0])
+        obstacleGrid[0][0] = -1
+        dir = [[1,0], [0,1]]
+
+        for i in range(m):
+            for j in range(n):
+                if obstacleGrid[i][j] == 1:
+                    continue
+                if i == 0 and j == 0:
+                    obstacleGrid[i][j] = -1
+                elif i == 0 and obstacleGrid[i][j-1] != 1:
+                    obstacleGrid[i][j] += obstacleGrid[i][j-1]
+                elif j == 0 and obstacleGrid[i-1][j] != 1:
+                    obstacleGrid[i][j] += obstacleGrid[i-1][j]
+                else:
+                    if obstacleGrid[i][j-1] != 1:
+                        obstacleGrid[i][j] += obstacleGrid[i][j-1]
+                    if obstacleGrid[i-1][j] != 1:
+                        obstacleGrid[i][j] += obstacleGrid[i-1][j]
+       
+
+        return -1*obstacleGrid[-1][-1]
+        
+
+# 498. diagonal traverse
+# get all diagonals in order from bottom up
+# if its an even diagonal we must reverse the list because we will travel top down
+
+class Solution:
+    def findDiagonalOrder(self, mat: List[List[int]]) -> List[int]:
+        m = len(mat)
+        n = len(mat[0])
+        digs = [[] for i in range((m) + (n-1))]
+        
+        
+        for i in range(m):
+            for j in range(n):
+                print(i,j)
+                digs[i+j].append(mat[i][j])
+        
+        res = []
+
+        for i in range(len(digs)):
+            if i%2:
+                for j in digs[i]:
+                    res.append(j)
+            else:
+                for j in reversed(digs[i]):
+                    res.append(j)
+        return res
+
+# 474. ones and zeroes
+
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        def getCount(x):
+            s = 0
+            for c in x:
+                if c == '1':
+                    s += 1
+            return [s, len(x)-s] 
+
+        dp = [[0 for j in range(n+1)] for i in range(m+1) ]
+        cache = {}
+
+        for s in strs:
+            if s not in cache:
+                cache[s] = getCount(s)
+            o,z = cache[s]
+            for i in range(m,z-1,-1):
+                for j in range(n, o-1,-1):
+                    dp[i][j] = max(dp[i][j], dp[i-z][j-o] + 1)
+        return dp[m][n]
