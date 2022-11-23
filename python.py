@@ -1651,3 +1651,190 @@ class Solution:
             moves = next_step
             steps += 1
         return -1
+
+# 279. perfect squares
+class Solution:
+    def numSquares(self, n: int) -> int:
+        res = []
+
+        for i in range(n+1):
+            res.append(i)
+        
+        for i in range(2,floor(math.sqrt(n))+1):
+            num = i*i
+            for x in range(num, n+1):
+                res[x] = min(res[x], res[x-num]+1)
+        return res[n]
+
+# 673. number of longest increasing subsequence
+
+class Solution:
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        lengths = {}
+        counts = {}
+        max_length = 1
+
+        for i in range(len(nums)):
+            lengths[i] = 1
+            counts[i] = 1
+            for j in range(0, i):
+
+                if nums[j] < nums[i]:
+
+                    if lengths[i] < lengths[j]+1:
+                        counts[i] = counts[j]
+                        lengths[i] = lengths[j]+1
+                    elif lengths[i] == lengths[j]+1:
+                        counts[i] += counts[j]
+            max_length = max(lengths[i], max_length)
+        res = 0
+        for i in range(len(nums)):
+            if lengths[i] == max_length:
+                res += counts[i]
+        return res
+
+
+
+# 2272. substring with largest variance
+# consider each unique letter pairing 
+# during the iteration we increment or decrement our variance depending on those 2 letters
+# edge case when our sequence starts with our 'b' letter => we can remove this letter if we find another 'b'
+class Solution:
+    def largestVariance(self, s: str) -> int:
+        letters = set(s)
+        max_v = 0
+        for a in letters:
+            for b in letters:
+                if a == b: continue
+                var = 0
+                found_b = 0
+                first_b = 0
+                for c in s:
+                    if c == a:
+                        var += 1
+                    elif c == b:
+                        var -= 1
+                        found_b = 1
+                        if var < -1 or (var == -1 and not first_b):
+                            first_b = 1
+                            var = -1
+                        elif first_b:
+                            first_b = 0
+                            var += 1
+
+                    if found_b:
+                        max_v = max(max_v, var)
+                
+                    
+        return max_v
+
+# 36. valid sudoku
+
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+
+        for i in range(9):
+            row = set()
+            col = set()
+            square = set()
+            for j in range(9):
+                _row = board[i][j]
+                _col = board[j][i]
+                _square = board[3*(i//3) + j//3][3*(i%3) + j%3]
+
+                if _row != '.' and _row in row:
+                    return False
+                if _col != '.' and _col in col:
+                    return False
+                if _square != '.' and _square in square:
+                    return False
+                row.add(_row)
+                col.add(_col)
+                square.add(_square)
+        return True
+
+
+# 37. sudoku solver
+
+class Solution:
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        rows = [set() for i in range(9)]
+        cols = [set() for i in range(9)]
+        squares = [set() for i in range(9)]
+        
+        #square => 3*i//3 + j//3
+        # row => i
+        # col => j
+        queue = []
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] == '.':
+                    queue.append([i,j])
+                else:
+                    rows[i].add(board[i][j])
+                    cols[j].add(board[i][j])
+                    squares[3*(i//3) + j//3].add(board[i][j])
+        
+        def backtrack(ind):
+            if ind == len(queue):
+                return True
+            i,j = queue[ind]
+            for x in range(1,10):
+                x = str(x)
+                if x in rows[i] or x in cols[j] or x in squares[3*(i//3) + j//3]:
+                    continue
+                board[i][j] = x
+                rows[i].add(x), cols[j].add(x), squares[3*(i//3) + j//3].add(x)
+                res = backtrack(ind+1)
+                if res:
+                    return True
+                rows[i].remove(x), cols[j].remove(x), squares[3*(i//3) + j//3].remove(x)
+            board[i][j] = '.'
+            return False
+        
+        backtrack(0)
+        return board
+
+
+# 980. unique paths iii
+
+class Solution:
+    def uniquePathsIII(self, grid: List[List[int]]) -> int:
+        num_squares = 1
+        start_ind = -1
+        end_ind = -1
+        m = len(grid)
+        n = len(grid[0])
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == 1:
+                    start_ind = [i,j]
+                elif grid[i][j] == 0:
+                    num_squares += 1
+                elif grid[i][j] == 2:
+                    end_ind = [i,j]
+
+        self.res = 0
+
+        def track(squares, i,j):
+            if i == end_ind[0] and j == end_ind[1]:
+                if squares == num_squares:
+                    self.res += 1
+                return
+            
+            dir = [[1,0], [-1,0], [0,1], [0,-1]]
+            grid[i][j] = -1
+            for adj in dir:
+                x,y = i+adj[0], j+adj[1]
+
+                if x < 0 or y < 0 or x == m or y == n or grid[x][y] == -1:
+                    continue
+                track(squares+1, x,y)
+            grid[i][j] = 0
+            return
+        
+        track(0,start_ind[0], start_ind[1])
+        return self.res    
