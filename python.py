@@ -1943,3 +1943,424 @@ class RLEIterator:
             self.count -= self.arr[self.pointer]
             self.pointer += 2
         return self.arr[self.pointer+1] if self.pointer < len(self.arr) else -1
+
+
+# 2059. minimum operations to convert number
+
+class Solution:
+    def minimumOperations(self, nums: List[int], start: int, goal: int) -> int:
+        visited = set([start])
+        queue = [start]
+        steps = 0
+
+        while queue:
+            next_steps = []
+            for x in queue:
+                if x == goal:
+                    return steps
+                if x < 0 or 1000 < x:
+                    continue
+                for num in nums:
+                    if x+num not in visited:
+                        visited.add(x+num)
+                        next_steps.append(x+num)
+                    if x-num not in visited:
+                        visited.add(x-num)
+                        next_steps.append(x-num)
+                    if x ^ num not in visited:
+                        visited.add(x^num)
+                        next_steps.append(x ^ num)
+            queue = next_steps
+            steps += 1
+        return -1
+
+
+# 907. sum of subarray minimums
+# x is subarrays starting at index j and going up to index i
+# y is all subarrays before index j where arr[j] would be the min that include j as min ele
+# up to index i 
+class Solution:
+    def sumSubarrayMins(self, arr: List[int]) -> int:
+        res = 0
+        arr.append(0)
+        
+        stack = []
+
+        for i in range(len(arr)):
+            while len(stack) and arr[i] < arr[stack[-1]]:
+                j = stack.pop()
+                x = ((i-j) * arr[j])
+
+                z = stack[-1]+1 if len(stack) else 0
+                y = (i-j) * (j-z) * arr[j]
+                res += x + y
+            stack.append(i)
+
+        return res%1000000007
+
+
+
+#1235 maximum profit in job scheduling
+
+class Solution:
+    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:
+        x = [[startTime[i], endTime[i], profit[i]] for i in range(len(startTime))]
+        
+        x =sorted(x, key=lambda job:job[1])
+        
+        dp = [[0,0]]
+        
+        def binaryOnJobs(limit):
+            lo = 0
+            hi = len(dp) - 1
+
+            while lo <= hi:
+                mid = lo + (hi-lo)//2
+                if dp[mid][0] <= limit:
+                    lo = mid+1
+                else:
+                    hi = mid-1
+            return lo-1
+            
+        for job in x:
+            most_profitable = binaryOnJobs(job[0])
+            profit = dp[most_profitable][1] + job[2]
+
+            if dp[-1][1] < profit:
+                dp.append([job[1], profit])
+
+        return dp[-1][1]
+
+
+# 2225. find players with zero or on loss
+# move players from zero => one to => many depending on loses
+class Solution:
+    def findWinners(self, matches: List[List[int]]) -> List[List[int]]:
+        zero =  set()
+        one = set()
+        many = set()
+
+
+        for [x,y] in matches:
+
+            if y in zero:
+                zero.remove(y)
+                one.add(y)
+            elif y in one:
+                one.remove(y)
+                many.add(y)
+            elif y not in many:
+                one.add(y)
+            if x not in many and x not in zero and x not in one:
+                zero.add(x)
+                
+        return [sorted(list(zero)), sorted(list(one))]
+
+
+
+# 2488 count subarrays with median k
+# find where k, iterate from index of k to the left side
+# keeping track of if we are over or under the median of k
+# then iterate right side and see if any of the sub sequences to the left have -over as their over/under
+class Solution:
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        i = nums.index(k)
+        res = 1
+        dp = {}
+        over = 0
+        x = i-1
+        
+        while 0 <= x:
+            if nums[x] < k:
+                over -= 1
+            else:
+                over += 1
+            if over not in dp:
+                dp[over] = 0
+            dp[over] += 1
+            if over == 0 or over == 1:
+                res+=1
+            x -= 1
+        
+        x = i+1
+        over = 0
+        
+        while x < len(nums):
+            if nums[x] < k:
+                over -= 1
+            else:
+                over += 1
+            
+            y = -1*over
+            if over == 1 or over == 0:
+                res += 1
+            if y in dp:
+                res += dp[y]
+            if y+1 in dp:
+                res += dp[y+1]
+            
+            x += 1
+
+            
+        return res
+
+
+# 2487. remove nodes from linked list
+# reverse the list and keep track of the current maximum removing any nodes that are less than the max
+# unreverse the list and this is our result
+class Solution:
+    def removeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        
+        def reverse(head):
+            
+            curr_node = None
+            
+            while head:
+                temp = head
+                head = head.next
+                temp.next = curr_node
+                curr_node = temp
+        
+            return curr_node
+        curr_node = reverse(head)
+        curr_max = curr_node.val
+        
+        sent = ListNode('sent', curr_node)
+        
+        while curr_node:
+            curr_max = curr_node.val
+            while curr_node.next and curr_node.next.val < curr_max:
+                curr_node.next = curr_node.next.next
+            curr_node = curr_node.next
+        return reverse(sent.next)
+
+
+# 2486 append characters to string to make subsequence
+
+class Solution:
+    def appendCharacters(self, s: str, t: str) -> int:
+        i = 0
+        
+        for c in s:
+            if c == t[i]:
+                i += 1
+            if i == len(t):
+                return 0
+        return len(t) - i
+
+# 2485 find the pivot integer
+class Solution:
+    def pivotInteger(self, n: int) -> int:
+        x = (n*(n+1))//2
+        y = 1
+        i = 1
+        while y <= x:
+            if y == x:
+                return i
+            x -= i
+            i += 1
+            y += i
+        
+        return -1
+            
+
+# 446. arithmetic slices ii - subsequence 
+# keep track of all possible numbers to the right of our current index
+# take every number and every possible pair for the respective number and check if there are any numbers to the right that would make an arithmetic sequence 
+# if there is a number try that numbers index for continuing the arithmetic sequence
+class Solution:
+    def numberOfArithmeticSlices(self, nums: List[int]) -> int:
+        n = len(nums)
+        dp = []
+        for i in range(n):
+            dp.append({})
+
+        for j in range(n-2,-1,-1):
+            dp[j] = copy.deepcopy(dp[j+1])
+            
+            if nums[j+1] not in dp[j]:
+                dp[j][nums[j+1]] = []
+            dp[j][nums[j+1]].append(j+1)
+        
+
+        res = 0
+        
+        def arthimeticTravel(index, diff):
+            num = nums[index]
+            next_num = num - diff
+            count = 0
+            if next_num in dp[index]:
+                for i in dp[index][next_num]:
+                    count += 1
+                    count += arthimeticTravel(i,diff)
+            return count
+        for i in range(n-2):
+            a = nums[i]
+            for b in dp[i]:
+                if b==a:
+                    m = len(dp[i][b])
+                    c = 2
+                    while c <= m:
+                        res += math.comb(m,c)
+                        c += 1
+                else:
+                    for j in dp[i][b]:
+                        res += arthimeticTravel(j, a-b)
+        return res
+
+
+
+# 2484. count palindromic subsequences
+# start off with all possible length 2 subsequences in our right dictionary
+# on each iteration remove the current number from the right dictionary
+# check if our left dictionary contains any subsequences that are also in the right dictionary
+class Solution:
+    def countPalindromes(self, s: str) -> int:
+        if len(s) < 5:
+            return 0
+        res = 0
+
+        comboLeft = {s[0]+s[1]:1}
+        leftNums = {s[0]:1}
+        comboRight = {}
+        rightNums = {}
+
+        if s[1] == s[0]:
+            leftNums[s[0]] += 1
+        else:
+            leftNums[s[1]] = 1
+
+        
+        for k in range(2, len(s)):
+            
+            for c in rightNums:
+                x = s[k] + c
+                if x not in comboRight:
+                    comboRight[x] = 0
+                comboRight[x] += rightNums[c]
+                
+            if s[k] not in rightNums:
+                rightNums[s[k]] = 0
+            rightNums[s[k]]+=1
+                
+        mid = len(s)//2
+                
+        for i in range(2,len(s)-2):
+            j = s[i]
+            
+            for num in rightNums:
+                if num == j:
+                    rightNums[num] -= 1
+                y = num+j
+                if y in comboRight:
+                    comboRight[y] -= rightNums[num]
+            
+            if i < mid:
+                for num in comboLeft:
+                    if num in comboRight:
+                        res += max(0,comboLeft[num]*comboRight[num])
+            else:
+                for num in comboRight:
+                    if num in comboLeft:
+                        res+= max(0,comboLeft[num]*comboRight[num])
+            
+            
+            for num in leftNums:
+                x = num+s[i]
+                if x not in comboLeft:
+                    comboLeft[x] = 0
+                comboLeft[x] += leftNums[num]
+            if s[i] not in leftNums:
+                leftNums[s[i]] = 0
+            leftNums[s[i]] += 1
+            
+        return res%1000000007
+
+
+# 2483. minimum penalty for a shop
+# count penalty for having shop closed at specific time
+# add to closing penalty the penalty for staying open
+# keep track of minimum on second iteration 
+class Solution:
+    def bestClosingTime(self, customers: str) -> int:
+        customers += 'X'
+        penalty = {}
+        running_penalty = 0
+        for j in range(len(customers)-1,-1,-1):
+            if customers[j] == 'Y':
+                running_penalty += 1
+            penalty[j] = running_penalty
+        running_penalty = 0
+        curr_min = 0
+        for i in range(len(customers)):
+            penalty[i] += running_penalty
+            if penalty[i] < penalty[curr_min]:
+                curr_min = i
+            if customers[i] == 'N':
+                running_penalty += 1
+        print(penalty)
+        return curr_min
+
+# 2482. difference between ones and zeroes in row and column
+# count the number of 1's in each row and column
+# at each point we just perform the calculation for the respective row and column
+class Solution:
+    def onesMinusZeros(self, grid: List[List[int]]) -> List[List[int]]:
+        rows = {}
+        cols = {}
+        
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if j not in cols:
+                    cols[j] = 0
+                if i not in rows:
+                    rows[i] = 0
+                if grid[i][j] == 1:
+                    rows[i] += 1
+                    cols[j] += 1
+        
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                x = rows[i] + cols[j] - (len(grid)-rows[i] + len(grid[0])-cols[j])
+                grid[i][j] = x
+        return grid
+
+
+# 2481. minimum cuts to divide a circle
+
+class Solution:
+    def numberOfCuts(self, n: int) -> int:
+        if n == 1:
+            return 0
+        if n%2 == 0:
+            return n//2
+        else:
+            return n
+
+
+
+# 907. sum of subarray minimums
+# keep mono-stack of increasing numbers
+# when we reach a number if it is smaller than any number in the stack then we can no longer use that number in our subarrays
+# so we pop it and check how long the number has been in the mono stack (i-j) 
+# and we also track how long the number can extend to the left (j-z) * (i-j)  note subarrays extending to the left can also extend up to the current index
+# we calculate z by seeing if there is a number in the stack... this means that number is a blocker and we can only take subarrays that dont have that number
+# if there is not a number in the stack then we can take every previous number in our subarray
+
+class Solution:
+    def sumSubarrayMins(self, arr: List[int]) -> int:
+        res = 0
+        arr.append(0)
+        
+        stack = []
+
+        for i in range(len(arr)):
+            while len(stack) and arr[i] < arr[stack[-1]]:
+                j = stack.pop()
+                x = ((i-j) * arr[j]) 
+                z = stack[-1]+1 if len(stack) else 0
+                y = (i-j) * (j-z) * arr[j]
+                res += x + y
+            stack.append(i)
+
+        return res%1000000007
