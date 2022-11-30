@@ -2364,3 +2364,175 @@ class Solution:
             stack.append(i)
 
         return res%1000000007
+
+
+
+# 380. insert delete getrandom o(1)
+# array to get random value 
+# dictionary to keep location of val
+# when we remove ele we swap the last value into the removed values location then remove last element so its not in the array twice
+# we also delete the remove ele from our dictionary 
+class RandomizedSet:
+
+    def __init__(self):
+        self.location = {}
+        self.rand = []
+
+    def insert(self, val: int) -> bool:
+        if val in self.location:
+            return False
+        self.location[val] = len(self.rand)
+        self.rand.append(val)
+        return True
+
+    def remove(self, val: int) -> bool:
+        if val not in self.location:
+            return False
+        self.rand[self.location[val]] = self.rand[-1]
+        self.location[self.rand[-1]] = self.location[val]
+        self.rand.pop()
+        del self.location[val] 
+        return True
+    def getRandom(self) -> int:
+        x = random.randint(0,len(self.rand)-1)
+        return self.rand[x]
+
+
+# 1306. jump game iii
+
+class Solution:
+    def canReach(self, arr: List[int], start: int) -> bool:
+        visited = set()
+
+        queue = [start]
+
+        while queue:
+
+            next_jumps = []
+
+            for x in queue:
+                if arr[x] == 0:
+                    return True
+                y = x + arr[x]
+                z = x - arr[x]
+                if y < len(arr) and y not in visited:
+                    next_jumps.append(y)
+                    visited.add(y)
+                if 0 <= z and z not in visited:
+                    next_jumps.append(z)
+                    visited.add(z)
+            queue = next_jumps
+        return False    
+
+
+# 1471. the k strongest values in an array
+
+class Solution:
+    def getStrongest(self, arr: List[int], k: int) -> List[int]:
+        arr = sorted(arr)
+
+        m = arr[(len(arr)-1)//2]
+
+        res = []
+
+        l = 0
+        h = len(arr)-1
+
+        while len(res) < k:
+            x = abs(arr[l]-m)
+            y = abs(arr[h]-m)
+            if x <= y:
+                res.append(arr[h])
+                h -= 1
+            else:
+                res.append(arr[l])
+                l += 1
+        return res
+
+
+# 207. course schedule
+# every classes starts off with x number of prereqs
+# start off by taking every class with 0 prereqs
+# when we take a class we can reduce the degree of all classes that depend on it by 1
+# if any of these classes have degree 0 we add them to our queue
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        taken = 0
+        
+        degree = [0 for i in range(numCourses)]
+        requiredFor = {}
+        for a,b in prerequisites:
+            degree[a] += 1
+            if b not in requiredFor:
+                requiredFor[b] = []
+            requiredFor[b].append(a)
+
+        queue = []
+
+        for i in range(len(degree)):
+            if degree[i] == 0:
+                queue.append(i)
+        
+        for x in queue:
+            taken += 1
+
+            if x in requiredFor:
+                for y in requiredFor[x]:
+                    degree[y] -= 1
+                    if degree[y] == 0:
+                        queue.append(y)
+        return taken == numCourses
+        
+
+
+# 1905. count sub islands
+
+class Solution:
+    def countSubIslands(self, grid1: List[List[int]], grid2: List[List[int]]) -> int:
+
+        def isSubIsland(i,j):
+            adj = [[0,1], [1,0], [0,-1], [-1,0]]
+            isSub = True
+            queue = [[i,j]]
+            grid2[i][j] = 2
+
+            for x,y in queue:
+                if grid1[x][y] == 0:
+                    isSub = False
+                for x1,y1 in adj:
+                    r,c = x+x1, y+y1
+                    if r < 0 or c < 0 or r == len(grid1) or c == len(grid1[0]) or grid2[r][c] != 1:
+                        continue
+                    grid2[r][c] = 2
+                    queue.append([r,c])
+            return isSub
+        
+        res = 0
+        for i in range(len(grid1)):
+            for j in range(len(grid1[0])):
+
+                if grid2[i][j] == 1:
+                    if isSubIsland(i,j):
+                        res += 1
+        return res
+
+
+# 1207. unique number of occurrences
+
+class Solution:
+    def uniqueOccurrences(self, arr: List[int]) -> bool:
+        freqs = {}
+        counts = {}
+        for num in arr:
+            if num not in freqs:
+                freqs[num] = 1
+                counts[1] = counts.get(1,0) + 1
+            else:
+                counts[freqs[num]] -= 1
+                freqs[num] += 1
+                counts[freqs[num]] = counts.get(freqs[num], 0) + 1
+
+        for key in counts:
+            if 1 < counts[key]:
+                return False
+        return True
