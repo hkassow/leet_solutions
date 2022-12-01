@@ -2536,3 +2536,22 @@ class Solution:
             if 1 < counts[key]:
                 return False
         return True
+
+
+# 1704. determine if string halves are alike
+
+class Solution:
+    def halvesAreAlike(self, s: str) -> bool:
+        vowels = {"a", "A", "e", "E", "i", "I", "o", "O", "u", "U"}
+        x = 0
+        y = 0
+
+        for i in range(0, len(s)//2):
+            c = s[i]
+            if c in vowels:
+                x += 1
+        for j in range(len(s)//2, len(s)):
+            c = s[j]
+            if c in vowels:
+                x -= 1
+        return x == 0
