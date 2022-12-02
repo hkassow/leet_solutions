@@ -2555,3 +2555,73 @@ class Solution:
             if c in vowels:
                 x -= 1
         return x == 0
+
+# 1755. closest subsequence sum
+# finding all possible subsequences takes too long
+# so we split our array in half and find the subsequences for each half
+# then we use binary search on the sorted first half subsequences 
+# for every subsequence in the second half
+class Solution:
+    def minAbsDifference(self, nums: List[int], goal: int) -> int:
+
+        def createSubs(sums,i,total, stopper):
+            sums.add(total)
+            if i == stopper:
+                return
+
+            createSubs(sums, i+1, total+nums[i],stopper)
+            createSubs(sums, i+1, total, stopper)
+        def binarySearch(target, nums):
+            lo = 0
+            hi = len(l1)-1
+
+            while lo <= hi:
+                mid = lo + (hi - lo)//2
+                if nums[mid] == target:
+                    return mid
+                if nums[mid] < target:
+                    lo = mid + 1
+                else:
+                    hi = mid - 1
+            return lo
+    
+        l1 = set()
+        l2 = set()
+        createSubs(l1, 0, 0, len(nums)//2)
+        createSubs(l2,len(nums)//2,0,len(nums))
+        
+        l1 = sorted(list(l1))
+        closest = abs(goal)
+        for sum2 in l2:
+            if closest == 0:
+                return 0
+            target = goal - sum2
+            idx = binarySearch(target, l1)
+            
+            if idx < len(l1) and 0 <= idx:
+                closest = min(closest, abs(l1[idx] + sum2 - goal))
+            if 0 < idx:
+                closest = min(closest, abs(l1[idx-1] + sum2 - goal))
+            if idx < len(l1)-1:
+                closest = min(closest, abs(l1[idx+1] + sum2 - goal))
+        return closest
+
+# 1657. determine if two strings are close
+# check that the strings both have the same characters, and the same counts for any type of character
+class Solution:
+    def closeStrings(self, word1: str, word2: str) -> bool:
+        c1 = Counter(word1)
+        c2 = Counter(word2)
+        c = {}
+
+        for x in c1:
+            c[c1[x]] = c.get(c1[x], 0) + 1
+        for x in c2:
+            if c2[x] not in c or x not in c1:
+                return False
+            c[c2[x]] -= 1
+            if c[c2[x]] == 0:
+                del c[c2[x]]
+                
+        return len(c) == 0
+        
