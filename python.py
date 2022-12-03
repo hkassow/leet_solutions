@@ -1,6 +1,6 @@
 from heapq import heappop, heappush
 import math
-
+from collections import Counter
 
 class TreeNode:
     def __init__(self, val, left=None, right=None):
@@ -2624,4 +2624,19 @@ class Solution:
                 del c[c2[x]]
                 
         return len(c) == 0
-        
+
+
+# 451. sort characters by frequency 
+
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        c = Counter(s)
+        x = []
+        for k,v in c.items():
+            heappush(x, (-v,k))
+        z = ''
+        while x:
+            a = heappop(x)
+            z += a[1]*(a[0]*-1)
+        return z
+
