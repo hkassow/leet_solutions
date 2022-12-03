@@ -2756,3 +2756,29 @@ class Solution:
                 else:
                     return False
         return make(0,0,0,0,0)
+
+# 2256. minimum average difference
+class Solution:
+    def minimumAverageDifference(self, nums: List[int]) -> int:
+
+        right = sum(nums) - nums[0]
+        left = nums[0]
+        j = 1
+        min_diff = inf
+        min_ind = -1
+        n = len(nums)
+
+        while j < n:
+            if min_diff == 0:
+                return min_ind
+            diff = abs(right//(n-j)-left//j)
+            if diff < min_diff:
+                min_ind = j-1
+                min_diff = diff
+            left += nums[j]
+            right -= nums[j]
+            j += 1
+            
+        if left//n < min_diff:
+            return n-1
+        return min_ind
