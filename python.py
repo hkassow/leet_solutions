@@ -2640,3 +2640,88 @@ class Solution:
             z += a[1]*(a[0]*-1)
         return z
 
+
+# 2415. reverse odd levels of binary tree
+# classic iterative traversal of binary tree
+# only caveat when we are on even level we add our node values to the val_store
+# and when we are on odd level we change our node value
+# if we are dealing with a large tree val_store might get very large because it contains every odd row's values
+# to solve this we could prune it on at the end of every odd iteration
+class Solution:
+    def reverseOddLevels(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        level = 'even'
+        val_store = []
+        queue = [root]
+
+        while queue:
+            next_queue = []
+            j = -1
+            for node in queue:
+                if node.left:
+                    if level == 'even':
+                        val_store.append(node.left.val)
+                        val_store.append(node.right.val)
+                    next_queue.append(node.left)
+                    next_queue.append(node.right)
+                if level == 'odd':
+                    node.val = val_store[j]
+                    j -= 1
+            if level == 'odd':
+                level = 'even'
+            else:
+                level = 'even'
+            queue = next_queue
+        return root
+                    
+
+
+
+# 1125. smallest sufficient team
+# for each skill get a list of people who have this skill
+# 1. start off with the skill that has the least amount of people 
+# 2. try every person with that skill 
+# 3. removing every skill that the person has 
+# 4. go back to step 1 until all skills have been removed from our set
+class Solution:
+    def smallestSufficientTeam(self, req_skills: List[str], people: List[List[str]]) -> List[int]:
+        skills = {}
+        for skill in req_skills:
+            skills[skill] = []
+        for i in range(len(people)):
+            person_skills = people[i]
+
+            for skill in person_skills:
+                skills[skill].append(i)
+        
+        min_skill = min(skills, key=lambda x:len(x))
+        
+
+        req_skills = set(req_skills)
+        self.min_people = [i for i in range(len(people))]
+        
+        def track(curr_skill, curr_people, skills_needed):
+            for person_index in skills[curr_skill]:
+                if len(self.min_people) <= len(curr_people):
+                    return 
+
+                removed = []
+                curr_people.append(person_index)
+
+                for person_skill in people[person_index]:
+                    if person_skill in skills_needed:
+                        removed.append(person_skill)
+                        skills_needed.remove(person_skill)
+
+                if len(skills_needed) == 0:
+                    if len(curr_people) < len(self.min_people):
+                        self.min_people = curr_people.copy()
+                else:
+                    next_skill = min(skills_needed, key=lambda x:len(skills[x]))
+                    track(next_skill, curr_people, skills_needed)
+                curr_people.pop()
+                
+                for skill in removed:
+                    skills_needed.add(skill)
+
+        track(min_skill, [], req_skills)
+        return self.min_people

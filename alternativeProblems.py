@@ -93,3 +93,46 @@ figure2 = [[0, 0, 1],
          [0, 0, 1]]
 
 #soltuion will be 0
+
+
+
+# special dictionary
+# problem:
+# we want to design a dictionary that allows incrementing all the keys and values
+# given a queryType ==> 'insert' || 'addToValue' || 'addToKey' || 'get'
+# and a query ========>  [k,v]   ||   [v]        ||     [v]    ||   [k]
+# return the value of all get operations
+# solution: 
+# using an offset for key and value we can achieve this in o(n) time without having to iterate through our dictionary every time
+# when we insert we must subtract both the offsets to put the key in the correct spot and not double add our value offset
+# when we get the key we must subtract the keyoffset to get the correct key and then add the value offset
+# example:
+# insert [5,10] => dict = {5:10}
+# addToKey [10] => dict = {5:10}
+# addToVal [5] => dict = {5:10}
+# get [15] 15-10=5 => get dict[5] = 10 + 5 => res = 15
+# insert [5,70] -5,65 => dict {5:10, -5:65}
+# get 5 5-10=-5 => get dict[-5] = 65 + 5 => res = 15 + 70
+
+def solution(queryType, query):
+    key_offset = 0
+    val_offset = 0
+    
+    store = {}
+    
+    res = 0
+    
+    for i in range(len(query)):
+        code = queryType[i]
+        q = query[i]
+        
+        if code == 'insert':
+            store[q[0]-key_offset] = q[1] - val_offset
+        elif code == 'addToValue':
+            val_offset += q[0]
+        elif code == 'addToKey':
+            key_offset += q[0]
+        else:
+            if q[0]-key_offset in store:
+                res += store[q[0]-key_offset] + val_offset
+    return res
