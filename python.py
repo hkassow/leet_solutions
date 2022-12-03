@@ -2725,3 +2725,34 @@ class Solution:
 
         track(min_skill, [], req_skills)
         return self.min_people
+
+
+
+# 473. matchsticks to square 
+class Solution:
+    def makesquare(self, matchsticks: List[int]) -> bool:
+        total = sum(matchsticks)
+        if total%4 != 0:
+            return False
+        side = total//4
+        matchsticks = sorted(matchsticks, reverse = True)
+        
+        def make(a,b,c,d,index):
+            if a == side and b == side and c == side and d == side:
+                return True
+            if index == len(matchsticks):
+                return False
+            
+            for i in range(index, len(matchsticks)):
+                size = matchsticks[i]
+                if a+size <= side and make(a+size,b,c,d,i+1):
+                    return True
+                elif b+size <= side and a != b and make(a,b+size,c,d,i+1):
+                    return True
+                elif c+size <= side and a != c and b != c and make(a,b,c+size,d,i+1):
+                    return True
+                elif d+size <= side and a != d and b != d and c != d and make(a,b,c,d+size,i+1):
+                    return True
+                else:
+                    return False
+        return make(0,0,0,0,0)
