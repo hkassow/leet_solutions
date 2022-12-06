@@ -2782,3 +2782,70 @@ class Solution:
         if left//n < min_diff:
             return n-1
         return min_ind
+
+# 876. middle node of the linked list
+
+class Solution:
+    def middleNode(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow = head
+        fast = head.next
+
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        if fast:
+            slow = slow.next
+        return slow
+
+
+# 341. flatten nested list iterator 
+# the check goes => if hasNext => next
+# on every hasNext we prepare our stack then check if we have any elements left
+class NestedIterator:
+    def __init__(self, nestedList: [NestedInteger]):
+        self.arr = nestedList[::-1]
+        
+    
+    def next(self) -> int:
+        return self.arr.pop()
+    def hasNext(self) -> bool:
+        self.prepareStack()
+        return len(self.arr) != 0
+        
+
+    def prepareStack(self):
+        if len(self.arr) == 0 or self.arr[-1].getInteger() != None:
+            return
+        else:
+            x = self.arr.pop().getList()
+            for i in range(len(x)-1,-1,-1):
+                self.arr.append(x[i])
+            self.prepareStack()
+
+
+# 1961. check if string is a prefix of array
+
+class Solution:
+    def isPrefixString(self, s: str, words: List[str]) -> bool:
+        i = 0
+        words.append('1')
+        for word in words:
+            if i == len(s):
+                return True
+            if s[i:i+len(word)] == word:
+                i+=len(word)
+            else:
+                return False
+
+# 938 range sum of bst
+
+class Solution:
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+        if not root:
+            return 0
+        if low <= root.val and root.val <= high:
+            return root.val + self.rangeSumBST(root.left,low,high) + self.rangeSumBST(root.right, low, high)
+        elif root.val < low:
+            return self.rangeSumBST(root.right, low, high)
+        else:
+            return self.rangeSumBST(root.left, low, high)
