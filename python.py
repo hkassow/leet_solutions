@@ -2851,7 +2851,9 @@ class Solution:
             return self.rangeSumBST(root.left, low, high)
 
 # 872. leaf-similar trees
-
+# travel all possilbe nodes until we reach their leaf 
+# appending leaf values from left to right 
+# compare arrays 
 class Solution:
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
         arr1 = []
@@ -2910,3 +2912,148 @@ class Solution:
             new_sy = s[i:y] + s[y+1:j]
             swap_j = self.minMovesToMakePalindrome(new_sy) + (y-i)
         return min(swap_i, swap_j)
+# the extremely smart solution for 2193. 
+# looks at last letter and finds the first location of it, swaps it to the front then pops it 
+# if last letter == first letter we dont add anything to the res 
+# if there is only 1 index for the last letter we move it to the middle 
+# always popping the last letter
+class Solution:
+    def minMovesToMakePalindrome(self, s: str) -> int:
+        res = 0
+        s = list(s)
+        while s:
+            i = s.index(s[-1])
+            if i == len(s) - 1:
+                res += i//2
+            else:
+                res += i
+                s.pop(i)
+            s.pop()
+        return res
+
+
+# 2493. divide nodes into the maximum number of groups
+# divide into connected components 
+# for each connected component we look for the maximum number of groups possible 
+# we do this by each node in the connected component and starting a bfs from it
+# the starting node will be group 1, each node connected to it will be group 2 each node connected to group 2 will be group 3 etc etc
+# if we run into a node thats been seen before its in previous group unless its in the current group then we have a conflict ie =>
+# 2 nodes being placed into the same group
+class Solution:
+    def magnificentSets(self, n: int, edges: List[List[int]]) -> int:
+        components = []
+        seen = set()
+        paths = {i+1:[] for i in range(n)}
+
+        for a,b in edges:
+            paths[a].append(b)
+            paths[b].append(a)
+        
+        for i in range(1,n+1):
+            if i in seen:
+                continue
+            queue = [i]
+            components.append([i])
+            seen.add(i)
+            while queue:
+                next_level = []
+                node = queue.pop()
+                for neighbor in paths[node]:
+                    if neighbor in seen:
+                        continue
+                    next_level.append(neighbor)
+                    components[-1].append(neighbor)
+                    seen.add(neighbor)
+                    queue.append(neighbor)
+        def bfs(node):
+            groups = 0
+            seen = {node:1}
+            queue = [node]
+
+            while queue:
+                groups += 1
+                next_group = []
+                for node in queue:
+                    for neighbor in paths[node]:
+                        if neighbor not in seen:
+                            next_group.append(neighbor)
+                            seen[neighbor] = groups + 1
+                        elif seen[neighbor] == groups:
+                            return -1
+                queue = next_group
+            return groups
+
+
+        longest = [-1] * len(components)
+        for i in range(len(components)):
+            arr = components[i]
+            for node in arr:
+                longest[i] = max(longest[i], bfs(node))
+        if min(longest) < 0:
+            return -1
+        return sum(longest)
+
+
+
+
+# 2392. minimum score of a path between two cities
+# travel every possible path starting from 1st city stopping if current min value is greater than one we have seen already
+class Solution:
+    def minScore(self, n: int, roads: List[List[int]]) -> int:
+        paths = {}
+        tried = {}
+        res = 0 
+        for a,b,c in roads:
+            if a not in paths:
+                paths[a] = []
+                tried[a] = inf
+            if b not in paths:
+                paths[b] = []
+                tried[b] = inf
+            paths[a].append([b,c])
+            paths[b].append([a,c])
+        
+        
+        def travel(node, val):
+            tried[node] = val
+            for city,cost in paths[node]:
+                m = min(cost,val)
+                if tried[city] <= m:
+                    continue
+                travel(city, m)
+                
+        travel(1, 100000)
+        return tried[n]
+
+# 2491. divide players into teams of equal skill
+# since we have to divide players into groups of 2 of equal value we can use two pointer adding low + high values
+class Solution:
+    def dividePlayers(self, skill: List[int]) -> int:
+        skill = sorted(skill)
+        
+        x = skill[0] + skill[-1]
+        res = 0
+        
+        i = 0
+        j = len(skill) - 1
+        
+        while i < j:
+            if skill[i] + skill[j] != x:
+                return -1
+            
+            res += (skill[i] * skill[j])
+            i += 1
+            j -= 1
+        return res
+
+# 2490. circular sentence 
+# check the current word's first letter is the same as the previous word's last letter
+# first index i=0 checks if the first and last word are circular because of negative indexing in python
+class Solution:
+    def isCircularSentence(self, sentence: str) -> bool:
+        s = sentence.split(' ')
+
+        for i in range(0, len(s)):
+            if s[i][0] != s[i-1][-1]:
+                return False
+        return True
