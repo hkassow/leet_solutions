@@ -2849,3 +2849,64 @@ class Solution:
             return self.rangeSumBST(root.right, low, high)
         else:
             return self.rangeSumBST(root.left, low, high)
+
+# 872. leaf-similar trees
+
+class Solution:
+    def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
+        arr1 = []
+        arr2 = []
+
+        def findLeaf(arr, root):
+            if not root.left and not root.right:
+                arr.append(root.val)
+            if root.left:
+                findLeaf(arr, root.left)
+            if root.right:
+                findLeaf(arr, root.right)
+        findLeaf(arr1, root1)
+        findLeaf(arr2, root2)
+        return arr1 == arr2
+
+
+# 2193. minimum number of moves to make palindrome 
+# super naive solution works but really slow need to optimize and prune so the code is more readable + faster
+class Solution:
+    def minMovesToMakePalindrome(self, s: str) -> int:
+        if not s or len(s) <= 1:
+            return 0
+        i = 0
+        j = len(s) - 1
+
+        while s[i] == s[j] and i < j:
+            i += 1 
+            j -= 1
+        
+        if j <= i:
+            return 0
+        
+        x = -1
+        y = -1
+
+        for k in range(i+1,j):
+            if s[k] == s[i]:
+                x = k
+            elif s[k] == s[j] and y == -1:
+                y = k
+
+        swap_i = math.inf
+        swap_j = math.inf
+        if x != -1 and y != -1:
+            if j-x < y-i:
+                new_sx = s[i+1:x] + s[x+1:j+1]
+                swap_i = self.minMovesToMakePalindrome(new_sx) + (j-x)
+            else:
+                new_sy = s[i:y] + s[y+1:j]
+                swap_j = self.minMovesToMakePalindrome(new_sy) + (y-i)
+        elif x != -1:
+            new_sx = s[i+1:x] + s[x+1:j+1]
+            swap_i = self.minMovesToMakePalindrome(new_sx) + (j-x)
+        elif y != -1:
+            new_sy = s[i:y] + s[y+1:j]
+            swap_j = self.minMovesToMakePalindrome(new_sy) + (y-i)
+        return min(swap_i, swap_j)
