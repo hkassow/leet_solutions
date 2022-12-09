@@ -3057,3 +3057,128 @@ class Solution:
             if s[i][0] != s[i-1][-1]:
                 return False
         return True
+
+# 1026. maximum difference between node and ancestor
+
+class Solution:
+    def maxAncestorDiff(self, root: Optional[TreeNode]) -> int:
+
+        def maxDiff(node, mx, mn):
+            if not node:
+                return 0
+            x = max(abs(node.val - mx), abs(node.val - mn))
+            mx = max(node.val, mx)
+            mn = min(node.val, mn)
+            return max(x, maxDiff(node.left,mx,mn), maxDiff(node.right,mx,mn))
+
+        return maxDiff(root, root.val, root.val)
+
+
+# 2352. equal row and column pairs
+
+class Solution:
+    def equalPairs(self, grid: List[List[int]]) -> int:
+        row_trie = {}
+
+        for row in grid:
+
+            trie = row_trie
+
+            for c in row:
+                if c not in trie:
+                    trie[c] = {}
+                trie = trie[c]
+            if 'done' not in trie:
+                trie['done'] = 0
+            trie['done'] += 1
+        res = 0
+        for c in range(len(grid)):
+            trie = row_trie
+            for r in range(len(grid)):
+                l = grid[r][c]
+                if l not in trie:
+                    break
+                trie = trie[l]
+            if 'done' in trie:
+                res += trie['done']
+
+        return res
+
+# 1765. map of highest peak
+# using 0 extra space 
+# start with water expand outwards
+class Solution:
+    def highestPeak(self, isWater: List[List[int]]) -> List[List[int]]:
+        queue = []
+
+        for i in range(len(isWater)):
+            for j in range(len(isWater[0])):
+                if isWater[i][j] == 1:
+                    queue.append([i,j])
+                    isWater[i][j] = 0
+                else:
+                    isWater[i][j] = -1
+
+        neighbors = [[1,0],[0,1],[-1,0], [0,-1]]
+
+        while queue:
+
+            next_level = []
+
+            for i,j in queue:
+
+                for rc,cc in neighbors:
+                    r,c = i+rc, j+cc
+                    if r < 0 or c < 0 or r == len(isWater) or c == len(isWater[0]) or 0 <= isWater[r][c]:
+                        continue
+                    isWater[r][c] = isWater[i][j] + 1
+                    next_level.append([r,c])
+            queue = next_level
+        return isWater
+
+# 2166. design bitset
+# using an offset to track wether we are in a flipped or not flipped state
+# tracking count of 1's 
+
+class Bitset:
+
+    def __init__(self, size: int):
+        self.arr = [0 for i in range(size)]
+        self.offset = False
+        self.cnt = 0
+    def fix(self, idx: int) -> None:
+        if not self.offset and self.arr[idx] == 0:
+            self.arr[idx] = 1
+            self.cnt += 1
+        elif self.offset and self.arr[idx] == 1:
+            self.arr[idx] = 0
+            self.cnt += 1
+
+    def unfix(self, idx: int) -> None:
+        if not self.offset and self.arr[idx] == 1:
+            self.arr[idx] = 0
+            self.cnt -= 1
+        elif self.offset and self.arr[idx] == 0:
+            self.arr[idx] = 1
+            self.cnt -= 1
+
+    def flip(self) -> None:
+        self.offset = not self.offset
+        self.cnt = len(self.arr) - self.cnt
+    def all(self) -> bool:
+        return self.cnt == len(self.arr)
+
+    def one(self) -> bool:
+        return self.cnt >= 1
+
+    def count(self) -> int:
+        return self.cnt
+
+    def toString(self) -> str:
+        res = ''
+        for b in self.arr:
+            if (b == 0 and not self.offset) or (b == 1 and self.offset):
+                res += '0'
+            else:
+                res += '1'
+        return res
