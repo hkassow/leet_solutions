@@ -3182,3 +3182,71 @@ class Bitset:
             else:
                 res += '1'
         return res
+
+
+# 1022. sum of root to leaf binary number
+
+class Solution:
+    def sumRootToLeaf(self, root: Optional[TreeNode]) -> int:
+        res = 0
+
+        def sumPath(node,val):
+            val += str(node.val)
+            if node.left :
+                sumPath(node.left, val)
+            if node.right:
+                sumPath(node.right, val)
+            if not node.right and not node.left:
+                nonlocal res
+                res += int(val, 2)
+        sumPath(root, '')
+        return res
+
+
+# 2278. percentage of letter in string
+
+class Solution:
+    def percentageLetter(self, s: str, letter: str) -> int:
+        return math.trunc(s.count(letter)/len(s)*100)
+
+# 1839. longest substring of all vowels in order
+
+class Solution:
+    def longestBeautifulSubstring(self, word: str) -> int:
+        
+        vow = {'a':0, 'e':1, 'i':2, 'o':3, 'u':4}
+        
+
+        mx = 0
+        i = 0
+
+        while i < len(word):
+            if word[i] == 'a':
+
+                length = 0
+                k = 0
+                while i < len(word) and (vow[word[i]] == k or vow[word[i]] == k + 1):
+                    k = vow[word[i]]
+                    i += 1
+                    length += 1
+                if k == 4:
+                    mx = max(mx, length)
+            else:
+                i+= 1
+        return mx
+
+# 124. binary tree maximum path sum
+class Solution:
+    def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        def helper(node):
+            if not node: return [-10000,-10000] 
+
+            left = helper(node.left)
+            right = helper(node.right)
+
+            path = max(left[0], right[0], 0) + node.val
+
+            max_path = max(path, left[1], right[1], left[0] + right[0] + node.val)
+
+            return [path, max_path]
+        return helper(root)[1]
