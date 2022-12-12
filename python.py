@@ -596,7 +596,16 @@ class Solution:
             return dp[n]
         
         return helpClimb(n)
-
+# using cache
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        
+        @cache
+        def helper(n):
+            if n <2:
+                return 1
+            return helper(n-1)+helper(n-2)
+        return helper(n)
 
 # 121. best time to buy and sell stock
 class Solution:
@@ -3250,3 +3259,25 @@ class Solution:
 
             return [path, max_path]
         return helper(root)[1]
+
+# 2336. smallest number in infinite set
+
+class SmallestInfiniteSet:
+
+    def __init__(self):
+        self.p = 1
+        self.q = []
+
+    def popSmallest(self) -> int:
+        if self.q and self.q[0] < self.p:
+            x = heappop(self.q)
+            while self.q and self.q[0] == x:
+                heappop(self.q)
+            return x
+        self.p += 1
+        return self.p - 1
+
+    def addBack(self, num: int) -> None:
+        if num < self.p:
+            heappush(self.q, num)
+
