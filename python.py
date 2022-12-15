@@ -642,7 +642,16 @@ class Solution:
             dp.append(max(dp[-2]+num, dp[-3]+num))
             res = max(res, dp[-1])
         return res
-
+# using just 2 pointers house we can add to and house we cant add to
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        dp = [0,0]
+        for i in range(len(nums)):
+            x = nums[i]+dp[0]
+            if dp[0] < dp[1]:
+                dp[0] = dp[1]
+            dp[1] = max(dp[1], x)
+        return max(dp)
 
 # 384. shuffle an array
 
@@ -3281,3 +3290,41 @@ class SmallestInfiniteSet:
         if num < self.p:
             heappush(self.q, num)
 
+
+
+# 931. minimum falling path sum
+# dfs on every node if we reach a node thats already been traveled on we have the minimum cost to travel down from that node
+
+class Solution:
+    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
+        cost = [[inf for j in range(len(matrix[0]))] for i in range(len(matrix))]
+        
+        def fall(i,j):
+            if j < 0 or j == len(matrix[0]):
+                return inf
+            if i == len(matrix):
+                return 0
+            if cost[i][j] != inf:
+                return cost[i][j]
+            cost[i][j] = min(fall(i+1,j-1), fall(i+1,j), fall(i+1,j+1)) + matrix[i][j]
+            return cost[i][j]
+
+
+        for j in range(len(matrix[0])):
+            fall(0,j)
+        return min(cost[0])
+
+
+# 1143. longest common subsequence 
+
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        dp = [[0 for j in range(len(text1)+1)] for i in range(len(text2)+1)]
+        
+        for j in range(len(text1)):
+            for i in range(len(text2)):
+                if text1[j] == text2[i]:
+                    dp[i+1][j+1] = max(dp[i][j]+1, dp[i][j+1], dp[i+1][j])
+                else:
+                    dp[i+1][j+1] = max(dp[i][j], dp[i][j+1], dp[i+1][j])
+        return dp[len(text2)][len(text1)]
