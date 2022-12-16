@@ -3328,3 +3328,61 @@ class Solution:
                 else:
                     dp[i+1][j+1] = max(dp[i][j], dp[i][j+1], dp[i+1][j])
         return dp[len(text2)][len(text1)]
+
+# 232. implement queue using stacks
+# can only use push/pop/peek from end 
+class MyQueue:
+
+    def __init__(self):
+        self.enter = []
+        self.exit = []
+
+    def push(self, x: int) -> None:
+        self.enter.append(x)
+
+    def pop(self) -> int:
+        if not self.exit:
+            while self.enter:
+                self.exit.append(self.enter.pop())
+        return self.exit.pop()
+
+    def peek(self) -> int:
+        if not self.exit:
+            while self.enter:
+                self.exit.append(self.enter.pop())
+        return self.exit[-1]
+
+
+    def empty(self) -> bool:
+        return not self.exit and not self.enter
+
+
+
+
+
+
+
+
+
+# 150. evalute reverse polish notation 
+# TRUNCATE DIVISON 
+
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        store = []
+
+        for c in tokens:
+            if c.strip('-').isnumeric():
+                store.append(int(c))
+            else:
+                b = store.pop()
+                a = store.pop()
+                if c == '+':
+                    store.append(a+b)
+                elif c == '/':
+                    store.append(math.trunc(a/b))
+                elif c == '*':
+                    store.append(a*b)
+                else:
+                    store.append(a-b)
+        return store[-1]
