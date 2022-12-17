@@ -3386,3 +3386,18 @@ class Solution:
                 else:
                     store.append(a-b)
         return store[-1]
+
+# 739. daily temperatures
+
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        res = [0 for i in range(len(temperatures))]
+        stack = []
+
+        for i in range(len(temperatures)):
+            curr_temp = temperatures[i]
+            while stack and stack[-1][0] < curr_temp:
+                prev_day = stack.pop()
+                res[prev_day[1]] = i - prev_day[1]
+            stack.append([curr_temp, i])
+        return res
