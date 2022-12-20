@@ -3401,3 +3401,175 @@ class Solution:
                 res[prev_day[1]] = i - prev_day[1]
             stack.append([curr_temp, i])
         return res
+# 1971. find if path exists in graph
+
+class Solution:
+    def validPath(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        graph = {i:[] for i in range(n)}
+
+        for a,b in edges:
+            graph[a].append(b)
+            graph[b].append(a)
+        
+        visited = set()
+        visited.add(source)
+        queue = [source]
+
+        while queue:
+            node = queue.pop()
+            if node == destination:
+                return True
+            for path in graph[node]:
+                if path not in visited:
+                    queue.append(path)
+                    visited.add(path)
+        return False
+
+
+
+# 841 keys and rooms
+
+class Solution:
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        queue = []
+        visited = set(rooms[0])
+        visited.add(0)
+        queue += rooms[0]
+        while queue:
+            room = rooms[queue.pop()]
+            for key in room:
+                if key not in visited:
+                    queue.append(key)
+                    visited.add(key)
+        return len(visited) == len(rooms)
+
+# 2508. add edges to make degrees of all node even
+# find all edges that have odd number of edges
+# if the number of edges is odd (1 or 3) we cannot solve the problem because we will have to turn an even edged node to an odd edged node
+# and we dont have enough available changes to correct this
+# if we have 2 edges we can either combine them if they arent already connected
+# or we can find a node that neither are connected to and connect them both to that edge
+# if we have 4 edges we must find a way to combine them together 
+# READ THE PROBLEM I ORIGINALLY THOUGHT THEY WANTED ALL NODES TO HAVE THE SAME NUMBER OF EDGES
+class Solution:
+    def isPossible(self, n: int, edges: List[List[int]]) -> bool:
+        graph = {i+1:set() for i in range(n)}
+        
+        degree = [0 for i in range(n)]
+
+        for a,b in edges:
+            graph[a].add(b)
+            graph[b].add(a)
+            degree[a-1]+=1
+            degree[b-1]+=1
+        
+        
+        queue = []
+        for i in range(n):
+            if degree[i]%2 == 1:
+                queue.append(i+1)
+        if len(queue) == 0:
+            return True
+        elif len(queue) == 2:
+            a = graph[queue[0]]
+            b = graph[queue[1]]
+            if queue[0] not in b:
+                return True
+            for i in range(1,n+1):
+                if i not in a and i not in b:
+                    return True
+        elif len(queue) == 4:
+            n_a,n_b,n_c,n_d = queue[0], queue[1], queue[2], queue[3]
+            a = graph[n_a]
+            b = graph[n_b]
+            c = graph[n_c]
+            d = graph[n_d]
+            if n_a not in b and n_c not in d:
+                return True
+            elif n_a not in c and n_b not in d:
+                return True
+            elif n_a not in d and n_b not in c:
+                return True
+        return False 
+
+# 2506. count pairs of similar strings
+# abc, abbbbc, bbbbbbac all map to abc
+# set to get unique words then sort the set to get the correct hash
+class Solution:
+    def similarPairs(self, words: List[str]) -> int:
+        res = 0
+        freq = {}
+        
+        for word in words:
+            x = set(list(word))
+            x = ''.join(sorted(list(x)))
+            if x in freq:
+                res += freq[x]
+            else:
+                freq[x] = 0
+            freq[x] += 1
+        return res
+
+# 2507. smallest value after replacing with sum of prime factors
+# my contest solution was a lot more brute force than this current solution
+# getting prime factor involves checking all numbers from 2 to n 
+# when we arrive at a factor that divides n we reduce n until the factor no longer divides it
+# if n is a prime number it will return itself 
+class Solution:
+    def smallestValue(self, n: int) -> int:
+        
+        def getPrimeFactors(n):
+            i = 2
+            count = 0
+            while i <= n:
+                while n%i == 0:
+                    count += i
+                    n = n//i
+                i += 1
+            return count
+        
+        smallest = n
+        
+        
+        while True:
+            new_n = getPrimeFactors(n)
+            smallest = min(smallest, new_n)
+            if new_n == n:
+                break
+            n = new_n
+        return smallest
+
+
+# 2509. cycle length queries in a tree
+# again reading the problem helps a lot
+# we take the min value and travel all the way to the root 
+# then we take the max value and travel all the way until we reach a point where the min value has reached
+# on every "travel" we increment our count by 1
+# i start count_b on 0 because when it arrives at a point that the min value has visited that point has already been counted
+
+class Solution:
+    def cycleLengthQueries(self, n: int, queries: List[List[int]]) -> List[int]:
+        res = []
+        
+        for query in queries:
+            a = min(query)
+            b = max(query)
+            
+            visited_a = {a:1}
+            count_a = 1
+            while a != 1:
+                count_a += 1
+                if a%2 == 0:
+                    a = a//2
+                else: 
+                    a = (a-1)//2
+                visited_a[a] = count_a
+            count_b = 0
+            while b not in visited_a:
+                if b%2 == 0:
+                    b = (b)//2
+                else:
+                    b = (b-1)//2
+                count_b += 1
+            res.append(count_b+visited_a[b])
+        return res
