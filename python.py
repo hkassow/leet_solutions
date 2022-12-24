@@ -3573,3 +3573,204 @@ class Solution:
                 count_b += 1
             res.append(count_b+visited_a[b])
         return res
+
+
+
+# 834. sum of distances in tree
+# treat tree like a graph and find some leaf (node with only 1 connection)
+# from the leaf travel all possible paths counting the number of nodes and dist from these nodes
+# on each iteration our dist will increase by how many nodes were previously found in the paths
+# the leafs distance will be this result
+# again start from leaf and on each path we take the previously computed count of nodes that are further along the path
+# these nodes will be 1 step closer to us than the parent node 
+# and all other nodes will be 1 step farther from us
+# res[node] = res[parent] + (total_node_count - nodes_further_along_path - 1)    -    count - 1
+#                        this is the amount of ndoes that are 1 step farther       this is amount of nodes 1 step closer, and minus 1 (our current node has dist 0)
+class Solution:
+    def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
+        graph = {key:[] for key in range(n)}
+
+        for a,b in edges:
+            graph[a].append(b)
+            graph[b].append(a)
+        nodes_below = {key:[] for key in range(n)}
+
+        def findDistBelow(node, parent):
+            count = 0
+            dist = 0
+            for child in graph[node]:
+                if child == parent:
+                    continue
+                res = findDistBelow(child, node)
+                count += res[1]
+                dist += res[0]
+            dist += count
+            nodes_below[node] = [dist, count]
+            return [dist, count+1]
+
+        def findDistAbove(node, parent):
+            dist, count = nodes_below[node]
+            if parent == -1:
+                res[node] = dist
+            else:
+                p_dist = res[parent]    
+
+                total = p_dist + (n-count-1)-count-1
+                res[node] = total
+            for child in graph[node]:
+                if child == parent:
+                    continue
+                findDistAbove(child, node)
+
+
+
+        res = [0 for key in graph]
+
+        for key in graph:
+           if len(graph[key]) == 1:
+               findDistBelow(key, -1)
+               findDistAbove(key, -1)
+               break
+
+        return res
+
+
+# 309. best time to buy and sell stock with cooldown
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        buy = -prices[0]
+        sell = -prices[0]
+        cooldown = 0
+
+        for price in prices:
+            new_buy = max(buy, cooldown - price)
+            new_sell = buy + price
+            new_cooldown = max(sell, cooldown)
+
+            buy = new_buy
+            sell = new_sell
+            cooldown = new_cooldown
+        return max(sell, cooldown, 0)
+
+# 790. dominio and tromino tiling
+
+class Solution:
+    def numTilings(self, n: int) -> int:
+
+        @cache
+        def tile(x,y):
+            if x > n or y > n:
+                return 0
+            if x == n and y == n:
+                return 1
+            
+            res = 0
+
+            if x == y:
+                res += tile(x+2,y+1)
+                res += tile(x+1,y+2)
+                res += tile(x+2,y+2)
+                res += tile(x+1,y+1)
+            elif x < y:
+                res += tile(x+2,y+1)
+                res += tile(x+2,y)
+            else:
+                res += tile(x+1,y+2)
+                res += tile(x,y+2)
+
+            return res
+
+        return tile(0,0)%1000000007
+
+# 6274. reward top k students
+# use heap w/ negative value for the student "grade" to sort by max
+# use tuple to sort by student_id if two student grades are the same
+class Solution:
+    def topStudents(self, positive_feedback: List[str], negative_feedback: List[str], report: List[str], student_id: List[int], k: int) -> List[int]:
+        positive_feedback = set(positive_feedback)
+        negative_feedback = set(negative_feedback)
+        
+        hp = []
+        
+        
+        for i in range(len(report)):
+            student = student_id[i]
+            feedback = report[i].split(' ')
+            res = 0
+            for word in feedback:
+                if word in positive_feedback:
+                    res += 3
+                elif word in negative_feedback:
+                    res -= 1
+            heappush(hp, tuple([-res,student]))
+        
+        
+        res = []
+        
+        while len(res) < k:
+            res.append(heappop(hp)[1])
+        return res
+
+
+# 6276. count anagrams
+# always use built in factorial function when you can
+# building factorial function caused timelimit to exceed
+# permutations for a word is factorial of the length 
+# divided by the factorial of the count of each letter
+# ie. 'too' => 3!/(1! * 2!) => 3 'too' 'oto' 'oot'
+
+class Solution:
+    def countAnagrams(self, s: str) -> int:
+        
+        
+        s = s.split(' ')
+        
+        def permu(word):
+            l = len(word)
+            c = Counter(word)
+            
+            res = math.factorial(l)
+            
+            for key in c:
+                res = res//(math.factorial(c[key]))
+                
+            return res
+        
+        count = 1
+        
+        for word in s:
+            count *= permu(word)
+            count %= 1000000007
+        return count%1000000007
+
+# 6273. maximum enemy forts that can be captured
+# READ THE PROBLEM.... 
+# can only move from a fort to a non fort and capture all enemy forts along the way...
+class Solution:
+    def captureForts(self, forts: List[int]) -> int:
+        mx = 0
+        prev = -1
+        for i in range(len(forts)):
+            if forts[i] == 0:
+                continue
+            elif forts[i] == -1:
+                prev = i
+                continue
+            back, front = 0,0
+            if prev != -1:
+                for j in range(i-1, prev,-1):
+                    if forts[j] == -1:
+                        break
+                    elif forts[j] == 1:
+                        back = 0
+                        break
+                    back += 1
+                prev = -1
+            for j in range(i+1,len(forts)):
+                if forts[j] == -1:
+                    break
+                elif forts[j] == 1 or j+1 == len(forts):
+                    break
+                front += 1
+            mx = max(mx, back, front)
+        return mx
