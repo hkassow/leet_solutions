@@ -1,3 +1,4 @@
+from functools import cache
 from heapq import heappop, heappush
 import math
 from collections import Counter
@@ -3745,7 +3746,7 @@ class Solution:
 
 # 6273. maximum enemy forts that can be captured
 # READ THE PROBLEM.... 
-# can only move from a fort to a non fort and capture all enemy forts along the way...
+# can only move from a fort to a non fort and capture all enemy forts along the way
 class Solution:
     def captureForts(self, forts: List[int]) -> int:
         mx = 0
@@ -3774,3 +3775,161 @@ class Solution:
                 front += 1
             mx = max(mx, back, front)
         return mx
+
+# 2389. longest subsequence with limited sum
+# since we can choose any subsequence the one that maximizes length uses the smallest numbers
+# trick is to sort the array and queries so we can deal with them in order and our subsequence builds upon the previous query
+class Solution:
+    def answerQueries(self, nums: List[int], queries: List[int]) -> List[int]:
+        nums = sorted(nums)
+        sorted_q = [[queries[i], i] for i in range(len(queries))]
+        sorted_q = sorted(sorted_q, key=lambda x: x[0] )
+
+
+        l = 0
+        s = 0
+        i = 0
+        res = [0 for i in range(len(queries))]
+
+        for total,index in sorted_q:
+            
+            while i < len(nums) and s+nums[i] <= total:
+                s+= nums[i]
+                i += 1
+                l += 1
+            res[index] = l
+        return res
+
+# 2515. shorted distance to traget string in a circular array
+# iterate from each direction until we find target
+
+class Solution:
+    def closetTarget(self, words: List[str], target: str, startIndex: int) -> int:
+        if words[startIndex] == target:
+            return 0
+        
+        if target not in words:
+            return -1
+        else:
+            
+            i = startIndex - 1
+            j = startIndex + 1
+            x = 0
+            y = 0
+            while i != startIndex:
+                if i == -1:
+                    i = len(words)-1
+                x += 1
+                if words[i] == target:
+                    break
+                i -= 1
+            while j != startIndex:
+                j %= len(words)
+                y += 1
+                if words[j] == target or x <= y:
+                    break
+                j += 1
+            return min(x,y)
+
+# 2516. take k of each character from left and right
+# expanding window starting with all characters 
+# and iterating backwards removing characters and then readding them if we need them to complete a count
+# start has all characters moving from the beginning 
+# end will have all necessary characters moving from the end
+
+class Solution:
+    def takeCharacters(self, s: str, k: int) -> int:
+        n = len(s)
+        if n < 3*k:
+            return -1
+        
+        ca = 0
+        cb = 0
+        cc = 0
+        
+        for char in s:
+            if char == 'a': ca += 1
+            if char == 'b': cb += 1
+            if char == 'c': cc += 1
+        if ca < k or cb < k or cc < k:
+            return -1
+        
+        i = n-1
+        j = n-1
+        res = n
+        while i>= 0:
+            char = s[i]
+            if char == 'a': ca -= 1
+            if char == 'b': cb -= 1
+            if char == 'c': cc -= 1
+
+            while ca < k or cb < k or cc < k:
+                char = s[j]
+                if char == 'a': ca += 1
+                if char == 'b': cb += 1
+                if char == 'c': cc += 1
+                j -= 1
+            res = min(res, i+n-j-1)
+            i -= 1
+        return res
+        
+
+# 2517. maximum tastiness of candy basket
+# binary search on wether or not the selected tasty is possible
+class Solution:
+    def maximumTastiness(self, price: List[int], k: int) -> int:
+        price = sorted(price)
+        
+        def findTasty(x):
+            prev = price[0]
+            i = 1
+            count = 1
+            while i < len(price) and count < k:
+                if prev + x <= price[i]:
+                    prev = price[i]
+                    count += 1
+                i += 1
+            return count == k
+        
+        l = 0
+        r = price[-1] - price[0]
+        
+        while l <= r:
+            m = l + (r-l)//2
+            if findTasty(m):
+                l = m+1
+            else:
+                r = m-1
+        return l-1
+
+# 2518. number of great partitions 
+# find all subsets that cant work
+# using sorted array and cache to speed things up
+# becomes knapsack problem, starting with smallest number and stopping when the current number is larger than k
+# in this case we can no longer make a subsest smaller than k
+# 2^n total subsets and each bad subset can either be the first or second set so we multiply it by 2
+# we also have to take into consideration the empty set
+
+class Solution:
+    def countPartitions(self, nums: List[int], k: int) -> int:
+        nums = sorted(nums)
+        n = len(nums)
+        
+        @cache
+        def helper(i, curr_sum):
+            if curr_sum >= k or i == n:
+                return 0
+            if nums[i] >= k or nums[i]+curr_sum >= k:
+                return 0
+            
+            res = 0
+            new_sum = nums[i]+curr_sum
+            if new_sum < k:
+                res += 1
+            
+            return 1 + helper(i+1,curr_sum) + helper(i+1, new_sum)
+
+            
+        x = (helper(0,0)+1)*2
+
+        return max(0, 2**n - x)%1000000007
