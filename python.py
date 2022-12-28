@@ -3933,3 +3933,70 @@ class Solution:
         x = (helper(0,0)+1)*2
 
         return max(0, 2**n - x)%1000000007
+
+# 2513. minimize the maximum of two arrays
+# BST minimum number we can use 
+# first we check if the number m is too small to contain all the numbers needed for array 1 or array 2 using their respective divisor
+# then we check if the number is large enough to contain both numbers
+# finally we default to making m bigger if we fail the 2nd check
+class Solution:
+    def minimizeSet(self, divisor1: int, divisor2: int, uniqueCnt1: int, uniqueCnt2: int) -> int:
+        
+        l = 0
+        r = 10000000007
+        a = divisor1
+        b = divisor2
+        ac = uniqueCnt1
+        bc = uniqueCnt2
+        g = lcm(a,b)
+        while l != r:
+            m = l + (r-l)//2
+
+            if m - m//a < ac or m-m//b < bc:
+                l = m+1
+            elif m-m//g >= ac+bc:
+                r = m
+            else:
+                l = m+1
+        return l
+
+# 2279. maximmum bags with full capacity of rocks
+
+class Solution:
+    def maximumBags(self, capacity: List[int], rocks: List[int], additionalRocks: int) -> int:
+
+        hp = []
+
+        for i in range(len(capacity)):
+            heappush(hp, capacity[i]- rocks[i])
+        
+        count = 0 
+        
+        while hp and additionalRocks:
+            rock = heappop(hp)
+            if rock == 0:
+                count += 1
+            elif rock <= additionalRocks:
+                additionalRocks -= rock
+                count += 1
+            else:
+                return count
+        return count
+
+
+# 1962. remove stones to minimize the total
+class Solution:
+    def minStoneSum(self, piles: List[int], k: int) -> int:
+
+        hp = []
+        for pile in piles:
+            heappush(hp, -pile)
+        while 0 < k:
+            pile = -heappop(hp)
+            
+            while 0 < k and (not hp or -hp[0] <= pile):
+                pile -= math.floor(pile/2)
+                k -= 1
+            if pile:
+                heappush(hp, -pile)
+        return -sum(hp)
