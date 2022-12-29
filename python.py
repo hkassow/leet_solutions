@@ -4000,3 +4000,30 @@ class Solution:
             if pile:
                 heappush(hp, -pile)
         return -sum(hp)
+
+# 1834. single-threaded cpu
+
+class Solution:
+    def getOrder(self, tasks: List[List[int]]) -> List[int]:
+        sorted_tasks = [[tasks[i][0], tasks[i][1],i] for i in range(len(tasks))]
+        sorted_tasks = sorted(sorted_tasks, key=lambda x:x[0])
+        curr_time = sorted_tasks[0][0]
+
+        available_tasks = []
+
+        task_order = []
+
+        i = 0
+        
+        while  len(task_order) < len(tasks):
+            if not available_tasks and curr_time < sorted_tasks[i][0]:
+                curr_time = sorted_tasks[i][0]
+            while i < len(tasks) and sorted_tasks[i][0] <= curr_time:
+                heappush(available_tasks, (sorted_tasks[i][1], sorted_tasks[i][2]))
+                i += 1
+                
+                
+            task = heappop(available_tasks)
+            task_order.append(task[1])
+            curr_time += task[0]
+        return task_order
