@@ -4027,3 +4027,180 @@ class Solution:
             task_order.append(task[1])
             curr_time += task[0]
         return task_order
+
+
+# 797. all paths from source to target
+# travel along all possible paths when we reach end we start to return our path 
+# and cache our path so if we run into a point thats already been exhausted we dont have to travel it again
+
+class Solution:
+    def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
+        possible_routes = [[] for i in range(len(graph))]
+
+        end = len(graph)-1
+        
+
+        def travel(node,end):
+            if possible_routes[node]:
+                return possible_routes[node]
+            elif node == end:
+                return [[end]]
+            
+            for adj in graph[node]:
+                res = travel(adj, end)
+                for path in res:
+                    possible_routes[node].append([node] + path)
+            return possible_routes[node]
+        
+        travel(0,end)
+        return possible_routes[0]
+
+# 290. word pattern
+
+class Solution:
+    def wordPattern(self, pattern: str, s: str) -> bool:
+        s = s.split(' ')
+        charToWord = {}
+        wordToChar = {}
+        if len(s) != len(pattern):
+            return False
+        
+        for i in range(len(pattern)):
+            c = pattern[i]
+            word = s[i]
+
+            if (word in wordToChar and wordToChar[word] != c) or (c in charToWord and charToWord[c] != word):
+                return False
+            elif word not in wordToChar:
+                wordToChar[word] = c
+                charToWord[c] = word
+        
+        return True
+
+
+
+
+# 2520. count the digits that divide a number
+class Solution:
+    def countDigits(self, num: int) -> int:
+        nums_str = str(num)
+        
+        count = 0
+        for c in nums_str:
+            if num%int(c) == 0:
+                count += 1
+        return count
+
+# 2521. distinct prime factors of product of array
+
+class Solution:
+    def distinctPrimeFactors(self, nums: List[int]) -> int:
+        
+        
+        def factor(num):
+            factors = set()
+            
+            i = 2
+            
+            while i <= num:
+                if num%i == 0:
+                    num /= i
+                    factors.add(i)
+                else:
+                    i+=1
+            return factors
+        
+        all_f = set()
+        
+        for num in nums:
+            res = factor(num)
+            for c in res:
+                all_f.add(c)
+        return len(all_f)
+
+
+# 2522. partition string into substrings with values at most k
+class Solution:
+    def minimumPartition(self, s: str, k: int) -> int:
+        nums = [int(c) for c in s]
+        
+        if k < 10 and max(nums) > k:
+            return -1
+        
+        count = 0
+        
+        i = 0
+        
+        while i < len(nums):
+            curr_num = 0
+            
+            while i < len(nums) and curr_num*10+nums[i] <= k:
+                curr_num *= 10
+                curr_num += nums[i]
+                i += 1
+            count += 1
+        return count
+
+# 2523. closest prime numbers in range
+
+class Solution:
+    def closestPrimes(self, left: int, right: int) -> List[int]:
+        
+        
+        def isPrime(n):
+            if n == 2 or n ==3:
+                return True
+            if n < 2 or n%2 == 0:
+                return False
+            if n < 9: 
+                return True
+            if n%3 == 0:
+                return False
+            f = 5
+            
+            end = int(n**.5)
+            
+            while f <= end:
+                if n % f == 0:
+                    return False
+                if n % (f+2) == 0: return False
+                f += 6
+            return True
+        
+        min_pair = [-1,-1]
+        last = -1
+        num = left
+        while num <= right:
+            if isPrime(num):
+                if min_pair[0] == -1:
+                    min_pair[0] = num
+                elif min_pair[1] == -1:
+                    min_pair[1] = num
+                elif min_pair[1] - min_pair[0] > num - last:
+                    min_pair[0] = last
+                    min_pair[1] = num
+                
+                if min_pair[0] != -1 and min_pair[1] != -1 and min_pair[1] - min_pair[0] == 2:
+                    return min_pair
+                last = num
+            num += 1
+                
+        
+        return min_pair if min_pair[0] != -1 and min_pair[1] != -1 else [-1,-1]
+    
+    
+# 520. detect capital
+
+class Solution:
+    def detectCapitalUse(self, word: str) -> bool:
+        return word == word.upper() or word == word.lower() or (word[0] == word[0].upper() and word[1:] == word[1:].lower())
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
