@@ -4322,3 +4322,129 @@ class Solution:
                 tank = 0
                 start_index = i+1
         return start_index
+
+
+# 2529. maximum count of positive integer and negative integer
+class Solution:
+    def maximumCount(self, nums: List[int]) -> int:
+        neg = 0
+        pos = 0
+        
+        for num in nums:
+            if num < 0:
+                neg += 1
+            elif num > 0:
+                pos += 1
+        return max(neg,pos)
+
+# 2530. maximal score after applying k operations
+# want to maximize score so just take the highest number each time
+class Solution:
+    def maxKelements(self, nums: List[int], k: int) -> int:
+        hp = []
+        for num in nums:
+            heappush(hp, -num)
+        
+        score = 0
+        while k > 0:
+            num = heappop(hp) * -1
+            score += num
+            heappush(hp, -math.ceil(num/3))
+            k -= 1
+        return score
+        
+# 2531. make number of distinct characters equal
+# just think of every single case for d = 0,1,2 where d is the difference between the counts
+# a simple more digestable way would be to use a temporary count and just try the swap on every key pair 
+# then check if the temp count for word1 and word2 are equal after the swap
+
+class Solution:
+    def isItPossible(self, word1: str, word2: str) -> bool:
+        c1 = Counter(word1)
+        c2 = Counter(word2)
+        if abs(len(c1) - len(c2)) > 2:
+            return False
+        if len(c1) < len(c2):
+            return self.isItPossible(word2, word1)
+        d = len(c1) - len(c2)
+        for key1 in c1:
+            x = c1[key1]
+            for key2 in c2:
+                y = c2[key2]
+                if d == 0:
+                    if x == 1 and y == 1 and ((key1 not in c2 and key2 not in c1) or(key1 in c2 and key2 in c1)):
+                        return True
+                    elif x > 1 and y > 1 and ((key1 not in c2 and key2 not in c1) or(key1 in c2 and key2 in c1)):
+                        return True
+                elif d == 1:
+                    if x > 1 and y > 1 and key1 not in c2 and key2 in c1:
+                        return True
+                    elif x == 1 and y > 1 and key2 in c1 and key1 in c2 and key1 != key2:
+                        return True
+                    elif x == 1 and y == 1 and key1 not in c2 and key2 in c1:
+                        return True
+                else:
+                    if x == 1 and y > 1 and key1 not in c2 and key2 in c1:
+                        return True
+        return False
+                        
+                
+# 2532. time to cross a bridge
+# kind of a simple hard, just simulate the problem using the constraints
+# keep track of time
+# on each iteration we move our workers who have finished packing/unpacking boxes back into leftBank or rightBank heaps
+# if there are any workers in rightBank the least efficient goes, increment the time
+# if there arent workers in rightBank then the least efficient leftBank worker goes, increment the time
+# if there are no workers in left or right then we move the time to the minimum of old/new (all workers are packing or unpacking)
+# IF we reach a point where there are no packages remaining to be moved then we stop moving workers from the left bank 
+# and only concern ourselves with old + rightBank
+
+class Solution:
+    def findCrossingTime(self, n: int, k: int, time: List[List[int]]) -> int:
+        leftBank, rightBank, old, new = [], [], [], []
+        a = 0
+        t = 0
+        for i in range(len(time)):
+            eff = time[i][0] + time[i][2]
+            heappush(leftBank, (-eff, -i))
+            
+        while n > 0:
+            while old and t >= old[0][0]:
+                worker = heappop(old)
+                heappush(rightBank, (worker[1], worker[2]))
+            while new and t >= new[0][0]:
+                worker = heappop(new)
+                heappush(leftBank, (worker[1], worker[2]))
+            if rightBank:
+                worker = heappop(rightBank)
+                ind = -1*worker[1]
+                t += time[ind][2]
+                a = t
+                heappush(new, (t+time[ind][3], worker[0], worker[1]))
+            elif leftBank:
+                worker = heappop(leftBank)
+                ind = -1* worker[1]
+                t += time[ind][0]
+                heappush(old, (t+time[ind][1], worker[0], worker[1]))
+                n -= 1
+            else:
+                if old and new:
+                    t = min(old[0][0], new[0][0])
+                elif old:
+                    t = old[0][0]
+                else:
+                    t = new[0][0]
+        while old or rightBank:
+            while old and t >= old[0][0]:
+                worker = heappop(old)
+                heappush(rightBank, (worker[1], worker[2]))
+            if not rightBank:
+                t = old[0][0]
+            else:
+                worker = heappop(rightBank)
+                ind = -1*worker[1]
+                t += time[ind][2]
+                a = t
+                
+        return a 
+        
