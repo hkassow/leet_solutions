@@ -4196,11 +4196,129 @@ class Solution:
         return word == word.upper() or word == word.lower() or (word[0] == word[0].upper() and word[1:] == word[1:].lower())
     
     
+# 2244. minimum rounds to complete all tasks
+# consider task that has 3,4,5 counts
+# task that has 3 count is divisible by 3 
+# task that has 4 count is divisble by 2 takes two tasks
+# task that has 5 count is divisible by 2 + 3 takes two tasks
+# only uncompletable task is task that has 1 count
+# all other tasks take count/3 rounded up
+
+class Solution:
+    def minimumRounds(self, tasks: List[int]) -> int:
+        c = Counter(tasks)
+        res = 0
+
+        for a,b in c.items():
+            if b== 1:
+                return -1
+            res += math.ceil(b/3)
+        return res
     
     
     
     
     
-    
-    
+# 452. minimum number of arrows to burst balloons
+# handle balloons in order 
+class Solution:
+    def findMinArrowShots(self, points: List[List[int]]) -> int:
+
+        sorted_p = sorted(points, key=lambda x: (x[0],x[1]))
         
+        
+
+        res = 0
+
+        curr_spread = [sorted_p[0][0], sorted_p[0][1]]
+
+
+        for a,b in sorted_p:
+            if a <= curr_spread[1]:
+                curr_spread[1] = min(b, curr_spread[1])
+            else:
+                res += 1
+                curr_spread = [a,b]
+        return res+1
+    
+# 1833. maximum ice cream bars
+
+class Solution:
+    def maxIceCream(self, costs: List[int], coins: int) -> int:
+        sorted_cost = sorted(costs)
+        bars = 0
+        for cost in sorted_cost:
+            if coins - cost < 0:
+                return  bars
+            else:
+                coins -= cost
+                bars += 1
+        return bars
+
+
+# 149. max points on a line
+# n^2 time complexity
+# take a start point and compare to every other point 
+# on each comparison we look at b point and the slope
+# edge case is when slope is 0 or slope is infinite x1 = x2
+
+class Solution:
+    def maxPoints(self, points: List[List[int]]) -> int:
+        n = len(points)
+        if n <= 2:
+            return n
+        tried_lines = set()
+        res = 0
+        for i in range(n):
+            x1,y1 = points[i]
+            new_lines = {}
+            for j in range(i+1,n):
+                x2,y2 = points[j]
+                if x1 == x2:
+                    if (x1,0,0) in tried_lines:
+                        continue
+                    if (x1,0,0) not in new_lines:
+                        new_lines[(x1,0,0)] = 1
+                    new_lines[(x1,0,0)] += 1
+                elif y1 == y2 :
+                    if (0,y1,0) in tried_lines:
+                        continue
+                    if (0,y1,0) not in new_lines:
+                        new_lines[(0,y1,0)] = 1
+                    new_lines[(0,y1,0)] += 1
+                else:
+                    slope = (y1-y2)/(x1-x2)
+                    b = y1 - slope*x1
+                    if (slope,b) not in tried_lines:
+                        if (slope,b) not in new_lines:
+                            new_lines[(slope,b)] = 1
+                        new_lines[(slope,b)] += 1
+            for key in new_lines:
+                res = max(res, new_lines[key])
+                tried_lines.add(key)
+        return res
+                        
+
+# 134. gas station
+# with memoization we can compute every possible cycle until we get a correct one
+# however we can use a greedy approach to achieve the same thing
+# if the sum of gas is less than sum of cost we can never make it around
+# however if this is false, there must be some starting point that can travel around the whole route
+# just keep trying starting points from the beginning until we reach a fail point
+# at the fail point we use the next index as our starting point
+class Solution:
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        if sum(gas) < sum(cost):
+            return -1
+        
+        start_index = 0
+        tank = 0
+
+        for i in range(len(gas)):
+            tank -= cost[i]
+            tank += gas[i]
+            
+            if tank < 0:
+                tank = 0
+                start_index = i+1
+        return start_index
