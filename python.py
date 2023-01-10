@@ -4434,6 +4434,7 @@ class Solution:
                     t = old[0][0]
                 else:
                     t = new[0][0]
+
         while old or rightBank:
             while old and t >= old[0][0]:
                 worker = heappop(old)
@@ -4448,3 +4449,54 @@ class Solution:
                 
         return a 
         
+
+# 144. binary tree preorder traversal
+class Solution:
+    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        if not root:
+            return []
+        q = []
+        q.append(root)
+        res = []
+        while q:
+            node = q.pop()
+            res.append(node.val)
+
+            if node.right:
+                q.append(node.right)
+            if node.left:
+                q.append(node.left)
+        return res
+            
+
+# 10    0. isSameTree
+
+class Solution:
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        if not p and not q:
+            return True
+        elif not p:
+            return False
+        elif not q:
+            return False
+        else:
+            return p.val == q.val and self.isSameTree(p.left,q.left) and self.isSameTree(q.right, p.right)
+
+
+# 898. bitwise ors of subarrays
+
+class Solution:
+    def subarrayBitwiseORs(self, arr: List[int]) -> int:
+        
+        uniq = set()
+        curr = set()
+
+        for x in arr:
+
+            curr = set([x|y for y in curr])
+            curr.add(x)
+            
+            uniq |=  curr
+        return len(uniq)
+
+
